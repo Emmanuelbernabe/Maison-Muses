@@ -1,0 +1,19 @@
+---
+const { data } = Astro.props;
+---
+<section>
+  <div class="avis">
+    <div data-reveal><div class="score">{data.score}</div><p class="s">{data.source}</p></div>
+    <div class="quotes">
+      {(data.quotes ?? []).map((q: string) => <p data-reveal>“{q}”</p>)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .avis{display:grid;grid-template-columns:auto 1fr;gap:clamp(40px,6vw,96px);align-items:start}
+  .score{font-size:clamp(110px,16vw,220px);line-height:.85;letter-spacing:-.06em;color:var(--orange)}
+  .s{color:var(--muted);margin-top:8px}
+  .quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;font-size:clamp(18px,1.6vw,22px);line-height:1.3;letter-spacing:-.01em}
+  @media (max-width:860px){.avis,.quotes{grid-template-columns:1fr}}
+</style>

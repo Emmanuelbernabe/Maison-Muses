@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Intro from '../components/Intro.astro';
+import Coffrets from '../components/Coffrets.astro';
+import Mission from '../components/Mission.astro';
+import Reviews from '../components/Reviews.astro';
+import Routine from '../components/Routine.astro';
+import Footer from '../components/Footer.astro';
+import { getHome, getSettings } from '../lib/sanity';
+
+const [home, settings] = await Promise.all([getHome(), getSettings()]);
+if (!home || !settings) {
+  throw new Error('Contenu introuvable : publiez « Page d’accueil » et « Réglages du site » dans Sanity (voir README).');
+}
+---
+<Layout
+  title={home.seoTitle ?? 'Maison Muses – Coiffure et bien-être à Toulouse'}
+  description={home.seoDescription}
+>
+  <Header logo={settings.logo} cta={settings.headerCta} />
+  <main id="top">
+    <Hero data={home.hero} />
+    <Intro data={home.intro} />
+    <Coffrets data={home.coffrets} />
+    <Mission data={home.mission} />
+    <Reviews data={home.reviews} />
+    <Routine data={home.routine} />
+  </main>
+  <Footer data={settings.footer} />
+  <script>
+    import '../scripts/main';
+  </script>
+</Layout>

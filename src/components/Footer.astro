@@ -1,0 +1,44 @@
+---
+import Lien from './Lien.astro';
+const { data } = Astro.props;
+---
+<footer>
+  <h2 class="big" data-split>{data.title}</h2>
+  {data.cta && <Lien href={data.cta.url}>{data.cta.label}</Lien>}
+  <div class="fcols" data-reveal>
+    {(data.spaces ?? []).map((s: any) => <div><h4>{s.title}</h4><p class="lines">{s.details}</p></div>)}
+    {data.newsletter && (
+      <div>
+        <h4>{data.newsletter.title}</h4>
+        <p>{data.newsletter.text}</p>
+        {data.newsletter.cta && <p class="nl"><Lien href={data.newsletter.cta.url}>{data.newsletter.cta.label}</Lien></p>}
+      </div>
+    )}
+    {data.socials?.length > 0 && (
+      <div>
+        <h4>{data.socialsTitle}</h4>
+        <p>
+          {data.socials.map((s: any) => (
+            <>{s.url ? <a href={s.url} rel="noopener">{s.label} · {s.handle}</a> : <span>{s.label} · {s.handle}</span>}<br /></>
+          ))}
+        </p>
+      </div>
+    )}
+  </div>
+  <div class="legal">
+    <span>{data.copyright}</span>
+    {data.legal && <a href={data.legal.url}>{data.legal.label}</a>}
+  </div>
+</footer>
+
+<style>
+  footer{margin-top:clamp(100px,14vw,200px);padding:clamp(80px,10vw,140px) var(--pad) 28px;background:var(--surface)}
+  .big{max-width:14ch;margin-bottom:64px}
+  .fcols{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;margin-top:clamp(80px,10vw,150px);font-size:16px}
+  h4{margin:0 0 14px;font-weight:400;color:var(--muted)}
+  p{line-height:1.6}
+  .lines{white-space:pre-line}
+  .nl{margin-top:12px}
+  .legal{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:96px;font-size:14px}
+  @media (max-width:860px){.fcols{grid-template-columns:1fr 1fr}}
+</style>

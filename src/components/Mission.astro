@@ -1,0 +1,57 @@
+---
+import Lien from './Lien.astro';
+import Tag from './Tag.astro';
+import SanityImage from './SanityImage.astro';
+const { data } = Astro.props;
+const team = (data.team ?? []).filter(Boolean);
+// Portraits locaux utilisés tant qu'aucune photo n'est renseignée dans le Studio
+const portraits: Record<string, string> = {
+  moussine: '/images/moussine.webp',
+  july: '/images/july.webp',
+  violaine: '/images/violaine.webp',
+};
+const fallback = (name: string) => portraits[name?.trim().toLowerCase()];
+---
+<section>
+  <div class="mission">
+    <div>
+      {data.eyebrow && <p class="small" data-reveal>{data.eyebrow}</p>}
+      <h2 class="big" data-split>{data.title}</h2>
+    </div>
+    <div data-reveal>
+      <p class="p">{data.text}</p>
+      <div class="acts">
+        {data.primaryCta && <Lien href={data.primaryCta.url}>{data.primaryCta.label}</Lien>}
+        {data.secondaryCta && <Lien href={data.secondaryCta.url}>{data.secondaryCta.label}</Lien>}
+      </div>
+    </div>
+  </div>
+  {team.length > 0 && (
+    <div class="equipe" id="equipe">
+      {team.map((m: any) => (
+        <figure data-reveal>
+          <div class="ph2" role="img" aria-label={`Portrait de ${m.name}`}>
+            {m.photo
+              ? <SanityImage image={m.photo} alt="" class="fill" ratio={[4, 5]} widths={[400, 800, 1200]} sizes="(max-width:860px) 100vw, 33vw" />
+              : fallback(m.name) && <img class="fill" src={fallback(m.name)} alt="" loading="lazy" decoding="async" />}
+          </div>
+          <h3>{m.name}</h3>
+          {m.tag && <Tag>{m.tag}</Tag>}
+        </figure>
+      ))}
+    </div>
+  )}
+</section>
+
+<style>
+  .mission{display:grid;grid-template-columns:1.4fr 1fr;gap:64px;align-items:end}
+  .small{color:var(--muted);margin-bottom:24px}
+  .acts{display:flex;gap:32px;flex-wrap:wrap;align-items:center;margin-top:32px}
+  .equipe{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:clamp(64px,8vw,110px)}
+  figure{margin:0}
+  .ph2 :global(img){object-position:50% 15%}
+  /* border-radius animé par GSAP au survol */
+  .ph2{aspect-ratio:4/5;background:var(--surface);border-radius:999px 999px 14px 14px;overflow:hidden}
+  h3{font-weight:400;font-size:clamp(32px,3.6vw,52px);letter-spacing:-.03em;margin:18px 0 10px;line-height:1}
+  @media (max-width:860px){.mission,.equipe{grid-template-columns:1fr}}
+</style>

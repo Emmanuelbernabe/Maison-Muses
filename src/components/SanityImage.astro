@@ -1,0 +1,23 @@
+---
+import { urlFor } from '../lib/sanity';
+
+interface Props {
+  image: any;
+  alt?: string;
+  widths?: number[];
+  sizes?: string;
+  ratio?: [number, number];
+  eager?: boolean;
+  class?: string;
+}
+const { image, alt, widths = [480, 800, 1200, 1800], sizes = '100vw', ratio, eager = false, class: cls } = Astro.props;
+
+const build = (w: number) => {
+  let b = urlFor(image).width(w).auto('format').quality(80);
+  if (ratio) b = b.height(Math.round((w * ratio[1]) / ratio[0])).fit('crop');
+  return b.url();
+};
+const src = build(widths[widths.length - 1]);
+const srcset = widths.map((w) => `${build(w)} ${w}w`).join(', ');
+---
+<img class={cls} src={src} srcset={srcset} sizes={sizes} alt={alt ?? image?.alt ?? ''} loading={eager ? 'eager' : 'lazy'} decoding="async" />

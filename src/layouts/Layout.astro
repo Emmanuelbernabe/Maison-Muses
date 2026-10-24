@@ -1,0 +1,33 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet" />
+    <!-- Les états « avant animation » du CSS ne s'appliquent que si le JS tourne -->
+    <script is:inline>document.documentElement.classList.add('js')</script>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="fl" viewBox="0 0 28 28">
+        <!-- Les règles CSS globales ne traversent pas <use> : le style passe par des variables héritées depuis .lien -->
+        <circle cx="14" cy="14" r="13" style="fill:var(--lien-fill,transparent);stroke:currentColor;stroke-width:1.2;transition:fill .3s" />
+        <path d="M9.5 14h9M15 10.5l3.5 3.5-3.5 3.5" style="fill:none;stroke:var(--lien-arrow,currentColor);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;transition:stroke .3s" />
+      </symbol>
+    </svg>
+    <slot />
+  </body>
+</html>

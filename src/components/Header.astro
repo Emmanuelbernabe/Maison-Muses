@@ -1,0 +1,21 @@
+---
+import Lien from './Lien.astro';
+const { logo, cta } = Astro.props;
+---
+<header id="hd">
+  <a class="logo" href="#top" aria-label={`${logo}, accueil`}>{logo}</a>
+  {cta && <Lien href={cta.url} light>{cta.label}</Lien>}
+</header>
+
+<style>
+  /* --hb / --hc / --hblur sont animées par GSAP (voir scripts/main.ts) */
+  header{
+    --hb:0; --hc:0; --hblur:0;
+    position:fixed;inset:0 0 auto 0;z-index:20;display:flex;justify-content:space-between;align-items:center;
+    padding:calc(env(safe-area-inset-top,0px) + 22px) var(--pad) 22px;
+    color:color-mix(in srgb,var(--ink) calc(var(--hc) * 1%),#fff);
+    background:color-mix(in srgb,var(--bg) calc(var(--hb) * 1%),transparent);
+    -webkit-backdrop-filter:blur(calc(var(--hblur) * 1px));backdrop-filter:blur(calc(var(--hblur) * 1px));
+  }
+  .logo{font-size:22px;font-weight:500;letter-spacing:-.03em}
+</style>

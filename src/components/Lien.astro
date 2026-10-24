@@ -1,0 +1,11 @@
+---
+interface Props {
+  href?: string;
+  light?: boolean;
+  as?: 'a' | 'span';
+}
+const { href, light = false, as: El = 'a' } = Astro.props;
+---
+<El class:list={['lien', { light }]} href={El === 'a' ? href : undefined}>
+  <slot /><svg aria-hidden="true"><use href="#fl" /></svg>
+</El>

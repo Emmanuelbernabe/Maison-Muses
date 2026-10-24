@@ -1,0 +1,89 @@
+---
+import Lien from './Lien.astro';
+import Tag from './Tag.astro';
+import SanityImage from './SanityImage.astro';
+
+const { data } = Astro.props;
+const items = (data.items ?? []).filter(Boolean);
+const hasDetail = (c: any) => Boolean(c.description || c.includes?.length || c.image);
+const firstOpen = items.findIndex(hasDetail);
+---
+<section id="coffrets">
+  <div class="head">
+    <h2 class="big" data-split>{data.title}</h2>
+    <div class="p" data-reveal>
+      {data.tag && <Tag>{data.tag}</Tag>}
+      <p class="lead">{data.text}</p>
+    </div>
+  </div>
+
+  <div class="coffrets" data-reveal>
+    {items.map((c: any, i: number) => {
+      const detail = hasDetail(c);
+      const open = i === firstOpen;
+      return (
+        <div class:list={['ligne', { open }]} data-row>
+          <button
+            type="button"
+            id={`coffret-btn-${i}`}
+            disabled={!detail}
+            aria-expanded={detail ? String(open) : undefined}
+            aria-controls={detail ? `coffret-detail-${i}` : undefined}
+          >
+            <span class="nom">{c.name}</span>
+            <span class="acc">{c.tagline}</span>
+            <span class="prix">{c.price}</span>
+          </button>
+          {detail && (
+            <div class="detail" id={`coffret-detail-${i}`} role="region" aria-labelledby={`coffret-btn-${i}`} {...(open ? {} : { inert: true })}>
+              <div class="d-in">
+                <div class="ph" role="img" aria-label={c.image?.alt || c.name}>
+                  {c.image && <SanityImage image={c.image} alt="" class="fill" ratio={[1, 1]} widths={[420, 840]} sizes="(max-width:860px) 100vw, 420px" />}
+                </div>
+                <div>
+                  {c.includes?.length > 0 && (
+                    <div class="inclus">
+                      {c.includes.map((x: any) => (
+                        <div data-d><small>{x.label}</small><strong>{x.title}</strong></div>
+                      ))}
+                    </div>
+                  )}
+                  {c.description && <p class="p" data-d>{c.description}</p>}
+                  {c.ctaUrl && <div data-d><Lien href={c.ctaUrl}>{c.ctaLabel || 'Réserver'}</Lien></div>}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  .lead{margin-top:20px}
+  .coffrets{border-bottom:1px solid var(--line)}
+  .ligne{border-top:1px solid var(--line)}
+  .ligne>button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:minmax(0,560px) 1fr auto;align-items:center;gap:24px;width:100%;padding:36px 0 36px 24px;transition:background .35s}
+  .ligne>button:disabled{cursor:default}
+  .ligne>button:not(:disabled):hover,.ligne>button:focus-visible,.ligne.open>button{background:var(--surface)}
+  .nom{font-size:clamp(30px,4.2vw,56px);letter-spacing:-.03em;line-height:1}
+  .acc{color:var(--muted);font-size:18px}
+  .prix{font-size:clamp(22px,2.7vw,36px);letter-spacing:-.02em;padding-right:24px;white-space:nowrap}
+  /* hauteur animée par GSAP (height: 0 ↔ auto) */
+  .detail{height:0;overflow:hidden}
+  .ligne.open .detail{height:auto}
+  .d-in{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:72px;padding:24px 24px 64px}
+  .ph{aspect-ratio:1;background:var(--surface);border-radius:14px;overflow:hidden}
+  .inclus{display:flex;gap:56px;flex-wrap:wrap;margin-bottom:36px}
+  .inclus div{max-width:300px}
+  .inclus small{display:block;font-size:14px;color:var(--muted);margin-bottom:8px}
+  .inclus strong{font-weight:400;font-size:28px;line-height:1.1;letter-spacing:-.02em}
+  .d-in .p{margin-bottom:40px;color:#555}
+  @media (prefers-color-scheme:dark){:global(:root:not([data-theme="light"])) .d-in .p{color:#b4b4ae}}
+  @media (max-width:860px){
+    .ligne>button{grid-template-columns:1fr auto;padding-left:0}
+    .acc{grid-column:1/-1;order:3}
+    .d-in{grid-template-columns:1fr;gap:32px;padding-left:0;padding-right:0}
+  }
+</style>

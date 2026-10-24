@@ -1,0 +1,29 @@
+---
+import SanityImage from './SanityImage.astro';
+const { data } = Astro.props;
+---
+<div class="hero">
+  <div class="img" role="img" aria-label={data.image?.alt || 'Portrait en noir et blanc'}>
+    {data.image
+      ? <SanityImage image={data.image} alt="" class="fill" eager widths={[800, 1280, 1920, 2560]} sizes="100vw" />
+      : <img class="fill" src="/images/hero.webp" alt="" width="1440" height="860" fetchpriority="high" decoding="async" />}
+  </div>
+  <svg class="mark" data-hero viewBox="0 0 140 140" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+    <path d="M70 0v36M44 62h52M50 74v-24M70 74v-24M90 74v-24" /><circle cx="70" cy="62" r="26" opacity="0" />
+  </svg>
+  {data.subtitle && <p class="sub" data-hero>{data.subtitle}</p>}
+  <h1><span>{data.title}</span></h1>
+</div>
+
+<style>
+  .hero{position:relative;width:100vw;height:110vh;min-height:560px;overflow:hidden;background:#0b0b0b;color:#fff}
+  .img{position:absolute;inset:0;overflow:hidden;background:#0a0a0a;filter:grayscale(1)}
+  /* l'image dépasse du cadre (130 %) : GSAP la déplace à l'intérieur pour la parallaxe */
+  .img :global(img){position:absolute;left:0;top:-15%;width:100%;height:130%;object-fit:cover;object-position:50% 35%;will-change:transform}
+  .hero::after{content:"";position:absolute;inset:0;background:rgba(4,4,4,.3)}
+  .mark{position:absolute;top:0;left:0;right:0;margin:0 auto;width:min(140px,22vw);z-index:2;color:var(--orange)}
+  h1{position:absolute;z-index:2;left:var(--pad);right:var(--pad);bottom:clamp(8px,2vw,24px);font-weight:500;font-size:clamp(46px,12.5vw,190px);line-height:.92;letter-spacing:-.05em;color:var(--orange);white-space:nowrap;overflow:hidden}
+  h1 span{display:inline-block}
+  .sub{position:absolute;z-index:2;left:var(--pad);bottom:clamp(120px,17vw,260px);max-width:34ch;font-size:clamp(16px,1.4vw,20px);line-height:1.35}
+  @media (max-width:860px){.sub{bottom:34vw}}
+</style>
