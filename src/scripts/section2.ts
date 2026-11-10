@@ -17,7 +17,7 @@ gsap.registerPlugin(CustomEase);
 CustomEase.create('musesEase', '0.22,1,0.36,1');
 
 // ── Titre : même apparition que s5-intro-main, ligne par ligne dans son masque, rejouée au retour ──
-function s2RevealLines() {
+function s2RevealLines(start = 'top 80%') {
   const titleBox = document.querySelector<HTMLElement>('[data-anim="s2-title-box"]');
   const lines = document.querySelectorAll<HTMLElement>('[data-anim="s2-line"]');
   if (!titleBox || !lines.length) return;
@@ -28,7 +28,7 @@ function s2RevealLines() {
     stagger: 0.12,
     scrollTrigger: {
       trigger: titleBox,
-      start: 'top 80%',
+      start,
       toggleActions: 'play none none reverse',
     },
   });
@@ -171,8 +171,9 @@ gsap.fromTo(heroImg,
       );
     }
 
-    // 3. Apparition ligne par ligne du titre
-    s2RevealLines();
+    // 3. Apparition ligne par ligne du titre, quand il est bien à l'écran
+    //    (plus tôt, elle se jouait encore en bas de l'écran, pendant la descente du portrait)
+    s2RevealLines('top 55%');
 
     return () => {
       ScrollTrigger.removeEventListener('refreshInit', s2SyncSlot);

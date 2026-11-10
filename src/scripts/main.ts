@@ -49,8 +49,11 @@ const $$ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode =
   Array.from(root.querySelectorAll<T>(sel));
 
 /* ───────── Lenis : défilement fluide, synchronisé avec GSAP / ScrollTrigger ───────── */
+// Lenis seulement avec une souris / un trackpad : sur tactile, le scroll natif est plus fiable
+const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
 function initLenis() {
-  if (reduce) return;
+  if (reduce || !finePointer) return;
   lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
   (window as any).__lenis = lenis;   // utilisé par section5.ts pour le passage carte par carte
   lenis.on('scroll', ScrollTrigger.update);
@@ -58,6 +61,16 @@ function initLenis() {
   gsap.ticker.lagSmoothing(0);
   // Lenis remesure la page avant chaque recalcul des ScrollTrigger
   ScrollTrigger.addEventListener('refreshInit', () => lenis?.resize());
+}
+
+/* ───────── Blocage du scroll (loader, menu) : Lenis si présent, sinon scroll natif ───────── */
+function lockScroll(on: boolean) {
+  if (lenis) {
+    if (on) lenis.stop();
+    else lenis.start();
+    return;
+  }
+  document.documentElement.style.overflow = on ? 'hidden' : '';
 }
 
 /* ───────── Resize global : un seul recalcul de tous les ScrollTrigger, une fois le resize terminé ───────── */
@@ -68,7 +81,10 @@ function initResize() {
   addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
-      if (innerWidth === lastW && innerHeight === lastH) return;
+      // Sur tactile, seule la largeur compte : la barre d'adresse qui apparaît / disparaît change
+      // la hauteur en plein scroll, et un recalcul à ce moment-là coupait l'élan du scroll
+      const heightOnly = innerWidth === lastW;
+      if (heightOnly && (innerHeight === lastH || !finePointer)) return;
       lastW = innerWidth;
       lastH = innerHeight;
       ScrollTrigger.refresh();
@@ -105,7 +121,7 @@ function initHeader() {
 initLenis();
 initHeader();
 initResize();
-initMenu((open) => (open ? lenis?.stop() : lenis?.start()));
+initMenu((open) => lockScroll(open));
 
 /* ───────── Hero : parallaxe supprimée (remplacée par l'animation section2 pinnée) ───────── */
 function initHero() {
@@ -338,11 +354,11 @@ if (!reduce && loaderEl && !loaderSeen) {
   // Pas de scroll possible tant que le loader tourne, et départ en haut de page
   history.scrollRestoration = 'manual';
   window.scrollTo(0, 0);
-  lenis?.stop();
+  lockScroll(true);
   initHero();
   initLoader().then(async () => {
     try { sessionStorage.setItem(LOADER_KEY, '1'); } catch {}
-    lenis?.start();
+    lockScroll(false);
     await document.fonts.ready;
     initSection2();
     initSection3();
