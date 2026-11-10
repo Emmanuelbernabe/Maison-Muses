@@ -1,29 +1,280 @@
 ---
 import SanityImage from './SanityImage.astro';
-const { data } = Astro.props;
+import { resolveImage } from '../lib/images';
+import { siteImage, SIZES } from '../lib/siteImage';
+const { data, photos } = Astro.props;
+
+const heroImg = siteImage(photos?.hero?.portrait, resolveImage('hero'), SIZES.portrait);
+const follow1Img = siteImage(photos?.hero?.reveal, resolveImage('follow-1'), SIZES.portrait);
+const marqueeFollowImg = siteImage(photos?.hero?.center, resolveImage('marquee-follow-img'), SIZES.portrait);
 ---
-<div class="hero">
-  <div class="img" role="img" aria-label={data.image?.alt || 'Portrait en noir et blanc'}>
-    {data.image
-      ? <SanityImage image={data.image} alt="" class="fill" eager widths={[800, 1280, 1920, 2560]} sizes="100vw" />
-      : <img class="fill" src="/images/hero.webp" alt="" width="1440" height="860" fetchpriority="high" decoding="async" />}
+
+<section class="hero" id="hero" data-anim="hero-section">
+  <!-- Layout : MAISON calé sous le header, portrait en fixed au bas du viewport, MUSES par-dessus -->
+  <div class="hero-stage">
+
+    <!-- MAISON : centré horizontalement, sous le header, passe derrière l'image (z-index 1) -->
+    <div class="hero-maison-wrap" data-anim="hero-maison">
+      <span class="hero-word hero-maison">MAISON</span>
+    </div>
+
+    <!-- Image portrait : position fixed au bas du viewport (z-index 2) -->
+    <div class="hero-media" id="hero-media" data-anim="hero-img">
+      <div class="img" role="img" aria-label="Portrait">
+        <img class="fill" src={heroImg.src} srcset={heroImg.srcset} sizes={heroImg.sizes} alt="" width="900" height="1100" loading="eager" fetchpriority="high" decoding="sync" />
+      </div>
+      <!-- load-1 overlay révélé par clip-path lors du scroll vers section 2 -->
+      <div class="load1-overlay" data-anim="s2-load1">
+        <img src={follow1Img.src} srcset={follow1Img.srcset} sizes={follow1Img.sizes} alt="" width="900" height="1100" loading="eager" decoding="async" />
+      </div>
+    </div>
+
+    <div class="s3-follow" data-anim="s3-follow">
+      <img src={marqueeFollowImg.src} srcset={marqueeFollowImg.srcset} sizes={marqueeFollowImg.sizes} alt="" width="900" height="1100" loading="eager" decoding="async" />
+    </div>
+
+    <!-- MUSES : chevauche l'image sur le flanc droit PAR DESSUS (z-index 3) -->
+    <div class="hero-muses-wrap" data-anim="hero-muses">
+      <span class="hero-word hero-muses">MUSES</span>
+    </div>
+
+    <!-- Paragraphe sous l'image / en bas à gauche -->
+    <p class="hero-sub" id="hero-sub" data-anim="hero-sub">
+      Sublimer vos cheveux, <br />éveiller vos sens.
+    </p>
   </div>
-  <svg class="mark" data-hero viewBox="0 0 140 140" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-    <path d="M70 0v36M44 62h52M50 74v-24M70 74v-24M90 74v-24" /><circle cx="70" cy="62" r="26" opacity="0" />
-  </svg>
-  {data.subtitle && <p class="sub" data-hero>{data.subtitle}</p>}
-  <h1><span>{data.title}</span></h1>
-</div>
+</section>
 
 <style>
-  .hero{position:relative;width:100vw;height:110vh;min-height:560px;overflow:hidden;background:#0b0b0b;color:#fff}
-  .img{position:absolute;inset:0;overflow:hidden;background:#0a0a0a;filter:grayscale(1)}
-  /* l'image dépasse du cadre (130 %) : GSAP la déplace à l'intérieur pour la parallaxe */
-  .img :global(img){position:absolute;left:0;top:-15%;width:100%;height:130%;object-fit:cover;object-position:50% 35%;will-change:transform}
-  .hero::after{content:"";position:absolute;inset:0;background:rgba(4,4,4,.3)}
-  .mark{position:absolute;top:0;left:0;right:0;margin:0 auto;width:min(140px,22vw);z-index:2;color:var(--orange)}
-  h1{position:absolute;z-index:2;left:var(--pad);right:var(--pad);bottom:clamp(8px,2vw,24px);font-weight:500;font-size:clamp(46px,12.5vw,190px);line-height:.92;letter-spacing:-.05em;color:var(--orange);white-space:nowrap;overflow:hidden}
-  h1 span{display:inline-block}
-  .sub{position:absolute;z-index:2;left:var(--pad);bottom:clamp(120px,17vw,260px);max-width:34ch;font-size:clamp(16px,1.4vw,20px);line-height:1.35}
-  @media (max-width:860px){.sub{bottom:34vw}}
+  :root {
+   
+    --hero-maison-fs: 23.75rem;
+    --hero-portrait-w: 28.125rem;
+    --hero-portrait-h: 34.56rem;
+    --hero-muses-fs: 7.5rem;
+    --hero-sub-fs:  clamp(1.2rem, 1.8vw, 2rem);
+    --hero-sub-gap: clamp(1rem, 1.66vw, 2.5rem); 
+  }
+
+  section.hero {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  .hero-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Image portrait : position fixed au bas du viewport sur desktop (z-index 2) */
+  .hero-media {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--hero-portrait-w);
+    height: var(--hero-portrait-h);
+    border-radius: 0;
+    overflow: hidden;
+    background: transparent;
+    z-index: 2;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  /* load-1 overlay : révélé par clip-path depuis le bas */
+  .load1-overlay {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(100% 0 0 0);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .load1-overlay img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+  }
+
+  .img {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+  }
+
+  .img :global(img) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+    border-radius: 0;
+  }
+
+  /* Typographie */
+  .hero-word {
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--orange, #e57851);
+    white-space: nowrap;
+    line-height: 0.88;
+    display: block;
+  }
+
+  /* MAISON : calé sous le header avec un top respirant, centré horizontalement */
+  .hero-maison-wrap {
+    position: absolute;
+    top: clamp(2.5rem, 5vh, 4.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    pointer-events: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-maison {
+    font-size: var(--hero-maison-fs);
+    display: inline-block;
+  }
+
+  /* MUSES : chevauche l'image sur le flanc droit PAR DESSUS (z-index 3) */
+  .hero-muses-wrap {
+    position: absolute;
+    left: calc(50% + var(--hero-portrait-w) / 2 - 0.11 * var(--hero-portrait-w));
+    bottom: calc(var(--hero-portrait-h) * 0.24);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .hero-muses {
+    font-size: var(--hero-muses-fs);
+  }
+
+  /* Sous-titre en bas à gauche */
+  .hero-sub {
+    position: absolute;
+    bottom: var(--hero-sub-gap);
+    left: var(--hero-sub-gap);
+    font-size: var(--hero-sub-fs);
+    margin: 0;
+    text-align: left;
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: -0.05rem;
+    line-height: 1.05;
+    color: var(--orange, #e57851);
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .s3-follow {
+  position: fixed;
+  left: calc(50% - var(--hero-portrait-w) / 2);
+  top: 50%;
+  margin-top: calc(var(--hero-portrait-h) / -2);   /* centrée comme le portrait en s2 */
+  width: var(--hero-portrait-w);
+  height: var(--hero-portrait-h);
+  overflow: hidden;
+  z-index: 1;                                      /* sous le portrait (z-index 2) */
+  visibility: hidden;                              /* révélée par section2.ts */
+  pointer-events: none;
+}
+.s3-follow img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
+@media (max-width: 1023px) { .s3-follow { display: none; } }
+
+  /* ── Mobile / tablette : sous-titre, MAISON, MUSES empilés au centre, portrait jusqu'en bas ── */
+  @media (max-width: 1023px) {
+    :root {
+      --hero-portrait-w: clamp(220px, 80vw, 300px);   /* utilisé par le marquee de la section 3 */
+      --hero-maison-fs: 26.667vw;                     /* 100px à 375 */
+      --hero-muses-fs: 24vw;                          /* 90px à 375 */
+      --hero-m-top: calc(env(safe-area-inset-top, 0px) + 72px);
+      --hero-m-sub-fs: 4vw;                           /* 15px à 375 */
+      --hero-m-img-w: 72.8vw;                         /* 273px à 375 */
+    }
+
+    section.hero {
+      height: 100svh;
+      min-height: 0;
+    }
+
+    .hero-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: var(--hero-m-top);
+      box-sizing: border-box;
+    }
+
+    .hero-sub {
+      position: relative;
+      order: 1;
+      left: auto;
+      bottom: auto;
+      margin: 0 0 4.5vw;
+      font-size: var(--hero-m-sub-fs);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .hero-sub br { display: none; }
+
+    .hero-maison-wrap {
+      position: relative;
+      order: 2;
+      top: auto;
+      left: auto;
+      transform: none;
+      width: auto;
+    }
+
+    .hero-muses-wrap {
+      position: relative;
+      order: 3;
+      left: auto;
+      bottom: auto;
+      margin-top: -3.5vw;
+    }
+
+    /* Portrait dans le flux : remplit l'espace jusqu'au bas de l'écran.
+       Son déplacement vers la section 2 est piloté par section2.ts */
+    .hero-media {
+      position: relative;
+      order: 4;
+      left: auto;
+      bottom: auto;
+      transform: none;
+      width: var(--hero-m-img-w);
+      height: auto;
+      flex: 1 1 auto;
+      min-height: 60vw;
+      margin-top: -5.1vw;
+    }
+  }
 </style>

@@ -3,8 +3,40 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
+import { initLoader } from './loader';
+import { initSection2 } from './section2';
+import { initSection3 } from './section3';
+import { initSection4 } from './section4';
+import { initSection5 } from './section5';
+import { initSection6 } from './section6';
+import { initSection7 } from './section7';
+import { initSection8 } from './section8';
+import { initSection9 } from './section9';
+import { initMenu } from './menu';
+
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, SplitText);
+
+// Pas de recalcul quand la barre d'adresse mobile apparaît / disparaît
+ScrollTrigger.config({ ignoreMobileResize: true });
+
+// La position de scroll est restaurée par nous, une fois les pins en place (sinon le navigateur la pose trop tôt)
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const SCROLL_KEY = `mm-scroll:${location.pathname}`;
+addEventListener('pagehide', () => {
+  try { sessionStorage.setItem(SCROLL_KEY, String(Math.round(window.scrollY))); } catch {}
+});
+
+function restoreScroll() {
+  const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  const isReturn = nav && (nav.type === 'reload' || nav.type === 'back_forward');
+  let y = 0;
+  try { y = isReturn ? Number(sessionStorage.getItem(SCROLL_KEY)) || 0 : 0; } catch {}
+  if (location.hash) return;   // une ancre dans l'URL garde la priorité
+  if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo(0, y);
+  ScrollTrigger.update();
+}
 
 let lenis: Lenis | null = null;
 
@@ -20,9 +52,28 @@ const $$ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode =
 function initLenis() {
   if (reduce) return;
   lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  (window as any).__lenis = lenis;   // utilisé par section5.ts pour le passage carte par carte
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis!.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
+  // Lenis remesure la page avant chaque recalcul des ScrollTrigger
+  ScrollTrigger.addEventListener('refreshInit', () => lenis?.resize());
+}
+
+/* ───────── Resize global : un seul recalcul de tous les ScrollTrigger, une fois le resize terminé ───────── */
+function initResize() {
+  let resizeTimer = 0;
+  let lastW = innerWidth;
+  let lastH = innerHeight;
+  addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      if (innerWidth === lastW && innerHeight === lastH) return;
+      lastW = innerWidth;
+      lastH = innerHeight;
+      ScrollTrigger.refresh();
+    }, 250);
+  });
 }
 
 /* ───────── Header : fond / couleur / flou pilotés par variables CSS ───────── */
@@ -34,28 +85,32 @@ function initHeader() {
     gsap.to(hd, { '--hb': on ? 86 : 0, '--hc': on ? 100 : 0, '--hblur': on ? 14 : 0, duration: t(0.4), ease: 'power2.out', overwrite: true });
   const st = ScrollTrigger.create({ trigger: hero, start: 'bottom top+=70', end: 'max', onToggle: (s) => solid(s.isActive) });
   if (st.isActive) solid(true);
+
+  // Items du header en crème tant que le milieu du header est au-dessus d'une section orange (coffrets)
+  // refreshPriority -1 : calculé après le pin horizontal de la section 5
+  const hdMid = () => `top top+=${hd.offsetHeight / 2}`;
+  const hdMidEnd = () => `bottom top+=${hd.offsetHeight / 2}`;
+  document.querySelectorAll<HTMLElement>('#s5').forEach((orangeSection) => {
+    ScrollTrigger.create({
+      trigger: orangeSection,
+      start: hdMid,
+      end: hdMidEnd,
+      refreshPriority: -1,
+      invalidateOnRefresh: true,
+      toggleClass: { targets: hd, className: 'is-on-orange' },
+    });
+  });
 }
 
-/* ───────── Hero : montée du titre + parallaxe de l'image ───────── */
-function initHero() {
-  if (reduce) return;
-  const span = document.querySelector('.hero h1 span');
-  if (!span) return;
-  gsap
-    .timeline({ defaults: { ease: EXPO } })
-    .fromTo(span, { yPercent: 105, opacity: 1 }, { yPercent: 0, duration: 1.3 }, 0.15)
-    .fromTo('[data-hero]', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.12 }, 0.5);
+initLenis();
+initHeader();
+initResize();
+initMenu((open) => (open ? lenis?.stop() : lenis?.start()));
 
-  // Parallaxe interne : le cadre .img reste fixe, seule l'image (130 % de haut) glisse à l'intérieur
-  gsap.fromTo(
-    '.hero .img img',
-    { yPercent: -8 },
-    {
-      yPercent: 8,
-      ease: 'none',
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
-    },
-  );
+/* ───────── Hero : parallaxe supprimée (remplacée par l'animation section2 pinnée) ───────── */
+function initHero() {
+  // La parallaxe de l'image est désormais gérée par la timeline pinnée de section2.ts
+  // On ne crée pas de ScrollTrigger concurrent sur .hero
 }
 
 /* ───────── Titres .big : révélation ligne par ligne (SplitText) ───────── */
@@ -271,13 +326,67 @@ function initMarquee() {
   }
 }
 
-initLenis();
-initHeader();
-initHero();
-initSplit();
-initReveals();
-initAccordion();
-initMarquee();
-initHovers();
-initAnchors();
+// Loader : une seule fois par visite (sessionStorage, effacé à la fermeture de l'onglet)
+const LOADER_KEY = 'mm-loader-seen';
+const loaderSeen = (() => {
+  try { return sessionStorage.getItem(LOADER_KEY) === '1'; } catch { return false; }
+})();
+const loaderEl = document.getElementById('loader');
+
+// Lance le loader, puis les animations de la page une fois terminé
+if (!reduce && loaderEl && !loaderSeen) {
+  // Pas de scroll possible tant que le loader tourne, et départ en haut de page
+  history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+  lenis?.stop();
+  initHero();
+  initLoader().then(async () => {
+    try { sessionStorage.setItem(LOADER_KEY, '1'); } catch {}
+    lenis?.start();
+    await document.fonts.ready;
+    initSection2();
+    initSection3();
+    initSection4();
+    initSection5();
+    initSection6();
+    initSection7();
+    initSection8();
+    initSection9();
+    initSplit();
+    initReveals();
+    initAccordion();
+    initMarquee();
+    initHovers();
+    initAnchors();
+    ScrollTrigger.refresh();
+  });
+} else {
+  loaderEl?.classList.add('ld-done');
+  const hd = document.getElementById('hd');
+  if (hd) {
+    gsap.set(hd, { y: 0, opacity: 1 });
+    hd.classList.add('hd-ready');
+  }
+  initHero();
+  document.fonts.ready.then(() => {
+    initSection2();
+    initSection3();
+    initSection4();
+    initSection5();
+    initSection6();
+    initSection7();
+    initSection8();
+    initSection9();
+    initSplit();
+    initReveals();
+    initAccordion();
+    initMarquee();
+    initHovers();
+    initAnchors();
+    ScrollTrigger.refresh();
+    restoreScroll();
+    // La page n'apparaît qu'une fois tout en place (voir LoadingScreen.astro)
+    requestAnimationFrame(() => document.documentElement.classList.add('mm-ready'));
+  });
+}
 addEventListener('load', () => ScrollTrigger.refresh());

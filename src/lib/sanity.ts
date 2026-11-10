@@ -16,8 +16,9 @@ const link = `{ label, url }`;
 export const getHome = () =>
   client.fetch(`*[_id == "homepage"][0]{
     seoTitle, seoDescription,
+    photos,
     hero { subtitle, title, image },
-    intro { title, text, gallery },
+    intro { title, text, gallery, soins[]{ label, url } },
     coffrets {
       title, tag, text,
       items[]->{ _id, name, tagline, price, includes, description, image, ctaLabel, ctaUrl }

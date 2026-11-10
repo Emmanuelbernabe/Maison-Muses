@@ -1,0 +1,193 @@
+---
+// Section 6 — Avis Planity (note + marquee de cartes)
+// TODO : remplacer l'URL, la note et les avis par ceux de la page Planity du salon
+const planityUrl = 'https://www.planity.com/';
+const rating = 5;
+
+const reviews = [
+  { quote: 'Un diagnostic précis, un balayage exactement comme je l’imaginais. Je ne vais plus ailleurs.', author: 'Léa M.', service: 'Balayage' },
+  { quote: 'Trente minutes de massage et j’ai oublié ma semaine. L’accueil est d’une douceur rare.', author: 'Camille D.', service: 'Massage relaxant' },
+  { quote: 'Le coffret Initiation offert par mon copain : meilleure idée cadeau de l’année.', author: 'Sarah B.', service: 'Coffret Initiation' },
+  { quote: 'On prend le temps de vous écouter. Mes cheveux n’ont jamais été aussi doux.', author: 'Inès T.', service: 'Soin profond' },
+  { quote: 'Le salon est magnifique, l’équipe passionnée. Une vraie maison.', author: 'Julie P.', service: 'Coupe et couleur' },
+];
+---
+
+<section class="s6" id="s6" data-anim="s6-section">
+  <div class="s6-top">
+    <h2 class="s6-title" data-anim="s6-title">
+      <span class="s6-thin">NOS MUSES</span> EN PARLENT MIEUX QUE NOUS.
+    </h2>
+    <div class="s6-rating">
+      <span class="s6-rating-note" data-anim="s6-note" data-value={rating}>{rating.toFixed(1).replace('.', ',')}</span>
+      <span class="s6-rating-label">SUR 435, AVIS VÉRIFIÉS PLANITY</span>
+      <a class="s6-btn" href={planityUrl} target="_blank" rel="noopener">LIRE TOUS LES AVIS</a>
+    </div>
+  </div>
+
+  <div class="s6-marquee" data-anim="s6-marquee">
+    <div class="s6-track" data-anim="s6-track">
+      {reviews.map((r) => (
+        <article class="s6-card">
+          <div>
+            <div class="s6-card-stars" aria-label="5 étoiles sur 5">★★★★★</div>
+            <p class="s6-card-quote">{r.quote}</p>
+          </div>
+          <div>
+            <div class="s6-card-author">{r.author}</div>
+            <div class="s6-card-service">{r.service}</div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  :root {
+    --fpx: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+    --s6-pad-x: calc(40 * var(--fpx));
+  }
+
+  .s6 {
+    position: relative;
+    width: 100%;
+    padding: calc(140 * var(--fpx)) 0;
+    background: var(--bg);
+    color: var(--orange, #e57851);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .s6-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(40 * var(--fpx));
+    padding: 0 var(--s6-pad-x);
+    margin-bottom: calc(90 * var(--fpx));
+  }
+
+  .s6-title {
+    margin: 0;
+    max-width: calc(900 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 700;
+    font-size: calc(120 * var(--fpx));
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+
+  .s6-thin { font-weight: 200; }
+
+  .s6-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .s6-rating-note {
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: calc(180 * var(--fpx));
+    line-height: 0.9;
+  }
+
+  .s6-rating-label {
+    margin: calc(14 * var(--fpx)) 0 calc(20 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(24 * var(--fpx));
+    line-height: 1;
+  }
+
+  .s6-btn {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(32 * var(--fpx));
+    line-height: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    transition: opacity 0.2s ease;
+  }
+
+  .s6-btn:hover { opacity: 0.8; }
+
+  .s6-marquee { overflow: hidden; }
+
+  .s6-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+
+  /* margin-right (et non gap) pour que la boucle xPercent -50 tombe juste */
+  .s6-card {
+    width: calc(400 * var(--fpx));
+    min-height: calc(300 * var(--fpx));
+    margin-right: calc(20 * var(--fpx));
+    padding: calc(30 * var(--fpx));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: rgba(229, 120, 81, 0.08);
+    box-sizing: border-box;
+  }
+
+  .s6-card-stars {
+    font-size: calc(16 * var(--fpx));
+    letter-spacing: 0.15em;
+  }
+
+  .s6-card-quote {
+    margin: calc(16 * var(--fpx)) 0 calc(28 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(32 * var(--fpx));
+    line-height: 1.05;
+  }
+
+  .s6-card-author {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(24 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .s6-card-service {
+    margin-top: calc(4 * var(--fpx));
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: calc(22 * var(--fpx));
+    line-height: 1.1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .s6-title { visibility: hidden; }
+  }
+
+  @media (max-width: 1023px) {
+    .s6 { padding: 5rem 0; }
+    .s6-top {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0 1.5rem;
+      margin-bottom: 3rem;
+      gap: 2rem;
+    }
+    .s6-title { font-size: 3.5rem; }
+    .s6-rating { align-items: flex-start; text-align: left; }
+    .s6-rating-note { font-size: 5rem; }
+    .s6-rating-label { font-size: 1.2rem; }
+    .s6-btn { font-size: 1.5rem; }
+    .s6-card { width: 17rem; min-height: 15rem; padding: 1.5rem; margin-right: 1rem; }
+    .s6-card-stars { font-size: 0.9rem; }
+    .s6-card-quote { font-size: 1.5rem; }
+    .s6-card-author { font-size: 1.15rem; }
+    .s6-card-service { font-size: 1.1rem; }
+  }
+</style>

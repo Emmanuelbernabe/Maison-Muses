@@ -1,0 +1,244 @@
+---
+// Section 7 — Routines personnalisées : deux portes vers les Typeform
+import { resolveImage } from '../lib/images';
+import { siteImage, SIZES } from '../lib/siteImage';
+const { photos } = Astro.props;
+
+// TODO : remplacer par les vraies URLs Typeform
+const doors = [
+  {
+    key: 'coiffure',
+    label: 'COIFFURE',
+    text: 'VOS CHEVEUX, VOS HABITUDES, VOS ENVIES.',
+    url: 'https://form.typeform.com/to/ROUTINE-COIFFURE',
+    img: siteImage(photos?.routines?.coiffure, resolveImage('marquee-1'), SIZES.door),
+    alt: 'Cheveux longs blonds ondulés au salon Maison Muses',
+  },
+  {
+    key: 'bien-etre',
+    label: 'BIEN-ÊTRE',
+    text: 'VOTRE RYTHME, VOS TENSIONS, VOS BESOINS.',
+    url: 'https://form.typeform.com/to/ROUTINE-BIEN-ETRE',
+    img: siteImage(photos?.routines?.bienEtre, resolveImage('load-3'), SIZES.door),
+    alt: 'Massage du visage à Maison Muses Bien-être',
+  },
+];
+---
+
+<section class="s7" id="s7" data-anim="s7-section">
+  <div class="s7-head">
+    <h2 class="s7-title" data-anim="s7-title">
+      <span class="s7-thin">UNE ROUTINE</span><br />PENSÉE POUR VOUS.
+    </h2>
+    <p class="s7-para">
+      QUELQUES QUESTIONS, ET NOS EXPERTS VOUS COMPOSENT UNE ROUTINE ADAPTÉE. VOUS LA RECEVEZ PAR E-MAIL.
+    </p>
+  </div>
+
+  <div class="s7-doors" data-anim="s7-doors">
+    {doors.map((d, i) => (
+      <a class:list={['s7-door', { 'is-open': i === 0 }]} href={d.url} target="_blank" rel="noopener" data-anim="s7-door">
+        <img class="s7-door-img" src={d.img.src} srcset={d.img.srcset} sizes={d.img.sizes} alt={d.img.alt ?? d.alt} loading="lazy" decoding="async" />
+        <span class="s7-door-veil" aria-hidden="true"></span>
+        <span class="s7-door-vertical" aria-hidden="true">{d.label}</span>
+        <span class="s7-door-content">
+          <span class="s7-door-text-wrap">
+            <span class="s7-door-name"><span class="s7-thin">ROUTINE</span> {d.label}</span>
+            <span class="s7-door-text">{d.text}</span>
+          </span>
+          <span class="s7-btn">FAIRE MON DIAGNOSTIC</span>
+        </span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  :root {
+    --fpx: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+    --s7-pad-x: calc(40 * var(--fpx));
+    --s7-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .s7 {
+    position: relative;
+    width: 100%;
+    padding: calc(140 * var(--fpx)) var(--s7-pad-x);
+    background: var(--bg);
+    color: var(--orange, #e57851);
+    box-sizing: border-box;
+  }
+
+  /* ── En-tête ── */
+  .s7-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(40 * var(--fpx));
+    margin-bottom: calc(60 * var(--fpx));
+  }
+
+  .s7-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(120 * var(--fpx));
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+
+  .s7-thin { font-weight: 200; }
+
+  .s7-para {
+    width: calc(520 * var(--fpx));
+    max-width: 100%;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(28 * var(--fpx));
+    line-height: 1.05;
+    text-align: right;
+  }
+
+  /* ── Portes ── */
+  .s7-doors {
+    display: flex;
+    gap: calc(16 * var(--fpx));
+    height: calc(620 * var(--fpx));
+  }
+
+  .s7-door {
+    position: relative;
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* largeur pilotée par GSAP au survol, valeur CSS = état sans JS */
+  .s7-door.is-open { flex-grow: 2.4; }
+
+  .s7-door-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+  }
+
+  /* Voile orange : remonte quand la porte s'ouvre */
+  .s7-door-veil {
+    position: absolute;
+    inset: 0;
+    background: var(--orange, #e57851);
+    clip-path: inset(0% 0% 0% 0%);
+    transition: clip-path 1s var(--s7-ease);
+  }
+
+  .s7-door.is-open .s7-door-veil { clip-path: inset(0% 0% 100% 0%); }
+
+  /* Nom vertical sur la porte fermée */
+  .s7-door-vertical {
+    position: absolute;
+    left: calc(24 * var(--fpx));
+    bottom: calc(24 * var(--fpx));
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(80 * var(--fpx));
+    line-height: 0.85;
+    color: var(--bg);
+    white-space: nowrap;
+    transition: opacity 0.5s var(--s7-ease);
+  }
+
+  .s7-door.is-open .s7-door-vertical { opacity: 0; }
+
+  /* Bandeau titre + lien : glisse depuis le bas quand la porte s'ouvre */
+  .s7-door-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(20 * var(--fpx));
+    padding: calc(28 * var(--fpx));
+    background: var(--bg);
+    transform: translateY(101%);
+    transition: transform 0.6s var(--s7-ease);
+  }
+
+  .s7-door.is-open .s7-door-content {
+    transform: translateY(0);
+    transition: transform 0.9s var(--s7-ease) 0.2s;
+  }
+
+  .s7-door-text-wrap { display: flex; flex-direction: column; min-width: 0; }
+
+  .s7-door-name {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(72 * var(--fpx));
+    line-height: 0.85;
+    white-space: nowrap;
+  }
+
+  .s7-door-text {
+    margin-top: calc(10 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(20 * var(--fpx));
+    line-height: 1.1;
+  }
+
+  .s7-btn {
+    flex-shrink: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(28 * var(--fpx));
+    line-height: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+  }
+
+  .s7-door:hover .s7-btn { opacity: 0.8; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .s7-title { visibility: hidden; }
+    :global(.js) .s7-door { clip-path: inset(100% 0% 0% 0%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .s7-door-veil,
+    .s7-door-vertical,
+    .s7-door-content,
+    .s7-door.is-open .s7-door-content { transition: none; }
+  }
+
+  /* ── Tablette / mobile : portes empilées, toutes ouvertes ── */
+  @media (max-width: 1023px) {
+    .s7 { padding: 5rem 1.5rem; }
+    .s7-head { flex-direction: column; align-items: flex-start; gap: 1.5rem; margin-bottom: 2.5rem; }
+    .s7-title { font-size: 3.5rem; }
+    .s7-para { width: 100%; text-align: left; font-size: 1.3rem; }
+    .s7-doors { flex-direction: column; height: auto; gap: 1rem; }
+    .s7-door { flex: none; height: 28rem; }
+    .s7-door-veil,
+    .s7-door-vertical { display: none; }
+    .s7-door-content {
+      transform: none;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.25rem;
+    }
+    .s7-door-name { font-size: 2.6rem; white-space: normal; }
+    .s7-door-text { font-size: 1.05rem; }
+    .s7-btn { font-size: 1.4rem; }
+  }
+</style>

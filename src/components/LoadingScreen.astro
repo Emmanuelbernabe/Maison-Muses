@@ -1,0 +1,247 @@
+---
+// LoadingScreen.astro — Nouveau design loader
+import { resolveImage } from '../lib/images';
+import { siteImage, SIZES } from '../lib/siteImage';
+const { photos } = Astro.props;
+
+// Mêmes sizes que le hero : la zone du loader finit à la taille du portrait
+const ldImg1 = siteImage(photos?.loader?.load1, resolveImage('load-1'), SIZES.portrait);
+const ldImg2 = siteImage(photos?.loader?.load2, resolveImage('load-2'), SIZES.portrait);
+const ldImg3 = siteImage(photos?.loader?.load3, resolveImage('load-3'), SIZES.portrait);
+const ldImg4 = siteImage(photos?.loader?.load4, resolveImage('load-4'), SIZES.portrait);
+const ldImgHero = siteImage(photos?.hero?.portrait, resolveImage('hero'), SIZES.portrait);
+---
+
+<!-- Loader déjà vu pendant cette visite : masqué avant même le premier affichage -->
+<script is:inline>
+  try {
+    if (sessionStorage.getItem('mm-loader-seen') === '1') {
+      document.documentElement.classList.add('ld-skip');
+      // Filet de sécurité : la page s'affiche quoi qu'il arrive
+      setTimeout(function () { document.documentElement.classList.add('mm-ready'); }, 4000);
+    }
+  } catch (e) {}
+</script>
+
+<div id="loader" aria-hidden="true">
+  <!-- Fond orange plein écran -->
+  <div id="ld-orange">
+    <!-- MAISON blanc (derrière l'image) -->
+    <div class="ld-word ld-maison" id="ld-maison-white">MAISON</div>
+  </div>
+
+  <!-- Zone image (au milieu, z-index 10) -->
+  <div id="ld-zone">
+    <!-- Images load avec clippath concentrique -->
+    <div id="ld-img-1" class="ld-img"><img src={ldImg1.src} srcset={ldImg1.srcset} sizes={ldImg1.sizes} alt="" draggable="false" /></div>
+    <div id="ld-img-2" class="ld-img"><img src={ldImg2.src} srcset={ldImg2.srcset} sizes={ldImg2.sizes} alt="" draggable="false" /></div>
+    <div id="ld-img-3" class="ld-img"><img src={ldImg3.src} srcset={ldImg3.srcset} sizes={ldImg3.sizes} alt="" draggable="false" /></div>
+    <div id="ld-img-4" class="ld-img"><img src={ldImg4.src} srcset={ldImg4.srcset} sizes={ldImg4.sizes} alt="" draggable="false" /></div>
+
+    <div id="ld-img-hero" class="ld-img"><img src={ldImgHero.src} srcset={ldImgHero.srcset} sizes={ldImgHero.sizes} alt="" draggable="false" /></div>
+  </div>
+
+  <!-- MUSES blanc : z-index 15 pour overlap par dessus l'image tant qu'on est sur fond orange -->
+  <div id="ld-muses-layer-white">
+    <div class="ld-word ld-muses" id="ld-muses-white">MUSES</div>
+  </div>
+
+  <!-- Bandeau crème qui se dévoile du bas vers le haut (z-index 20) -->
+  <!-- Note : #ld-cream a pointer-events:none et son fond #F7F2EC couvre tout sauf l'image grâce au masque ou à son placement -->
+  <!-- Mais pour que l'image reste 100% visible quand le crème monte : on place la réplique ou on monte le crème sans couvrir l'image ! -->
+  <div id="ld-cream">
+    <!-- MAISON orange -->
+    <div class="ld-word ld-maison" id="ld-maison-orange">MAISON</div>
+    <!-- Hero-sub : visible dès que le crème commence à remonter depuis le bas -->
+    <p class="ld-hero-sub">Sublimer vos cheveux, <br />éveiller vos sens.</p>
+  </div>
+
+  <!-- MUSES orange : z-index 25, au-dessus de tout pour overlap par-dessus l'image une fois crème -->
+  <div id="ld-muses-layer-orange">
+    <div class="ld-word ld-muses" id="ld-muses-orange">MUSES</div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --ld-orange: #e57851;
+    --ld-cream: #F7F2EC;
+  }
+
+  #loader {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    overflow: hidden;
+    pointer-events: all;
+    opacity: 1;
+  }
+
+  /* ── Fond orange (couche inférieure z-index 1) ── */
+  #ld-orange {
+    position: absolute;
+    inset: 0;
+    background: var(--ld-orange);
+    z-index: 1;
+  }
+
+  /* ── Zone image (z-index 10 : au-dessus du fond orange et du fond crème !) ── */
+  #ld-zone {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 14.25rem;
+    height: 17.5rem;
+    border-radius: 0;
+    overflow: hidden;
+    background: transparent;
+    z-index: 10;
+    will-change: width, height, top, bottom, transform;
+    backface-visibility: hidden;
+  }
+
+  /* ── Images load ── */
+  .ld-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 0;
+    clip-path: inset(50% 50% 50% 50%);
+    will-change: clip-path;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  #ld-img-1 { z-index: 1; }
+  #ld-img-2 { z-index: 2; }
+  #ld-img-3 { z-index: 3; }
+  #ld-img-4 { z-index: 4; }
+  #ld-img-hero { z-index: 5; }
+
+  .ld-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+    border-radius: 0;
+    pointer-events: none;
+  }
+
+  /* ── Bandeau crème (z-index 5 : DERRIÈRE la zone image (z-index 10), mais DEVANT le fond orange (z-index 1) !) ── */
+  /* Ainsi quand le crème se dévoile du bas vers le haut, il ne recouvre JAMAIS l'image ! */
+  #ld-cream {
+    position: absolute;
+    inset: 0;
+    background: var(--ld-cream);
+    z-index: 5;
+    clip-path: inset(100% 0% 0% 0%);
+    will-change: clip-path;
+    pointer-events: none;
+  }
+
+  /* ── Calque MUSES blanc (z-index 15 : au-dessus de #ld-zone pour l'overlap blanc) ── */
+  #ld-muses-layer-white {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    pointer-events: none;
+  }
+
+  /* ── Calque MUSES orange (z-index 25 : au-dessus de #ld-zone pour l'overlap orange) ── */
+  #ld-muses-layer-orange {
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+    clip-path: inset(100% 0% 0% 0%); /* Synchronisé avec le bandeau crème */
+    will-change: clip-path;
+    pointer-events: none;
+  }
+
+  /* ── Typographie ── */
+  .ld-word {
+    position: absolute;
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.88;
+    white-space: nowrap;
+    display: block;
+    pointer-events: none;
+    visibility: hidden; /* Empêche le FOUC avant que GSAP n'initialise la position et la taille */
+  }
+
+  /* MAISON : centré horizontalement */
+  .ld-maison {
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+
+  #ld-maison-white  { color: #ffffff; }
+  #ld-maison-orange { color: var(--ld-orange); }
+
+  /* MUSES : overlap PAR DESSUS les images */
+  .ld-muses {
+    /* piloté par JS */
+  }
+
+  #ld-muses-white  { color: #ffffff; }
+  #ld-muses-orange { color: var(--ld-orange); }
+
+  /* ── Hero-sub dans le crème : calqué exactement sur Hero.astro ── */
+  .ld-hero-sub {
+    position: absolute;
+    bottom: var(--hero-sub-gap);
+    left: var(--hero-sub-gap);
+    font-size: var(--hero-sub-fs);
+    margin: 0;
+    text-align: left;
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: -0.05rem;
+    line-height: 1.05;
+    color: var(--ld-orange);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Mobile : même position que le sous-titre du hero (centré en haut, une ligne) */
+  @media (max-width: 1023px) {
+    .ld-hero-sub {
+      top: var(--hero-m-top);
+      bottom: auto;
+      left: 0;
+      right: 0;
+      font-size: var(--hero-m-sub-fs);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .ld-hero-sub br { display: none; }
+  }
+
+  /* ── Fin du loader ── */
+  #loader.ld-done,
+  :global(html.ld-skip) #loader {
+    pointer-events: none;
+    display: none;
+  }
+
+  /* Sans loader : page invisible le temps que les animations soient en place et le scroll restauré (pas de flash du hero) */
+  :global(html.ld-skip:not(.mm-ready) body) {
+    opacity: 0;
+  }
+
+  /* Fondu uniquement à l'apparition (pas de fondu en sortie au chargement) */
+  :global(html.ld-skip.mm-ready body) {
+    transition: opacity 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #loader { display: none; }
+  }
+</style>

@@ -1,21 +1,229 @@
 ---
-import Lien from './Lien.astro';
-const { logo, cta } = Astro.props;
+import { resolveImage } from '../lib/images';
+const { cta, logo } = Astro.props;
+const logoSrc = logo?.asset?.url ?? resolveImage('logo');
+
+// Mêmes destinations que les liens « La maison » du footer, plus l'accueil
+const menuLinks = [
+  { label: 'Accueil',   url: '#top' },
+  { label: 'Espace bien-être', url: '#s2' },
+  { label: 'Espace coiffure',  url: '#s2' },
+  { label: 'Coffrets',  url: '#s5' },
+  { label: 'L’équipe',  url: '#s4' },
+  { label: 'Journal',   url: '#s8' },
+];
 ---
 <header id="hd">
-  <a class="logo" href="#top" aria-label={`${logo}, accueil`}>{logo}</a>
-  {cta && <Lien href={cta.url} light>{cta.label}</Lien>}
+  <button class="nav-item nav-menu" type="button" aria-expanded="false" aria-controls="menu-panel" data-menu-open>MENU</button>
+  <a class="nav-logo" href="#top" aria-label="Maison Muses, accueil">
+    <img src={logoSrc} alt="Maison Muses" width="28" height="52" />
+    <img class="nav-logo-cream" src={logoSrc} alt="" width="28" height="52" aria-hidden="true" />
+  </a>
+  <a class="nav-item nav-reserver" href={cta?.url ?? "#reserver"}>RESERVER</a>
 </header>
 
+<div class="menu-backdrop" data-menu-backdrop aria-hidden="true"></div>
+
+<nav class="menu-panel" id="menu-panel" aria-label="Menu principal" inert data-menu-panel>
+  <div class="menu-head">
+    <button class="menu-title" type="button" data-menu-close>Menu</button>
+    <button class="menu-close" type="button" aria-label="Fermer le menu" data-menu-close>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M1.4 14L0 12.6L5.6 7L0 1.4L1.4 0L7 5.6L12.6 0L14 1.4L8.4 7L14 12.6L12.6 14L7 8.4L1.4 14Z" fill="currentColor"/>
+      </svg>
+    </button>
+  </div>
+  <ul class="menu-links">
+    {menuLinks.map((l) => (
+      <li><a class="menu-link" href={l.url} data-menu-link>{l.label}</a></li>
+    ))}
+  </ul>
+</nav>
+
 <style>
-  /* --hb / --hc / --hblur sont animées par GSAP (voir scripts/main.ts) */
-  header{
-    --hb:0; --hc:0; --hblur:0;
-    position:fixed;inset:0 0 auto 0;z-index:20;display:flex;justify-content:space-between;align-items:center;
-    padding:calc(env(safe-area-inset-top,0px) + 22px) var(--pad) 22px;
-    color:color-mix(in srgb,var(--ink) calc(var(--hc) * 1%),#fff);
-    background:color-mix(in srgb,var(--bg) calc(var(--hb) * 1%),transparent);
-    -webkit-backdrop-filter:blur(calc(var(--hblur) * 1px));backdrop-filter:blur(calc(var(--hblur) * 1px));
+  header#hd {
+    position: fixed;
+    inset: 0 0 auto 0;
+    max-width: 1920px;
+    margin-inline: auto;
+    z-index: 1001;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 26px) clamp(24px, 3.5vw, 48px) 26px;
+    background: transparent;
+    pointer-events: auto;
   }
-  .logo{font-size:22px;font-weight:500;letter-spacing:-.03em}
+
+  /* Avant le déclenchement GSAP, masqué et décalé vers le haut */
+  :global(.js) header#hd {
+    opacity: 0;
+    transform: translateY(-50px);
+    pointer-events: none;
+  }
+
+  :global(.js) header#hd.hd-ready {
+    pointer-events: auto;
+  }
+
+  .nav-item {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--orange, #e57851);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    text-decoration: none;
+    transition: opacity 0.25s ease, color 0.35s ease;
+    cursor: pointer;
+  }
+
+  .nav-item:hover {
+    opacity: 0.75;
+  }
+
+  .nav-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.25s ease;
+  }
+
+  .nav-logo:hover {
+    opacity: 0.85;
+  }
+
+  .nav-logo img {
+    height: clamp(40px, 3.2vw, 48px);
+    width: auto;
+    display: block;
+    transition: opacity 0.35s ease;
+  }
+
+  /* Copie crème du logo, superposée : on fond l'une dans l'autre (pas de transition de filtre, qui passe par du vert) */
+  .nav-logo .nav-logo-cream {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    filter: brightness(0) invert(96%) sepia(6%) saturate(250%) hue-rotate(330deg);
+    opacity: 0;
+  }
+
+  /* Au-dessus d'une section à fond orange (coffrets) : items en crème */
+  header#hd.is-on-orange .nav-item {
+    color: var(--ld-cream, #F7F2EC);
+  }
+
+  header#hd.is-on-orange .nav-logo img {
+    opacity: 0;
+  }
+
+  header#hd.is-on-orange .nav-logo .nav-logo-cream {
+    opacity: 1;
+  }
+
+  /* Le MENU est maintenant un <button> : on neutralise le style natif */
+.nav-menu { background: none; border: 0; padding: 0; }
+
+/* ── Menu déployé ── */
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1002;                       /* au-dessus du header (1001) : tout le reste est flouté */
+  background: rgba(247, 242, 236, 0.35);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.menu-head {
+  display: flex;
+  align-items: center;               /* l'icône reste centrée sur la hauteur du titre */
+  justify-content: space-between;
+}
+
+.menu-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: #F7F2EC;
+  transition: opacity 0.25s ease;
+}
+.menu-close:hover { opacity: 0.75; }
+
+.menu-close svg {
+  display: block;
+  width: calc(14 * var(--fpx));      /* 14px à 1440, ~19px à 1920 */
+  height: auto;
+}
+
+.menu-panel {
+  position: fixed;
+  top: 0;
+  left: 0;                             /* position exacte posée par menu.ts */
+  z-index: 1003;
+  box-sizing: border-box;
+  width: calc(206 * var(--fpx));
+  padding: calc(12 * var(--fpx)) calc(16 * var(--fpx)) calc(16 * var(--fpx));
+  background: var(--orange, #e57851);
+  border-radius: calc(8 * var(--fpx));
+  clip-path: inset(0% 100% 100% 0%);   /* fermé : replié dans l'angle haut-gauche */
+  visibility: hidden;
+}
+
+.menu-title {
+  display: block;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  /* Même typo que les items du header (MENU / RESERVER) */
+  font-family: 'Thunder', sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #F7F2EC;                      /* crème : le panneau est orange */
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-decoration: none;
+  transition: opacity 0.25s ease, color 0.35s ease;
+  cursor: pointer;
+}
+
+.menu-links {
+  list-style: none;
+  margin: calc(24 * var(--fpx)) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;               /* aligné à droite */
+  gap: 0.5rem;
+}
+
+.menu-link {
+  display: block;
+  font-family: 'Thunder', sans-serif;
+  font-weight: 400;                    /* regular */
+  font-size: calc(24 * var(--fpx));    /* 24px à 1440, 32px à 1920 */
+  line-height: 0.85;
+  color: #F7F2EC;
+  text-decoration: none;
+  transition: opacity 0.25s ease;
+}
+.menu-link:hover { opacity: 0.75; }
+
+:global(html.menu-open) { overflow: hidden; }   /* repli si Lenis est désactivé */
 </style>

@@ -1,19 +1,41 @@
+@font-face {
+  font-family: 'Thunder';
+  src: url('/fonts/Thunder-VF.woff2') format('woff2'),
+       url('/fonts/Thunder-VF.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root{
-  --bg:#f4f4f2; --surface:#e9e9e6; --ink:#111; --muted:#8a8a8a; --orange:#e57851; --line:#111;
+  --bg:#F7F2EC; --surface:#f7f7f5; --ink:#2C2C2C; --muted:#8a8a8a; --orange:#e57851; --line:#111;
   --tag-bg:rgba(229,120,81,.16);
   --font:"DM Sans","Helvetica Neue",Arial,sans-serif; --mono:"DM Mono",ui-monospace,Menlo,monospace;
   --pad:clamp(20px,3.4vw,48px);
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121211;--surface:#1d1d1b;--ink:#f4f4f2;--line:#f4f4f2;--muted:#8f8f8a;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#121211;--surface:#1d1d1b;--ink:#f4f4f2;--line:#f4f4f2;--muted:#8f8f8a;color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.5 var(--font);font-optical-sizing:auto;-webkit-font-smoothing:antialiased}
+html {
+  font-size: clamp(14px, calc(-0.421px + 1.14035vw), 21.4737px);
+  scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 72px);
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+  overflow-x: clip;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1.125rem/1.5 var(--font);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  max-width: 1920px;
+  margin-inline: auto;
+  position: relative;
+}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
-html{overflow-x:clip}
 /* Lenis */
 html.lenis,html.lenis body{height:auto}
 .lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}
@@ -35,12 +57,13 @@ h1,h2,h3,p{margin:0}
 
 /* Sections */
 section{padding:clamp(100px,14vw,200px) var(--pad) 0}
+section.s5, section#s5 { padding: 0 !important; }
 .head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap;margin-bottom:clamp(56px,7vw,100px)}
 .head .p{max-width:34ch;color:var(--muted)}
 
 /* États initiaux des animations GSAP (uniquement si JS actif et mouvement autorisé) */
 @media (prefers-reduced-motion:no-preference){
   .js [data-split]{visibility:hidden}
-  .js [data-reveal],.js [data-hero],.js .hero h1 span,.js .mos>div,.js [data-d]{opacity:0}
+  .js [data-reveal],.js [data-hero],.js .mos>div,.js [data-d]{opacity:0}
   .js .ph{clip-path:inset(0% 0% 100% 0%)}
 }

@@ -1,9 +1,10 @@
 ---
 import SanityImage from './SanityImage.astro';
+import { resolveImage } from '../lib/images';
 const { data } = Astro.props;
 const gallery = data.gallery ?? [];
 // Photos du marquee : 6 visuels répétés pour avoir assez de cartes pour la boucle
-const slides = [1, 2, 3, 4, 5, 6].map((n) => `/images/slide-${n}.webp`);
+const slides = [1, 2, 3, 4, 5, 6].map((n) => resolveImage(`slide-${n}`));
 const cards = [...slides, ...slides];
 ---
 <div class="intro">

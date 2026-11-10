@@ -5,6 +5,14 @@ const group = (name: string, title: string, fields: any[]) =>
 
 const ref = (to: string) => defineArrayMember({ type: 'reference', to: [{ type: to }] });
 
+const sub = (name: string, title: string, fields: any[]) =>
+  defineField({ name, title, type: 'object', options: { collapsible: true, collapsed: true }, fields });
+
+const BIG = 'Grand portrait : 1200 px minimum sur le petit côté.';
+const SMALL = 'Petite image : 800 px minimum sur le petit côté.';
+const photo = (name: string, title: string, description = BIG) =>
+  defineField({ name, title, type: 'cmsImage', description });
+
 export const homepage = defineType({
   name: 'homepage',
   title: 'Page d’accueil',
@@ -17,6 +25,52 @@ export const homepage = defineType({
       defineField({ name: 'image', title: 'Image (affichée en noir & blanc)', type: 'cmsImage' }),
       defineField({ name: 'subtitle', title: 'Sous-titre', type: 'string' }),
       defineField({ name: 'title', title: 'Grand titre', type: 'string', description: 'Reste sur une seule ligne : 14 caractères max.', validation: (r) => r.required().max(14) }),
+    ]),
+
+    group('photos', 'Photos du site', [
+      sub('loader', 'Loader', [
+        photo('load1', 'Photo 1'),
+        photo('load2', 'Photo 2'),
+        photo('load3', 'Photo 3'),
+        photo('load4', 'Photo 4'),
+      ]),
+      sub('hero', 'Hero', [
+        photo('portrait', 'Portrait du hero', `${BIG} Aussi utilisé à la fin du loader.`),
+        photo('reveal', 'Portrait révélé au scroll', `${BIG} Apparaît sur le portrait du hero puis reste en section 2.`),
+        photo('center', 'Portrait central du marquee', `${BIG} Fait le relais entre la section 2 et le marquee de la section 3.`),
+      ]),
+      sub('s2', 'Section 2 : coiffure et bien-être', [
+        photo('ambiance', 'Image ambiance', SMALL),
+      ]),
+      sub('s3', 'Section 3 : marquee', [
+        defineField({
+          name: 'marquee',
+          title: 'Photos du marquee',
+          type: 'array',
+          of: [defineArrayMember({ type: 'cmsImage' })],
+          description: `5 photos, placées autour du portrait central. ${BIG}`,
+          validation: (r) => r.max(5),
+        }),
+      ]),
+      sub('s4', 'Section 4 : équipe', [
+        photo('thumb', 'Vignette du titre', SMALL),
+        photo('teamLeft', 'Photo équipe gauche'),
+        photo('teamMid', 'Photo équipe centre'),
+        photo('teamRight', 'Photo équipe droite'),
+      ]),
+      sub('coffrets', 'Section 5 : coffrets', [
+        photo('initiationBig', 'Initiation, grande image'),
+        photo('initiationSmall', 'Initiation, petite image', SMALL),
+        photo('harmonieBig', 'Harmonie, grande image'),
+        photo('harmonieSmall', 'Harmonie, petite image', SMALL),
+        photo('symbioseBig', 'Symbiose, grande image'),
+        photo('symbioseSmall', 'Symbiose, petite image', SMALL),
+        photo('prestigeSmall', 'Prestige, petite image', `${SMALL} La grande reste la vidéo.`),
+      ]),
+      sub('routines', 'Section 7 : routines', [
+        photo('coiffure', 'Porte routine coiffure'),
+        photo('bienEtre', 'Porte routine bien-être'),
+      ]),
     ]),
 
     group('intro', 'Introduction', [

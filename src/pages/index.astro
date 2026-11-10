@@ -2,33 +2,40 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
-import Intro from '../components/Intro.astro';
-import Coffrets from '../components/Coffrets.astro';
-import Mission from '../components/Mission.astro';
-import Reviews from '../components/Reviews.astro';
-import Routine from '../components/Routine.astro';
-import Footer from '../components/Footer.astro';
+import Section2 from '../components/Section2.astro';
+import Section3 from '../components/Section3.astro';
+import Section4 from '../components/Section4.astro';
+import Section5 from '../components/Section5.astro';
+import Section6 from '../components/Section6.astro';
+import Section7 from '../components/Section7.astro';
+import Section8 from '../components/Section8.astro';
+import Section9 from '../components/Section9.astro';
+import LoadingScreen from '../components/LoadingScreen.astro';
 import { getHome, getSettings } from '../lib/sanity';
 
 const [home, settings] = await Promise.all([getHome(), getSettings()]);
 if (!home || !settings) {
-  throw new Error('Contenu introuvable : publiez « Page d’accueil » et « Réglages du site » dans Sanity (voir README).');
+  throw new Error("Contenu introuvable : publiez « Page d'accueil » et « Réglages du site » dans Sanity (voir README).");
 }
 ---
 <Layout
   title={home.seoTitle ?? 'Maison Muses – Coiffure et bien-être à Toulouse'}
   description={home.seoDescription}
 >
+  <LoadingScreen photos={home.photos} />
   <Header logo={settings.logo} cta={settings.headerCta} />
   <main id="top">
-    <Hero data={home.hero} />
-    <Intro data={home.intro} />
-    <Coffrets data={home.coffrets} />
-    <Mission data={home.mission} />
-    <Reviews data={home.reviews} />
-    <Routine data={home.routine} />
+    <!-- Hero et Section 2 dans le flux normal sans pin superposé -->
+    <Hero data={home.hero} photos={home.photos} />
+    <Section2 data={home.intro} photos={home.photos} />
+    <Section3 photos={home.photos} />
+    <Section4 photos={home.photos} />
+    <Section5 photos={home.photos} />
+    <Section6 />
+    <Section7 photos={home.photos} />
+    <Section8 />
   </main>
-  <Footer data={settings.footer} />
+  <Section9 />
   <script>
     import '../scripts/main';
   </script>

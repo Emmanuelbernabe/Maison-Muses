@@ -1,0 +1,1036 @@
+---
+// Section 5 — Coffrets avec Pin et Scroll Horizontal GSAP
+import { resolveImage, resolveVideo } from '../lib/images';
+import { siteImage, SIZES } from '../lib/siteImage';
+const { photos } = Astro.props;
+const cf = photos?.coffrets;
+
+const c1Little = siteImage(cf?.initiationSmall, resolveImage('initiation-little', 'slide-2'), SIZES.coffretSmall);
+const c1Big = siteImage(cf?.initiationBig, resolveImage('initiation-big', 'soin-img'), SIZES.coffretBig);
+
+const c2Little = siteImage(cf?.harmonieSmall, resolveImage('harmonie-little'), SIZES.coffretSmall);
+const c2Big = siteImage(cf?.harmonieBig, resolveImage('harmonie-big'), SIZES.coffretBig);
+
+const c3Big = siteImage(cf?.symbioseBig, resolveImage('symbiose-big'), SIZES.coffretBig);
+const c3Little = siteImage(cf?.symbioseSmall, resolveImage('symbiose-little'), SIZES.coffretSmall);
+
+const c4Little = siteImage(cf?.prestigeSmall, resolveImage('prestige-little'), SIZES.coffretSmall);
+const c4BigVideo = resolveVideo('prestige-big');
+---
+
+<section class="s5" id="s5" data-anim="s5-section">
+  <!-- ── 1. En-tête de section (Intro) ── -->
+  <div class="s5-intro">
+    <div class="s5-intro-header">
+      <h2 class="s5-intro-main">COIFFURE, MASSAGE, SOIN PROFOND. BIENVENUE DANS <br>LE RITUEL DES <em>MUSES</em>.</h2>
+      <!-- Illustration Muse : en bas du header, contre le padding de droite -->
+      <svg class="s5-intro-deco" width="690" height="508" viewBox="0 -82 690 508" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <g clip-path="url(#s5-deco-clip)">
+      <path d="M3.24609 -78.7554H686.754V422.756H3.24609V-78.7554Z" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M348.797 109.311C297.413 72.4044 230.813 121.1 230.813 213.982C229.862 219.108 228.529 234.486 225.675 244.738C222.63 254.99 213.875 265.242 213.305 275.494C212.924 285.746 217.872 295.998 223.201 306.249C228.529 316.501 239.948 326.753 245.277 337.005C250.796 347.257 255.554 357.509 255.554 367.761C255.554 378.013 250.796 388.264 245.277 398.516C239.948 408.768 229.481 419.02 223.201 429.272C216.73 439.524 209.308 449.776 207.215 460.028C205.311 470.279 206.834 480.531 210.83 490.783C214.637 501.035 227.388 516.413 230.813 521.539" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M351.645 13.3787C240.334 -28.9896 93.3571 37.6086 93.3571 223.558C92.6945 229.443 91.3694 247.096 88.7191 258.865C86.0689 270.634 78.1181 282.403 77.8972 294.172C77.4555 305.941 81.8726 317.71 86.5106 329.479C91.3694 341.248 101.529 353.017 106.388 364.786C111.246 376.555 115.443 388.324 115.443 400.093C115.443 411.862 111.246 423.631 106.388 435.4C101.529 447.169 92.2528 458.938 86.5106 470.707C80.7684 482.476 74.1427 494.245 72.3759 506.014C70.609 517.783 71.9342 529.552 75.4678 541.32C79.0015 553.089 90.486 570.743 93.3571 576.627" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M244.373 -82.5984C129.097 -114.645 -11.7949 63.0368 -11.7949 273.478C-12.1073 277.929 -12.5759 291.282 -13.3569 300.184C-14.2941 309.085 -17.1057 317.987 -17.2619 326.889C-17.4181 335.791 -15.8561 344.693 -14.1379 353.595C-12.5759 362.497 -8.98331 371.399 -7.26511 380.301C-5.54691 389.203 -3.98492 398.105 -3.98492 407.006C-3.98492 415.908 -5.54691 424.81 -7.26511 433.712C-8.98331 442.614 -12.2635 451.516 -14.1379 460.418C-16.1685 469.32 -18.5115 478.222 -19.2925 487.124C-19.9173 496.026 -19.2925 504.927 -18.0429 513.829C-16.9495 522.731 -12.8883 536.084 -11.7949 540.535" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M351.645 109.311C403.03 70.8666 459.187 123.411 459.187 220.163C460.139 225.503 461.471 241.521 464.326 252.2C467.371 262.879 476.125 273.558 476.696 284.237C477.077 294.916 472.128 305.595 466.8 316.274C461.471 326.953 450.052 337.633 444.724 348.312C439.205 358.991 434.447 369.67 434.447 380.349C434.447 391.028 439.205 401.707 444.724 412.386C450.052 423.065 460.519 433.744 466.8 444.423C473.27 455.102 480.693 465.781 482.786 476.46C484.689 487.139 483.167 497.818 479.17 508.497C475.364 519.176 462.613 535.195 459.187 540.534" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M352.595 13.3782C459.471 -26.7076 582.321 30.5575 582.321 206.49C582.957 212.057 584.229 228.759 586.774 239.894C589.319 251.029 596.953 262.164 597.165 273.299C597.589 284.434 593.348 295.569 588.895 306.704C584.229 317.839 574.475 328.974 569.81 340.109C565.144 351.244 561.115 362.379 561.115 373.513C561.115 384.648 565.144 395.783 569.81 406.918C574.475 418.053 583.381 429.188 588.895 440.323C594.408 451.458 600.77 462.593 602.466 473.728C604.163 484.863 602.89 495.998 599.497 507.133C596.105 518.268 585.078 534.97 582.321 540.538" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M360.189 -91.1819C521.237 -129.002 700.619 -41.9765 700.619 206.373C701.056 211.626 701.711 227.384 702.802 237.89C704.111 248.395 708.039 258.901 708.257 269.406C708.475 279.912 706.293 290.417 703.893 300.923C701.711 311.428 696.691 321.934 694.291 332.439C691.891 342.945 689.708 353.451 689.708 363.956C689.708 374.461 691.891 384.967 694.291 395.472C696.691 405.978 701.274 416.483 703.893 426.989C706.73 437.494 710.003 448 711.094 458.505C711.967 469.011 711.094 479.516 709.348 490.022C707.821 500.527 702.147 516.286 700.619 521.538" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M231.082 202.395C231.082 274.582 281.396 358.167 345.949 358.167C410.503 358.167 458.918 274.582 458.918 202.395" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M265.258 192.896C282.978 206.827 300.699 206.827 318.42 192.896" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M371.581 192.896C389.302 206.827 407.022 206.827 424.743 192.896" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M345 213.793C343.102 247.987 331.71 261.285 350.696 265.084" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M307.028 348.669C307.028 407.363 304.061 458.125 305.544 502.542" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      <path d="M382.973 348.669C382.973 407.363 385.939 458.125 384.456 502.542" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+      </g>
+      <defs>
+      <clipPath id="s5-deco-clip">
+      <rect width="690" height="508" fill="white" transform="translate(0 -82)"/>
+      </clipPath>
+      </defs>
+      </svg>
+    </div>
+    <!-- Paragraphe placé en dessous du header, aligné à droite -->
+    <div class="s5-intro-para-wrap">
+      <p class="s4-para s5-intro-para">
+        UNE JOURNÉE COIFFURE ET BIEN-ÊTRE DANS NOS 2 ÉTABLISSEMENTS AU CENTRE VILLE DE TOULOUSE. CES EXPÉRIENCES DÉDIÉES À NOS MUSES, VOUS APPORTE UN MOMENT DE DÉTENTE RIEN QUE POUR VOUS. UNE PAUSE OÙ NOTRE ÉQUIPE D'EXPERTS VOUS APPORTE DES SOINS HAUT DE GAMME.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── 2. Conteneur Pin 100vh pour le scroll horizontal ── -->
+  <div class="s5-pin-container" data-anim="s5-pin">
+    <div class="s5-track" data-anim="s5-track">
+
+      <!-- ═════════ CARD 1 : COFFRET INITIATION ═════════ -->
+      <article class="s5-card s5-card-1" data-anim="s5-card">
+        <span class="s5-card-num" aria-hidden="true">01</span>
+        <!-- Top Bar -->
+        <header class="s5-card-header">
+          <div class="s5-card-title-group">
+            <h3 class="s5-card-title" data-anim="s5-title">
+              <span class="s5-extra-light">COFFRET</span>
+              <span class="s5-extra-bold">INITIATION</span>
+            </h3>
+            <span class="s5-card-subtitle">LA PARENTHESE DOUCEUR</span>
+          </div>
+          <div class="s5-card-price">80€</div>
+        </header>
+
+        <!-- Flexbox principale en dessous du header -->
+        <div class="s5-card-body">
+          <!-- Flexbox "Tout le reste" (2 div) -->
+          <div class="s5-card-main">
+            <!-- Div 1 : services + bouton (justify-between) et petite image alignée -->
+            <div class="s5-action-block">
+              <div class="s5-action-left">
+                <div class="s5-services-row">
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">BIEN ÊTRE</h4>
+                    <p class="s5-service-detail">Massage relaxant<br />30 min</p>
+                  </div>
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">COIFFURE</h4>
+                    <p class="s5-service-detail">Soin profond cheveux<br />& coiffure au choix</p>
+                  </div>
+                </div>
+                <a class="s5-btn-reserver" href="#reserver">RESERVER</a>
+              </div>
+              <div class="s5-img-clip s5-img-small" data-anim="s5-img">
+                <img src={c1Little.src} srcset={c1Little.srcset} sizes={c1Little.sizes} alt={c1Little.alt ?? 'Coiffure Maison Muses'} loading="lazy" decoding="async" />
+              </div>
+            </div>
+
+            <!-- Div 2 : Le paragraphe en bas -->
+            <div class="s5-para-block">
+              <p class="s5-desc-text">
+                Profitez d'une parenthèse de douceur avec un massage relaxant de 30 minutes chez Maison Muses Bien-être, suivi d'un soin profond pour vos cheveux et d'une coiffure au choix. Idéal pour découvrir l'alliance du bien-être et de la coiffure.
+              </p>
+            </div>
+          </div>
+
+          <!-- Deuxième flexbox : grosse image prenant toute la hauteur disponible -->
+          <div class="s5-img-clip s5-img-big" data-anim="s5-img">
+            <img src={c1Big.src} srcset={c1Big.srcset} sizes={c1Big.sizes} alt={c1Big.alt ?? 'Massage Maison Muses'} data-anim="s5-parallax" loading="lazy" decoding="async" />
+          </div>
+        </div>
+      </article>
+
+      <!-- ═════════ CARD 2 : COFFRET HARMONIE ═════════ -->
+      <article class="s5-card s5-card-2 is-mirror" data-anim="s5-card">
+        <span class="s5-card-num" aria-hidden="true">02</span>
+        <!-- Top Bar -->
+        <header class="s5-card-header">
+          <div class="s5-card-title-group">
+            <h3 class="s5-card-title" data-anim="s5-title">
+              <span class="s5-extra-light">COFFRET</span>
+              <span class="s5-extra-bold">HARMONIE</span>
+            </h3>
+            <span class="s5-card-subtitle">L'EXPERIENCE SUR MESURE</span>
+          </div>
+          <div class="s5-card-price">SUR DEVIS</div>
+        </header>
+
+        <!-- Flexbox principale en dessous du header -->
+        <div class="s5-card-body">
+          <!-- Flexbox "Tout le reste" (2 div) -->
+          <div class="s5-card-main">
+            <!-- Div 1 : Le paragraphe en haut -->
+            <div class="s5-para-block">
+              <p class="s5-desc-text">
+                L'harmonie parfaite entre beauté des cheveux et bien-être. Choisis librement parmi toutes nos prestations coiffure et soins pour un moment unique personnalisé (or rituels Olaplex/Tokio Inkarami et Essence des Muses). La durée sera en fonction des prestations choisies.
+              </p>
+            </div>
+
+            <!-- Div 2 : services + bouton (justify-between) et petite image alignée -->
+            <div class="s5-action-block">
+              <div class="s5-action-left">
+                <div class="s5-services-row">
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">BIEN ÊTRE</h4>
+                    <p class="s5-service-detail">Prestation au choix</p>
+                  </div>
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">COIFFURE</h4>
+                    <p class="s5-service-detail">Prestation au choix</p>
+                  </div>
+                </div>
+                <a class="s5-btn-reserver" href="#reserver">RESERVER</a>
+              </div>
+              <div class="s5-img-clip s5-img-small" data-anim="s5-img">
+                <img src={c2Little.src} srcset={c2Little.srcset} sizes={c2Little.sizes} alt={c2Little.alt ?? 'Ambiance Maison Muses'} loading="lazy" decoding="async" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Deuxième flexbox : grosse image prenant toute la hauteur disponible -->
+          <div class="s5-img-clip s5-img-big" data-anim="s5-img">
+            <img src={c2Big.src} srcset={c2Big.srcset} sizes={c2Big.sizes} alt={c2Big.alt ?? 'Soin Maison Muses'} data-anim="s5-parallax" loading="lazy" decoding="async" />
+          </div>
+        </div>
+      </article>
+
+      <!-- ═════════ CARD 3 : COFFRET SYMBIOSE ═════════ -->
+      <article class="s5-card s5-card-3" data-anim="s5-card">
+        <span class="s5-card-num" aria-hidden="true">03</span>
+        <!-- Top Bar -->
+        <header class="s5-card-header">
+          <div class="s5-card-title-group">
+            <h3 class="s5-card-title" data-anim="s5-title">
+              <span class="s5-extra-light">COFFRET</span>
+              <span class="s5-extra-bold">SYMBIOSE</span>
+            </h3>
+            <span class="s5-card-subtitle">L'EXPERIENCE REVITALISANTE</span>
+          </div>
+          <div class="s5-card-price">185 à 305€</div>
+        </header>
+
+        <!-- Flexbox principale en dessous du header : grosse image à gauche -->
+        <div class="s5-card-body">
+          <!-- Grosse image à gauche prenant toute la hauteur disponible -->
+          <div class="s5-img-clip s5-img-big" data-anim="s5-img">
+            <img src={c3Big.src} srcset={c3Big.srcset} sizes={c3Big.sizes} alt={c3Big.alt ?? 'Soin Symbiose'} data-anim="s5-parallax" loading="lazy" decoding="async" />
+          </div>
+
+          <!-- Flexbox "Tout le reste" à droite (2 div) -->
+          <div class="s5-card-main">
+            <!-- Div 1 : Le paragraphe en haut -->
+            <div class="s5-para-block">
+              <p class="s5-desc-text">
+                L'harmonie parfaite entre beauté des cheveux et bien-être. Choisis librement parmi toutes nos prestations coiffure et soins pour un moment unique personnalisé (or rituels Olaplex/Tokio Inkarami et Essence des Muses). La durée sera en fonction des prestations choisies.
+              </p>
+            </div>
+
+            <!-- Div 2 : services + bouton (justify-between) et petite image alignée -->
+            <div class="s5-action-block">
+              <div class="s5-action-left">
+                <div class="s5-services-row">
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">BIEN ÊTRE</h4>
+                    <p class="s5-service-detail">Prestation au choix</p>
+                  </div>
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">COIFFURE</h4>
+                    <p class="s5-service-detail">Prestation au choix</p>
+                  </div>
+                </div>
+                <a class="s5-btn-reserver" href="#reserver">RESERVER</a>
+              </div>
+              <div class="s5-img-clip s5-img-small" data-anim="s5-img">
+                <img src={c3Little.src} srcset={c3Little.srcset} sizes={c3Little.sizes} alt={c3Little.alt ?? 'Détail Symbiose'} loading="lazy" decoding="async" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ═════════ CARD 4 : COFFRET PRESTIGE ═════════ -->
+      <article class="s5-card s5-card-4 is-mirror" data-anim="s5-card">
+        <span class="s5-card-num" aria-hidden="true">04</span>
+        <!-- Top Bar -->
+        <header class="s5-card-header">
+          <div class="s5-card-title-group">
+            <h3 class="s5-card-title" data-anim="s5-title">
+              <span class="s5-extra-light">COFFRET</span>
+              <span class="s5-extra-bold">PRESTIGE</span>
+            </h3>
+            <span class="s5-card-subtitle">LA SIGNATURE MAISON MUSES</span>
+          </div>
+          <div class="s5-card-price">315 à 420€</div>
+        </header>
+
+        <!-- Flexbox principale en dessous du header -->
+        <div class="s5-card-body">
+          <!-- Flexbox "Tout le reste" (2 div) -->
+          <div class="s5-card-main">
+            <!-- Div 1 : Petite image à gauche, services + bouton au milieu -->
+            <div class="s5-action-block">
+              <div class="s5-img-clip s5-img-small" data-anim="s5-img">
+                <img src={c4Little.src} srcset={c4Little.srcset} sizes={c4Little.sizes} alt={c4Little.alt ?? 'Coiffure Prestige'} loading="lazy" decoding="async" />
+              </div>
+              <div class="s5-action-left">
+                <div class="s5-services-row">
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">BIEN ÊTRE</h4>
+                    <p class="s5-service-detail">Soin Signature<br />Essence des Muses</p>
+                  </div>
+                  <div class="s5-service-item">
+                    <h4 class="s5-service-title">COIFFURE</h4>
+                    <p class="s5-service-detail">Prestation au choix<br />avec le RITUEL TOKIO INKARAMI</p>
+                  </div>
+                </div>
+                <a class="s5-btn-reserver" href="#reserver">RESERVER</a>
+              </div>
+            </div>
+
+            <!-- Div 2 : Le paragraphe en bas -->
+            <div class="s5-para-block s5-para-prestige">
+              <p class="s5-desc-text s5-desc-bold">
+                L'ultime expérience signée Maison Muses Bien-être et Maison Muses coiffure !
+              </p>
+              <p class="s5-desc-text">
+                Ce coffret regroupe la prestation coiffure de ton choix avec le rituel Tokio Inkarami, ainsi que le soin signature l'Essence des Muses qui est un voyage de deux heures alliant massage et soin visage.
+              </p>
+            </div>
+          </div>
+
+          <!-- Deuxième flexbox : bg video prenant toute la hauteur disponible -->
+          <div class="s5-img-clip s5-img-big s5-video-box" data-anim="s5-img">
+            <div class="s5-video-parallax" data-anim="s5-parallax">
+              <video class="s5-video" src={c4BigVideo} preload="none" loop muted playsinline data-anim="s5-video"></video>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  :root {
+    /* Multiplicateur fluide calé sur 1440px (1px) et 1920px (1.35px) */
+    --fpx: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+
+    /* Section 5 : Padding horizontal identique à la section 4 */
+    --s5-pad-x: calc(40 * var(--fpx));
+    /* Hauteur sous le menu fixed au top (dégagement de header#hd) */
+    --s5-pad-top: calc(env(safe-area-inset-top, 0px) + calc(75 * var(--fpx)));
+  }
+
+  /* Annulation stricte du padding hérité de global.css 'section' */
+  section.s5 {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative;
+    width: 100%;
+    background: var(--orange, #e57851);
+    color: #ffffff;
+    overflow-x: clip;
+    box-sizing: border-box;
+  }
+
+  /* ── 1. Intro ── */
+  .s5-intro {
+    position: relative;
+    padding: var(--s5-pad-top) var(--s5-pad-x) calc(80 * var(--fpx));
+    display: flex;
+    flex-direction: column;
+    gap: calc(120 * var(--fpx));
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  /* Titre à gauche, illustration à droite, alignés en bas */
+  .s5-intro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(40 * var(--fpx));
+  }
+
+
+  .s5-intro-main {
+    position: relative;
+    z-index: 1;
+    max-width: 50rem;
+    margin: 0;
+    padding: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(120 * var(--fpx));
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 0.85;
+  }
+
+  /* « muses » : extra light, minuscules, italique */
+  .s5-intro-main em {
+    font-weight: 200;
+    text-transform: uppercase;
+    font-family: 'Thunder LC italic', 'Thunder', sans-serif;
+  }
+
+  /* Illustration : cadre complet, en bas du header, contre le padding de droite */
+  .s5-intro-deco {
+    flex-shrink: 0;
+    width: calc(428 * var(--fpx));
+    height: auto;
+    color: inherit;
+    pointer-events: none;
+  }
+
+  .s5-intro-para-wrap {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .s5-intro-para {
+    width: calc(740 * var(--fpx));
+    max-width: 100%;
+    font-family: 'Thunder', sans-serif;
+    font-size: calc(24 * var(--fpx));
+    font-weight: 400;
+    line-height: 1.05;
+    text-transform: uppercase;
+    text-align: left;
+    color: #ffffff !important;
+  }
+
+  /* ── 2. Pinned Container ── */
+  .s5-pin-container {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .s5-track {
+    display: flex;
+    height: 100%;
+    width: max-content;
+    will-change: transform;
+  }
+
+  /* ── Carte Coffret ── */
+  .s5-card {
+    width: var(--s5-card-w, 100vw);
+    height: 100vh;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: var(--s5-pad-top) var(--s5-pad-x) calc(40 * var(--fpx));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  /* Header de carte commun */
+  .s5-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: calc(24 * var(--fpx));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: calc(12 * var(--fpx));
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+
+  .s5-card-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: calc(4 * var(--fpx));
+  }
+
+  .s5-card-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-size: calc(60 * var(--fpx));
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: #ffffff;
+    display: flex;
+    gap: calc(12 * var(--fpx));
+  }
+
+  .s5-extra-light {
+    font-weight: 200;
+  }
+
+  .s5-extra-bold {
+    font-weight: 800;
+  }
+
+  .s5-card-subtitle {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(40 * var(--fpx));
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1;
+  }
+
+  .s5-card-price {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 700;
+    font-size: calc(110 * var(--fpx));
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 0.95;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Flexbox principale en dessous du header ── */
+  .s5-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    gap: calc(40 * var(--fpx));
+    box-sizing: border-box;
+  }
+
+  /* Flexbox "Tout le reste" (qui contient les 2 div) */
+  .s5-card-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+  }
+
+  /* Div 1 : Texte bien-être/coiffure + petite image + bouton */
+  .s5-action-block {
+    display: flex;
+    align-items: stretch;
+    gap: calc(30 * var(--fpx));
+    height: calc(230 * var(--fpx));
+    flex-shrink: 0;
+  }
+
+  /* Colonne avec justify-between entre les services et le bouton */
+  .s5-action-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  /* Typographies services et détails */
+  .s5-services-row {
+    display: flex;
+    gap: calc(40 * var(--fpx));
+    flex-shrink: 0;
+  }
+
+  .s5-service-item {
+    display: flex;
+    flex-direction: column;
+    gap: calc(4 * var(--fpx));
+  }
+
+  .s5-service-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 500;
+    font-size: calc(32 * var(--fpx));
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1;
+  }
+
+  .s5-service-detail {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 500;
+    font-size: calc(24 * var(--fpx));
+    color: #ffffff;
+    line-height: 1.1;
+  }
+
+  .s5-btn-reserver {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(40 * var(--fpx));
+    text-transform: uppercase;
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+    display: inline-block;
+    align-self: flex-start;
+    flex-shrink: 0;
+    line-height: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .s5-btn-reserver:hover {
+    opacity: 0.8;
+  }
+
+  /* Petite image : même hauteur que le bloc services + bouton */
+  .s5-img-small {
+    width: calc(250 * var(--fpx));
+    height: 100%;
+    flex-shrink: 0;
+  }
+
+  /* Div 2 : Le paragraphe */
+  .s5-para-block {
+    max-width: calc(720 * var(--fpx));
+    flex-shrink: 0;
+  }
+
+  .s5-para-prestige {
+    display: flex;
+    flex-direction: column;
+    gap: calc(6 * var(--fpx));
+    max-width: calc(850 * var(--fpx));
+  }
+
+  .s5-desc-text {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(24 * var(--fpx));
+    line-height: 1.12;
+    color: #ffffff;
+  }
+
+  .s5-desc-bold {
+    font-weight: 700;
+  }
+
+  /* Deuxième flexbox : la grosse image prend toute la height disponible */
+  .s5-img-big {
+    height: 100%;
+    width: calc(460 * var(--fpx));
+    flex-shrink: 0;
+  }
+
+  /* Clip-path pour apparition de haut en bas */
+  .s5-img-clip {
+    overflow: hidden;
+    position: relative;
+    clip-path: inset(0 0 100% 0);
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .s5-img-clip img,
+  .s5-img-clip video,
+  .s5-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Card 4 : Conserver le format vertical 9:16 naturel sans étirement excessif */
+  .s5-card-4 .s5-img-big {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 9 / 16;
+    max-width: calc(460 * var(--fpx));
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* Conteneur vidéo pour supprimer les bandes noires de prestige-big.mp4 */
+  .s5-video-box {
+    position: relative;
+    overflow: hidden;
+    background: transparent !important;
+  }
+
+  .s5-video-box .s5-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.02);
+    height: 100%;
+    width: auto;
+    min-height: 100%;
+    max-width: none;
+    display: block;
+  }
+
+  /* Numéro de carte et calque de parallaxe de la vidéo */
+  .s5-card-num {
+    display: none;
+  }
+
+  .s5-video-parallax {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* ── Desktop : layout éditorial (double page par coffret, image et texte alternés) ──
+     --s5-u suit la largeur (--fpx) mais ne dépasse jamais ce que permet la hauteur de l'écran :
+     tout le contenu tient dans les 100vh de la carte, même sur un écran large et peu haut. */
+  @media (min-width: 1024px) {
+    .s5 {
+      --s5-u: min(var(--fpx), calc(100vh / 900));
+    }
+
+    .s5-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 0.95fr 1fr;
+      grid-template-rows: repeat(5, auto);
+      align-content: center;
+      column-gap: calc(60 * var(--s5-u));
+      padding: calc(85 * var(--s5-u)) var(--s5-pad-x) calc(40 * var(--s5-u));
+    }
+
+    .s5-card.is-mirror {
+      grid-template-columns: 1fr 0.95fr;
+    }
+
+    /* Les blocs intermédiaires s'effacent : leurs enfants se placent directement dans la grille */
+    .s5-card-header,
+    .s5-card-title-group,
+    .s5-card-body,
+    .s5-card-main {
+      display: contents;
+    }
+
+    /* Numéro : sur la ligne du titre, côté extérieur, derrière le titre uniquement */
+    .s5-card-num {
+      display: block;
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
+      align-self: start;
+      position: relative;
+      z-index: 0;
+      font-family: 'Cormorant Infant', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: calc(190 * var(--s5-u));
+      line-height: 0.8;
+      color: rgba(255, 255, 255, 0.16);
+      pointer-events: none;
+    }
+
+    .s5-card.is-mirror .s5-card-num {
+      grid-column: 1;
+      justify-self: start;
+    }
+
+    /* Grande image (ou vidéo) : toute la hauteur de la colonne */
+    .s5-img-big {
+      grid-column: 1;
+      grid-row: 1 / span 5;
+      align-self: center;
+      width: 100%;
+      height: min(76vh, calc(100vh - 125 * var(--s5-u)));
+    }
+
+    .s5-card.is-mirror .s5-img-big {
+      grid-column: 2;
+    }
+
+    .s5-card-4 .s5-img-big {
+      width: auto;
+      max-width: none;
+      margin-left: 0;
+      justify-self: start;
+    }
+
+    /* Image plus large que son cadre pour la parallaxe */
+    .s5-img-big img[data-anim="s5-parallax"] {
+      width: 120%;
+      max-width: none;
+      margin-left: -10%;
+    }
+
+    .s5-video-parallax {
+      inset: 0 -10%;
+    }
+
+    /* Colonne texte */
+    .s5-card-title,
+    .s5-card-price,
+    .s5-card-subtitle,
+    .s5-para-block,
+    .s5-action-block {
+      grid-column: 2;
+    }
+
+    .s5-card.is-mirror .s5-card-title,
+    .s5-card.is-mirror .s5-card-price,
+    .s5-card.is-mirror .s5-card-subtitle,
+    .s5-card.is-mirror .s5-para-block,
+    .s5-card.is-mirror .s5-action-block {
+      grid-column: 1;
+    }
+
+    .s5-card-title {
+      grid-row: 1;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+
+    .s5-card-title .s5-extra-light {
+      display: block;
+      font-size: calc(40 * var(--s5-u));
+      line-height: 1;
+    }
+
+    /* Le nom du coffret déborde sur l'image */
+    .s5-card-title .s5-extra-bold {
+      display: block;
+      font-size: calc(170 * var(--s5-u));
+      line-height: 0.82;
+      margin-left: calc(-180 * var(--s5-u));
+      white-space: nowrap;
+    }
+
+    .s5-card.is-mirror .s5-card-title {
+      text-align: right;
+    }
+
+    .s5-card.is-mirror .s5-card-title .s5-extra-bold {
+      margin-left: 0;
+      margin-right: calc(-180 * var(--s5-u));
+    }
+
+    .s5-card-price {
+      grid-row: 2;
+      margin: calc(18 * var(--s5-u)) 0 calc(10 * var(--s5-u));
+      font-family: 'Cormorant Infant', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: calc(76 * var(--s5-u));
+      line-height: 1;
+      text-transform: none;
+    }
+
+    .s5-card-subtitle {
+      grid-row: 3;
+      font-weight: 400;
+      font-size: calc(22 * var(--s5-u));
+      letter-spacing: 0.04em;
+    }
+
+    .s5-para-block {
+      grid-row: 4;
+      max-width: calc(640 * var(--s5-u));
+      margin-top: calc(30 * var(--s5-u));
+    }
+
+    .s5-desc-text {
+      font-family: var(--font, 'DM Sans', sans-serif);
+      font-size: calc(17 * var(--s5-u));
+      line-height: 1.45;
+    }
+
+    .s5-action-block {
+      grid-row: 5;
+      height: auto;
+      align-items: flex-end;
+      gap: calc(30 * var(--s5-u));
+      margin-top: calc(24 * var(--s5-u));
+    }
+
+    .s5-action-left {
+      height: auto;
+      justify-content: flex-start;
+      gap: calc(24 * var(--s5-u));
+    }
+
+    .s5-services-row {
+      gap: calc(40 * var(--s5-u));
+    }
+
+    .s5-service-title {
+      font-weight: 800;
+      font-size: calc(24 * var(--s5-u));
+    }
+
+    .s5-service-detail {
+      font-size: calc(20 * var(--s5-u));
+      text-transform: uppercase;
+    }
+
+    .s5-btn-reserver {
+      font-size: calc(28 * var(--s5-u));
+    }
+
+    .s5-img-small {
+      order: 2;
+      width: calc(170 * var(--s5-u));
+      height: auto;
+      aspect-ratio: 4 / 5;
+      margin-left: auto;
+    }
+  }
+
+  /* ── Responsive Mobile / Tablette ── */
+  @media (max-width: 1023px) {
+    .s5-intro {
+      padding: 3rem 1.5rem 4rem;
+      gap: 2.5rem;
+    }
+    .s5-intro-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+    .s5-intro-main {
+      font-size: 3.5rem;
+    }
+    /* Mobile : l'illustration passe au-dessus du titre, alignée à droite */
+    .s5-intro-deco {
+      order: -1;
+      align-self: flex-end;
+      width: 60vw;
+    }
+    .s5-intro-para-wrap {
+      justify-content: flex-start;
+    }
+    .s5-intro-para {
+      width: 100%;
+      text-align: left;
+      font-size: 1.4rem;
+    }
+    .s5-pin-container {
+      height: auto;
+      overflow: visible;
+    }
+    .s5-track {
+      flex-direction: column;
+      height: auto;
+      width: 100%;
+      transform: none !important;
+    }
+
+    /* Cartes empilées, version éditoriale : image, titre, prix, sous-titre, texte, services, bouton */
+    .s5-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr;
+      row-gap: 0;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      min-height: auto;
+      padding: 3rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .s5-card-header,
+    .s5-card-title-group,
+    .s5-card-body,
+    .s5-card-main {
+      display: contents;
+    }
+
+    .s5-img-big { order: 1; }
+    .s5-card-title { order: 2; }
+    .s5-card-price { order: 3; }
+    .s5-card-subtitle { order: 4; }
+    .s5-para-block { order: 5; }
+    .s5-action-block { order: 6; }
+
+    /* Numéro en haut à droite, par-dessus l'image */
+    .s5-card-num {
+      display: block;
+      position: absolute;
+      z-index: 2;
+      top: 2rem;
+      right: 1.25rem;
+      font-family: 'Cormorant Infant', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 7rem;
+      line-height: 0.8;
+      color: rgba(255, 255, 255, 0.16);
+      pointer-events: none;
+    }
+
+    .s5-img-big {
+      width: 100%;
+      height: 110vw;
+      margin-bottom: 1.5rem;
+    }
+
+    .s5-card-4 .s5-img-big {
+      width: auto;
+      max-width: none;
+      height: 110vw;
+      aspect-ratio: 9 / 16;
+      margin: 0 0 1.5rem;
+      justify-self: start;
+    }
+
+    .s5-card-title {
+      display: block;
+    }
+
+    .s5-card-title .s5-extra-light {
+      display: block;
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .s5-card-title .s5-extra-bold {
+      display: block;
+      font-size: 3.6rem;
+      line-height: 0.85;
+    }
+
+    .s5-card-price {
+      margin: 0.75rem 0 0.35rem;
+      font-family: 'Cormorant Infant', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 2.6rem;
+      line-height: 1;
+      text-transform: none;
+    }
+
+    .s5-card-subtitle {
+      font-weight: 400;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+    }
+
+    .s5-para-block {
+      max-width: none;
+      margin-top: 1.25rem;
+    }
+
+    .s5-desc-text {
+      font-family: var(--font, 'DM Sans', sans-serif);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .s5-action-block {
+      height: auto;
+      margin-top: 1.25rem;
+    }
+
+    .s5-action-left {
+      height: auto;
+      justify-content: flex-start;
+      gap: 1.25rem;
+    }
+
+    .s5-services-row {
+      gap: 2rem;
+    }
+
+    .s5-service-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .s5-service-detail {
+      font-size: 1rem;
+      text-transform: uppercase;
+    }
+
+    .s5-btn-reserver {
+      font-size: 1.4rem;
+    }
+
+    .s5-img-small {
+      display: none;
+    }
+
+    .s5-img-clip {
+      clip-path: none !important;
+    }
+  }
+</style>

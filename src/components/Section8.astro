@@ -1,0 +1,203 @@
+---
+// Section 8 — Journal des Muses (articles + podcast, aperçu image au survol)
+import { resolveImage } from '../lib/images';
+
+// TODO : brancher sur les vrais articles / épisodes
+const entries = [
+  { type: 'article', label: 'Article', title: 'PRÉPARER SES CHEVEUX À L’HIVER', meta: '4 MIN DE LECTURE', url: '#', img: resolveImage('slide-5') },
+  { type: 'podcast', label: 'Podcast', title: 'ÉPISODE 7 : POURQUOI ON TIENT AU DIAGNOSTIC', meta: 'ÉCOUTER, 32 MIN', url: '#', img: resolveImage('marquee-4') },
+  { type: 'article', label: 'Article', title: 'BALAYAGE OU OMBRÉ : CE QUI CHANGE VRAIMENT', meta: '6 MIN DE LECTURE', url: '#', img: resolveImage('slide-4') },
+  { type: 'podcast', label: 'Podcast', title: 'ÉPISODE 6 : PRENDRE SOIN DE SOI SANS CULPABILISER', meta: 'ÉCOUTER, 41 MIN', url: '#', img: resolveImage('moussine') },
+  { type: 'article', label: 'Article', title: 'MASSAGE DU CUIR CHEVELU, LE SOIN QU’ON OUBLIE', meta: '3 MIN DE LECTURE', url: '#', img: resolveImage('marquee-6') },
+];
+---
+
+<section class="s8" id="s8" data-anim="s8-section">
+  <div class="s8-head">
+    <h2 class="s8-title" data-anim="s8-title">
+      <span class="s8-thin">LE JOURNAL</span> DES MUSES
+    </h2>
+    <div class="s8-filters" role="group" aria-label="Filtrer le journal">
+      <button class="s8-filter" type="button" data-filter="all" aria-pressed="true">TOUT</button>
+      <button class="s8-filter" type="button" data-filter="article" aria-pressed="false">ARTICLES</button>
+      <button class="s8-filter" type="button" data-filter="podcast" aria-pressed="false">PODCAST</button>
+    </div>
+  </div>
+
+  <ul class="s8-list" data-anim="s8-list">
+    {entries.map((e, i) => (
+      <li class="s8-item" data-type={e.type} data-index={i}>
+        <a class="s8-item-link" href={e.url}>
+          <span class="s8-item-type">{e.label}</span>
+          <span class="s8-item-title">{e.title}</span>
+          <span class="s8-item-meta">{e.meta}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <div class="s8-more">
+    <a class="s8-btn" href="#">TOUT LE JOURNAL</a>
+  </div>
+
+  <div class="s8-preview" data-anim="s8-preview" aria-hidden="true">
+    {entries.map((e, i) => (
+      <img class="s8-preview-img" src={e.img} alt="" data-index={i} loading="lazy" decoding="async" />
+    ))}
+  </div>
+</section>
+
+<style>
+  :root {
+    --fpx: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+    --s8-pad-x: calc(40 * var(--fpx));
+  }
+
+  .s8 {
+    position: relative;
+    width: 100%;
+    padding: calc(140 * var(--fpx)) var(--s8-pad-x);
+    background: var(--bg);
+    color: var(--orange, #e57851);
+    box-sizing: border-box;
+  }
+
+  .s8-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: calc(40 * var(--fpx));
+    margin-bottom: calc(70 * var(--fpx));
+  }
+
+  .s8-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 700;
+    font-size: calc(120 * var(--fpx));
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+
+  .s8-thin { font-weight: 200; }
+
+  .s8-filters { display: flex; gap: calc(8 * var(--fpx)); }
+
+  .s8-filter {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(24 * var(--fpx));
+    line-height: 1;
+    color: var(--orange, #e57851);
+    background: none;
+    border: 1px solid var(--orange, #e57851);
+    border-radius: 999px;
+    padding: calc(10 * var(--fpx)) calc(20 * var(--fpx)) calc(8 * var(--fpx));
+    cursor: pointer;
+  }
+
+  .s8-filter[aria-pressed='true'] {
+    background: var(--orange, #e57851);
+    color: var(--bg);
+    font-weight: 800;
+  }
+
+  .s8-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(229, 120, 81, 0.3);
+  }
+
+  .s8-item { border-bottom: 1px solid rgba(229, 120, 81, 0.3); }
+
+  .s8-item-link {
+    display: grid;
+    grid-template-columns: calc(160 * var(--fpx)) 1fr auto;
+    align-items: baseline;
+    gap: calc(24 * var(--fpx));
+    padding: calc(28 * var(--fpx)) 0;
+  }
+
+  .s8-item-type {
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: calc(26 * var(--fpx));
+  }
+
+  .s8-item-title {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(56 * var(--fpx));
+    line-height: 0.95;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .s8-item-link:hover .s8-item-title,
+  .s8-item-link:focus-visible .s8-item-title { transform: translateX(calc(24 * var(--fpx))); }
+
+  .s8-item-meta {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(22 * var(--fpx));
+    white-space: nowrap;
+  }
+
+  .s8-more { margin-top: calc(48 * var(--fpx)); }
+
+  .s8-btn {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(32 * var(--fpx));
+    line-height: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    transition: opacity 0.2s ease;
+  }
+
+  .s8-btn:hover { opacity: 0.8; }
+
+  /* Aperçu qui suit le curseur (desktop uniquement) */
+  .s8-preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: calc(260 * var(--fpx));
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 20;
+    visibility: hidden;
+  }
+
+  .s8-preview-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .s8-title { visibility: hidden; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .s8-item-title { transition: none; }
+  }
+
+  @media (max-width: 1023px) {
+    .s8 { padding: 5rem 1.5rem; }
+    .s8-head { flex-direction: column; align-items: flex-start; gap: 1.5rem; margin-bottom: 2.5rem; }
+    .s8-title { font-size: 3.5rem; }
+    .s8-filter { font-size: 1.1rem; padding: 0.5rem 1rem 0.4rem; }
+    .s8-item-link { grid-template-columns: 1fr; gap: 0.4rem; padding: 1.25rem 0; }
+    .s8-item-type { font-size: 1.15rem; }
+    .s8-item-title { font-size: 2rem; }
+    .s8-item-meta { font-size: 1.05rem; }
+    .s8-btn { font-size: 1.5rem; }
+    .s8-preview { display: none; }
+  }
+</style>

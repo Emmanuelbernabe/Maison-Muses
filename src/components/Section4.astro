@@ -1,0 +1,371 @@
+---
+import { resolveImage } from '../lib/images';
+import { siteImage, SIZES } from '../lib/siteImage';
+const { photos } = Astro.props;
+
+const titleLine1 = ['DES', 'PRESTATIONS', 'HAUT', 'DE', 'GAMME'];
+const titleLine2 = ['POUR', 'UNE', 'EXPÉRIENCE', 'BIEN', 'ÊTRE'];
+const titleLine3 = ['COMPLETE'];
+const thinWords = new Set(['DES', 'POUR', 'UNE']);
+const paraText = "NOTRE HISTOIRE, C'EST CELLE DE TROIS PASSIONNÉS QUI ONT RÉUNI LEUR SAVOIR-FAIRE POUR CRÉER BIEN PLUS QU'UN UNIVERS. ENSEMBLE, NOUS AVONS FAÇONNÉ MAISON MUSES, UN COCON OÙ L'ART DE LA COIFFURE ET DU BIEN-ÊTRE SE MÊLENT, DANS UNE QUÊTE COMMUNE D'EXCELLENCE ET D'ÉMOTION.";
+
+const thumbImg = siteImage(photos?.s4?.thumb, resolveImage('s4-thumb'), SIZES.thumb, [160, 320, 480]);
+const teamLeftImg = siteImage(photos?.s4?.teamLeft, resolveImage('s4-team-left'), SIZES.team);
+const teamMidImg = siteImage(photos?.s4?.teamMid, resolveImage('s4-team-mid'), SIZES.team);
+const teamRightImg = siteImage(photos?.s4?.teamRight, resolveImage('s4-team-right'), SIZES.team);
+---
+
+<section class="s4" id="s4" data-anim="s4-section">
+  <!-- ── 1. Header plein format en haut ── -->
+  <h2 class="s4-header" data-anim="s4-header">
+    <div class="s4-header-line">
+      <span class="s4-thumb" data-anim="s4-thumb">
+        <img src={thumbImg.src} srcset={thumbImg.srcset} sizes={thumbImg.sizes} alt={thumbImg.alt ?? 'Prestations soin'} width="180" height="85" loading="lazy" decoding="async" />
+      </span>
+      {titleLine1.map((w) => (
+  <span class:list={['s4-word', { 's4-word--thin': thinWords.has(w) }]}>{w}</span>
+))}
+    </div>
+    <div class="s4-header-line">
+     {titleLine2.map((w) => (
+  <span class:list={['s4-word', { 's4-word--thin': thinWords.has(w) }]}>{w}</span>
+))}
+    </div>
+    <div class="s4-header-line">
+      {titleLine3.map((w) => (
+        <span class="s4-word">{w}</span>
+      ))}
+    </div>
+  </h2>
+
+  <!-- ── 2. Paragraphe en dessous du header, aligné à droite ── -->
+  <div class="s4-mid">
+    <p class="s4-para">
+      {paraText}
+    </p>
+  </div>
+
+  <!-- ── 3. Bloc bas : 3 colonnes photos avec parallax 110% ── -->
+  <div class="s4-bottom">
+    <!-- Colonne 1 : photo gauche + bouton aligné au bas de l'image du milieu -->
+    <div class="s4-col s4-col-left">
+      <div class="s4-img-frame s4-frame-left">
+        <img class="s4-parallax-img" src={teamLeftImg.src} srcset={teamLeftImg.srcset} sizes={teamLeftImg.sizes} alt={teamLeftImg.alt ?? 'Équipe Maison Muses'} loading="lazy" decoding="async" />
+      </div>
+      <div class="s4-action-wrap">
+        <a class="s4-btn" href="#equipe">VOIR L'ÉQUIPE</a>
+      </div>
+    </div>
+
+    <!-- Colonne 2 : image du milieu, plus haute, descend jusqu'en bas -->
+    <div class="s4-col s4-col-mid">
+      <div class="s4-img-frame s4-frame-mid">
+        <img class="s4-parallax-img" src={teamMidImg.src} srcset={teamMidImg.srcset} sizes={teamMidImg.sizes} alt={teamMidImg.alt ?? 'Moussine et July'} loading="lazy" decoding="async" />
+      </div>
+    </div>
+
+    <!-- Colonne 3 : photo droite + MUSES en bas aligné à l'image du milieu -->
+    <div class="s4-col s4-col-right">
+      <div class="s4-img-frame s4-frame-right">
+        <img class="s4-parallax-img" src={teamRightImg.src} srcset={teamRightImg.srcset} sizes={teamRightImg.sizes} alt={teamRightImg.alt ?? 'Violaine'} loading="lazy" decoding="async" />
+      </div>
+      <div class="s4-muses-wrap">
+        <span class="s4-muses" data-anim="s4-muses">MUSES</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  :root {
+    /* Multiplicateur fluide calé sur 1440px (1px) et 1920px (1.35px) */
+    --fpx: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+
+    /* Section 4 */
+    --s4-pad-x: calc(40 * var(--fpx));
+    --s4-pad-y: calc(90 * var(--fpx));
+
+    /* Header : 120px à 1440 */
+    --s4-header-fs: calc(120 * var(--fpx));
+    --s4-thumb-w: calc(175 * var(--fpx));
+    --s4-thumb-h: calc(85 * var(--fpx));
+
+    /* Paragraphe : 40px à 1440 */
+    --s4-para-fs: calc(24 * var(--fpx));
+    --s4-para-w: calc(700 * var(--fpx));
+
+    /* Colonnes photos */
+    --s4-gap: calc(16 * var(--fpx));
+
+    --s4-img-h-short: calc(440 * var(--fpx));
+    --s4-img-h-tall: calc(560 * var(--fpx));
+
+    /* MUSES et Bouton */
+    --s4-muses-fs: calc(115 * var(--fpx));
+    --s4-btn-fs: calc(20 * var(--fpx));
+  }
+
+  .s4 {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    padding: var(--s4-pad-y) var(--s4-pad-x);
+    box-sizing: border-box;
+    background: var(--bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: calc(40 * var(--fpx));
+  }
+
+  /* ── 1. Header plein format en haut ── */
+  .s4-header {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    font-family: 'Thunder', sans-serif;
+    font-size: var(--s4-header-fs);
+    font-weight: 700;
+    line-height: 0.88;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .s4-header-line {
+    display: flex;
+    align-items: top;
+    flex-wrap: nowrap;
+    gap: calc(14 * var(--fpx));
+  }
+
+  .s4-thumb {
+    width: var(--s4-thumb-w);
+    height: var(--s4-thumb-h);
+    overflow: hidden;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+
+  .s4-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Mots du header : colorés au scroll */
+  /* Couleur pleine : c'est l'opacité qui est animée au scroll (section4.ts) */
+  .s4-word {
+    display: inline-block;
+    color: var(--orange, #e57851);
+  }
+
+  .s4-word--thin {
+  font-weight: 200;
+}
+
+  /* ── 2. Paragraphe en dessous du header, aligné à droite ── */
+  .s4-mid {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: calc(10 * var(--fpx));
+    margin-bottom: calc(20 * var(--fpx));
+  }
+
+  .s4-para {
+    margin: 0;
+    padding: 0;
+    width: var(--s4-para-w);
+    max-width: 100%;
+    font-family: 'Thunder', sans-serif;
+    font-size: var(--s4-para-fs);
+    font-weight: 400;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+    letter-spacing: -0.01em;
+    text-align: right;
+  }
+
+  /* ── 3. Bloc bas : 3 colonnes photos ── */
+  .s4-bottom {
+    display: flex;
+    gap: var(--s4-gap);
+    align-items: stretch;
+    width: 100%;
+    min-height: var(--s4-img-h-tall);
+  }
+
+  .s4-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .s4-col-left {
+    flex: 1.72 1 0;
+  }
+
+  .s4-col-mid {
+    flex: 1 1 0;
+  }
+
+  .s4-col-right {
+    flex: 1.05 1 0;
+  }
+
+  /* Cadre photo avec parallax (overflow hidden) */
+  .s4-img-frame {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    background: #e0ded8;
+  }
+
+  .s4-frame-left {
+    height: var(--s4-img-h-short);
+  }
+
+  .s4-frame-mid {
+    height: var(--s4-img-h-tall);
+  }
+
+  .s4-frame-right {
+    height: var(--s4-img-h-short);
+  }
+
+  /* Images avec height 110% pour parallax sans zoom excessif */
+  .s4-parallax-img {
+    position: absolute;
+    top: -5%;
+    left: 0;
+    width: 100%;
+    height: 110%;
+    object-fit: cover;
+    display: block;
+    will-change: transform;
+  }
+
+  /* Zone d'action sous photo gauche : alignée en bas comme l'image du milieu */
+  .s4-action-wrap {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    flex: 1 1 auto;
+    padding-bottom: calc(4 * var(--fpx));
+  }
+
+  .s4-btn {
+    font-family: 'Thunder', sans-serif;
+    font-size: var(--s4-btn-fs);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    display: inline-block;
+    transition: opacity 0.2s ease;
+  }
+
+  .s4-btn:hover {
+    opacity: 0.75;
+  }
+
+  /* MUSES en bas à droite : aligné avec le bas de l'image du milieu */
+  .s4-muses-wrap {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    flex: 1 1 auto;
+    line-height: 0.8;
+  }
+
+  .s4-muses {
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: var(--s4-muses-fs);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
+    color: var(--orange, #e57851);
+    display: inline-block;
+    will-change: transform;
+  }
+
+  /* Responsive Mobile / Tablette */
+  @media (max-width: 1023px) {
+    .s4 {
+      padding: 3rem 1.5rem;
+      gap: 2.5rem;
+      height: auto;
+      min-height: auto;
+    }
+
+    /* Header : un seul bloc de texte qui revient à la ligne naturellement (plus de lignes forcées) */
+    .s4-header {
+      display: block;
+      font-size: clamp(2.8rem, 9vw, 5.5rem);
+    }
+    .s4-header-line {
+      display: contents;
+    }
+    .s4-word {
+      margin-right: 0.2em;
+    }
+    .s4-thumb {
+      width: clamp(80px, 20vw, 120px);
+      height: clamp(40px, 10vw, 60px);
+      margin-right: 0.2em;
+      vertical-align: top;
+    }
+
+    .s4-mid {
+      margin: 1rem 0;
+      justify-content: flex-start;
+    }
+    .s4-para {
+      width: 100%;
+      text-align: left;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+    }
+
+    /* Photos empilées, MUSES qui chevauche la dernière, puis le bouton */
+    .s4-bottom {
+      flex-direction: column;
+      gap: 2rem;
+      min-height: auto;
+    }
+    .s4-col {
+      display: contents;
+    }
+    .s4-frame-left { order: 1; }
+    .s4-frame-mid { order: 2; }
+    .s4-frame-right { order: 3; }
+    .s4-frame-left, .s4-frame-mid, .s4-frame-right {
+      height: 60vw;
+    }
+    .s4-muses-wrap {
+      order: 4;
+      position: relative;
+      z-index: 2;
+      justify-content: flex-end;
+      margin-top: -4.6rem;
+    }
+    .s4-muses {
+      font-size: 4rem;
+    }
+    .s4-action-wrap {
+      order: 5;
+      justify-content: flex-start;
+      margin-top: -0.5rem;
+      padding-bottom: 0;
+    }
+  }
+</style>

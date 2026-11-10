@@ -1,0 +1,50 @@
+---
+import { resolveImage } from '../lib/images';
+import { siteImage, SIZES } from '../lib/siteImage';
+const { photos } = Astro.props;
+
+// La 2e photo est le portrait central (relais avec la section 2), mêmes réglages que dans le hero
+const marquee = photos?.s3?.marquee ?? [];
+const slides = [
+  siteImage(marquee[0], resolveImage('marquee-1', 'slide-2'), SIZES.portrait),
+  siteImage(photos?.hero?.center, resolveImage('marquee-follow-img'), SIZES.portrait),
+  siteImage(marquee[1], resolveImage('marquee-3', 'slide-3'), SIZES.portrait),
+  siteImage(marquee[2], resolveImage('marquee-4', 'slide-4'), SIZES.portrait),
+  siteImage(marquee[3], resolveImage('marquee-5', 'slide-5'), SIZES.portrait),
+  siteImage(marquee[4], resolveImage('marquee-6', 'slide-6'), SIZES.portrait),
+];
+---
+<section class="s3" id="s3" data-anim="s3-section">
+  <div class="s3-row">
+    <div class="s3-track" data-anim="s3-track">
+      {[0, 1].map((g) => slides.map((img, i) => (
+        <div class="s3-item" data-center={g === 0 && i === 1 ? '' : undefined} aria-hidden={g === 1 ? 'true' : undefined}>
+          <img src={img.src} srcset={img.srcset} sizes={img.sizes} alt="" loading="eager" decoding="async" draggable="false" />
+        </div>
+      )))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .s3 {
+    --s3-w: var(--hero-portrait-w);
+    --s3-gap: calc(45 * var(--fpx));
+    position: relative; z-index: 1;
+    height: 100vh; overflow: hidden;
+  }
+  .s3-row { position: absolute; inset: 0; }
+  .s3-track {
+    position: absolute;
+    top: 50%;
+    height: var(--hero-portrait-h);
+    margin-top: calc(var(--hero-portrait-h) / -2);
+    /* l'image d'index 1 (ciseaux) est centrée, celle d'index 0 commence à x=0 à 1440 */
+    left: calc(50% - var(--s3-w) / 2 - (var(--s3-w) + var(--s3-gap)));
+    display: flex; gap: var(--s3-gap);
+    will-change: transform;
+  }
+  .s3-item { flex: none; width: var(--s3-w); height: 100%; overflow: hidden; }
+  .s3-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .s3-item[data-center] { visibility: hidden; }  /* révélée au passage de relais */
+</style>

@@ -2,13 +2,14 @@
 import Lien from './Lien.astro';
 import Tag from './Tag.astro';
 import SanityImage from './SanityImage.astro';
+import { resolveImage } from '../lib/images';
 const { data } = Astro.props;
 const team = (data.team ?? []).filter(Boolean);
 // Portraits locaux utilisés tant qu'aucune photo n'est renseignée dans le Studio
 const portraits: Record<string, string> = {
-  moussine: '/images/moussine.webp',
-  july: '/images/july.webp',
-  violaine: '/images/violaine.webp',
+  moussine: resolveImage('moussine'),
+  july: resolveImage('july'),
+  violaine: resolveImage('violaine'),
 };
 const fallback = (name: string) => portraits[name?.trim().toLowerCase()];
 ---
