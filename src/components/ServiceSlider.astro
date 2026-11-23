@@ -1,0 +1,99 @@
+---
+// Pages espace — slider centré, en boucle, glissable, parallaxe dans les images (sans Swiper)
+interface Props { slides: any[]; label: string; }
+const { slides, label } = Astro.props;
+---
+
+<section class="cf-slider-section" aria-label={label}>
+  <div class="cf-slider" data-anim="cf-slider" tabindex="0" aria-roledescription="carrousel" aria-label="Réalisations, flèches gauche et droite pour naviguer">
+    {slides.map((slide) => (
+      <figure class="cf-slide" data-cf-slide data-sanity={slide.attr}>
+        <!-- data-parallax-x : déplacement de l'image dans sa diapositive (équivalent de data-swiper-parallax-x) -->
+        <img src={slide.src} alt={slide.alt} data-parallax-x="25" loading="lazy" decoding="async" draggable="false" />
+      </figure>
+    ))}
+    <div class="cf-slider-nav">
+      <button type="button" data-cf-prev aria-label="Photo précédente">
+        <svg width="9" height="7" viewBox="0 0 9 7" fill="none" aria-hidden="true"><path d="M3.70703 6.35352L0.707031 3.35352L3.70703 0.353516M0.707031 3.35352L8.70703 3.35351" stroke="currentColor" /></svg>
+      </button>
+      <button type="button" data-cf-next aria-label="Photo suivante">
+        <svg width="9" height="7" viewBox="0 0 9 7" fill="none" aria-hidden="true"><path d="M4.93151 5.99004L7.89041 3.17617L4.93151 0.362305M7.89041 3.17617L0 3.17617" stroke="currentColor" /></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Pleine largeur : aucune marge héritée, le slider touche les bords de l'écran */
+  .cf-slider-section { padding: 0; margin: 0; width: 100%; }
+
+  .cf-slider {
+    --f: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+    position: relative;
+    height: calc(580 * var(--f));
+    overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+    outline: none;
+  }
+
+  .cf-slider:focus-visible { outline: 2px solid var(--sp-c, #e57851); outline-offset: -2px; }
+  .cf-slider.is-dragging { cursor: grabbing; }
+
+  .cf-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--slide-w, 31vw);
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  /* Image plus large que sa diapositive, pour la parallaxe */
+  .cf-slide img {
+    position: absolute;
+    top: 0;
+    left: -25%;
+    width: 150%;
+    max-width: none;   /* sinon le reset global (max-width: 100%) recoupe l'image */
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    will-change: transform;
+  }
+
+  /* Flèches : en bas à droite de la diapositive du centre, à 1,25rem de ses bords */
+  .cf-slider-nav {
+    position: absolute;
+    z-index: 3;
+    right: calc(50% - var(--slide-w, 31vw) / 2 + 1.25rem);
+    bottom: 1.25rem;
+    display: flex;
+    gap: 8px;
+  }
+
+  .cf-slider-nav button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--bg, #F7F2EC);
+    color: var(--sp-c, #e57851);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .cf-slider-nav svg { width: 9px; height: 7px; display: block; }
+  .cf-slider-nav button:focus-visible { outline: 2px solid var(--bg, #F7F2EC); outline-offset: 2px; }
+
+  @media (max-width: 899px) {
+    .cf-slider { height: 95vw; }
+  }
+</style>

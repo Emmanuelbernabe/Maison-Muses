@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import EquipeHero from '../components/EquipeHero.astro';
+import EquipeMembers from '../components/EquipeMembers.astro';
+import Section9 from '../components/Section9.astro';
+import { getSettings } from '../lib/sanity';
+
+const settings = await getSettings();
+if (!settings) {
+  throw new Error("Contenu introuvable : publiez « Réglages du site » dans Sanity (voir README).");
+}
+---
+<Layout
+  title="L’équipe – Maison Muses, coiffure et bien-être à Toulouse"
+  description="Moussine, coiffeur, et Violaine, praticienne bien-être : l’équipe de Maison Muses au centre de Toulouse."
+>
+  <Header logo={settings.logo} cta={settings.headerCta} />
+  <main id="top">
+    <EquipeHero />
+    <EquipeMembers />
+  </main>
+  <!-- CTA « Prenez le temps » + footer -->
+  <Section9 />
+  <script>
+    import '../scripts/main';
+  </script>
+</Layout>

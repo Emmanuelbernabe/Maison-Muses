@@ -1,0 +1,181 @@
+---
+// Pages espace — accordéon : lignes (consultation, diagnostic…), marques, Instagram (un seul ouvert à la fois)
+import { clean } from '../lib/sanity';
+interface Props { steps: any[]; brands: any; social: any; }
+const { steps, brands, social } = Astro.props;
+// Les marques reprennent tour à tour les 5 styles typographiques du bandeau
+const brandStyles = ['nord', 'vert', 'origine', 'lab', 'pure'];
+const external = (url?: string) => (url?.startsWith('http') ? '_blank' : undefined);
+---
+
+<section class="cf-acc" data-anim="cf-acc" aria-label="Votre visite">
+  {steps.map((step, i) => (
+    <div class={`cf-row${i === 0 ? ' is-open' : ''}`} data-cf-row>
+      <button class="cf-row-btn" type="button" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`cf-d${i + 1}`}><span class="cf-tag">{step.tag}</span><h3>{step.title}</h3><span class="cf-plus" aria-hidden="true">+</span></button>
+      <div class="cf-detail" id={`cf-d${i + 1}`} inert={i !== 0}><div class="cf-detail-inner">
+        <div class="cf-detail-text">
+          {step.paragraphs.map((p: string) => <p>{p}</p>)}
+          {step.ctaLabel && step.ctaUrl && <a class="cf-cta" href={step.ctaUrl} target={external(step.ctaUrl)} rel="noopener">{step.ctaLabel}</a>}
+        </div>
+        <figure class="cf-detail-photo" data-cf-acc-clip data-sanity={step.image.attr}><img src={step.image.src} alt={step.image.alt} loading="lazy" decoding="async" /></figure>
+      </div></div>
+    </div>
+  ))}
+
+  <div class="cf-row" data-cf-row>
+    <button class="cf-row-btn" type="button" aria-expanded="false" aria-controls="cf-db"><span class="cf-tag">{brands.tag}</span><h3>{brands.title}</h3><span class="cf-plus" aria-hidden="true">+</span></button>
+    <div class="cf-detail" id="cf-db" inert><div class="cf-detail-inner">
+      <div class="cf-detail-text">
+        <p>{brands.text}</p>
+      </div>
+      <div class="cf-brands" aria-label="Nos marques partenaires">
+        <div class="cf-brands-track" data-cf-brands>
+          {[0, 1].map((copy) => brands.list.map((name: string, i: number) => (
+            <span class={`cf-brand cf-brand-${brandStyles[i % brandStyles.length]}`} aria-hidden={copy === 1 ? 'true' : undefined}>{copy === 1 ? clean(name) : name}</span>
+          )))}
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="cf-row" data-cf-row>
+    <button class="cf-row-btn" type="button" aria-expanded="false" aria-controls="cf-ds"><span class="cf-tag">{social.tag}</span><h3>{social.title}</h3><span class="cf-plus" aria-hidden="true">+</span></button>
+    <div class="cf-detail" id="cf-ds" inert><div class="cf-detail-inner">
+      <div class="cf-detail-text">
+        <p>{social.text}</p>
+        <a class="cf-cta" href={social.url} target="_blank" rel="noopener">{social.handle}</a>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<style>
+  .cf-acc {
+    --f: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+    padding: calc(100 * var(--f)) calc(40 * var(--f)) calc(140 * var(--f));
+    color: var(--sp-c, #e57851);
+  }
+
+  .cf-row { border-top: 1px solid currentColor; }
+  .cf-row:last-child { border-bottom: 1px solid currentColor; }
+
+  .cf-row-btn {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: calc(288 * var(--f)) 1fr auto;
+    align-items: center;
+    width: 100%;
+    padding: calc(34 * var(--f)) 0 calc(30 * var(--f));
+  }
+
+  .cf-row-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+  .cf-tag {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(22 * var(--f));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .cf-row-btn h3 {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(72 * var(--f));
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .cf-plus {
+    width: calc(32 * var(--f));
+    height: calc(32 * var(--f));
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    display: grid;
+    place-items: center;
+    font-size: calc(18 * var(--f));
+    font-weight: 300;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cf-row.is-open .cf-plus { transform: rotate(45deg); }
+
+  .cf-detail { height: 0; overflow: hidden; }
+  .cf-row.is-open .cf-detail { height: auto; }
+
+  .cf-detail-inner {
+    display: grid;
+    grid-template-columns: calc(288 * var(--f)) 1fr calc(300 * var(--f));
+    padding-bottom: calc(40 * var(--f));
+  }
+
+  .cf-detail-text {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(26 * var(--f));
+    max-width: calc(510 * var(--f));
+    padding-top: calc(10 * var(--f));
+    font-size: calc(17 * var(--f));
+    line-height: 1.5;
+  }
+
+  .cf-detail-text p { margin: 0; }
+
+  .cf-cta {
+    margin-top: calc(14 * var(--f));
+    font-size: calc(22 * var(--f));
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    color: inherit;
+  }
+
+  .cf-detail-photo { grid-column: 3; width: calc(300 * var(--f)); height: calc(368 * var(--f)); margin: 0; overflow: hidden; }
+  .cf-detail-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Marques : défilement en boucle, bords fondus, un filet au-dessus et en dessous */
+  .cf-brands {
+    grid-column: 1 / -1;
+    margin-top: calc(40 * var(--f));
+    padding: calc(28 * var(--f)) 0;
+    border-top: 1px solid color-mix(in srgb, var(--sp-c, #e57851) 35%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--sp-c, #e57851) 35%, transparent);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .cf-brands-track { display: flex; align-items: center; width: max-content; }
+  .cf-brand { display: flex; align-items: center; white-space: nowrap; padding-right: calc(70 * var(--f)); }
+  .cf-brand::after { content: '✦'; margin-left: calc(70 * var(--f)); font-size: calc(12 * var(--f)); font-family: var(--font, 'DM Sans', sans-serif); letter-spacing: 0; }
+  .cf-brand-nord { font-family: 'Thunder', sans-serif; font-weight: 800; font-size: calc(32 * var(--f)); text-transform: uppercase; }
+  .cf-brand-vert { font-family: 'Cormorant Infant', serif; font-size: calc(36 * var(--f)); }
+  .cf-brand-origine { font-size: calc(18 * var(--f)); letter-spacing: 0.5em; text-transform: uppercase; }
+  .cf-brand-lab { font-family: 'Thunder', sans-serif; font-weight: 600; font-size: calc(32 * var(--f)); text-transform: uppercase; }
+  .cf-brand-pure { font-family: 'Cormorant Infant', serif; font-size: calc(34 * var(--f)); }
+
+  @media (max-width: 899px) {
+    .cf-acc { padding: 3rem 1.25rem 5rem; }
+    .cf-row-btn { grid-template-columns: 1fr auto; row-gap: 0.4rem; }
+    .cf-row-btn .cf-tag { grid-column: 1 / -1; }
+    .cf-tag { font-size: 1rem; }
+    .cf-row-btn h3 { font-size: 2.3rem; }
+    .cf-plus { width: 2rem; height: 2rem; font-size: 1.1rem; }
+    .cf-detail-inner { grid-template-columns: 1fr; gap: 1.2rem; }
+    .cf-detail-text { grid-column: 1; max-width: none; font-size: 0.95rem; }
+    .cf-cta { font-size: 1rem; }
+    .cf-detail-photo { grid-column: 1; width: 75%; height: auto; aspect-ratio: 300 / 368; }
+    .cf-brand-nord, .cf-brand-lab { font-size: 1.5rem; }
+    .cf-brand-vert, .cf-brand-pure { font-size: 1.7rem; }
+    .cf-brand-origine { font-size: 0.9rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { .cf-plus { transition: none; } }
+</style>

@@ -1,0 +1,44 @@
+---
+// Édition visuelle : active seulement sur le site d'aperçu, ouvert dans le Studio (onglet « Modifier le site »).
+// Sur le site public, rien n'est chargé : le script s'arrête faute de balise <meta>.
+import { visualEditing } from '../lib/sanity';
+---
+{visualEditing && <meta name="mm-visual-editing" content="on" />}
+
+<script>
+  const veEnabled = document.querySelector('meta[name="mm-visual-editing"]');
+
+  // ============ INIT ============
+  // Seulement dans l'iframe du Studio, et chargé à la demande (jamais sur le site public)
+  if (veEnabled && window.self !== window.top) {
+    Promise.all([
+      import('@sanity/visual-editing-standalone'),
+      import('@sanity/visual-editing-standalone/styles.css'),
+    ]).then(([{ enableVisualEditing }]) => {
+      enableVisualEditing({
+        history: {
+          subscribe: (navigate) => {
+            const onPop = () => navigate({ type: 'pop', url: location.href });
+            // Changement de page (transitions Astro) : on prévient le Studio
+            const onLoad = () => navigate({ type: 'push', url: location.href });
+            addEventListener('popstate', onPop);
+            document.addEventListener('astro:page-load', onLoad);
+            return () => {
+              removeEventListener('popstate', onPop);
+              document.removeEventListener('astro:page-load', onLoad);
+            };
+          },
+          update: (update) => {
+            if (update.type === 'pop') history.back();
+            else if (update.url !== location.pathname + location.search) location.href = update.url;
+          },
+        },
+        // Après une modification dans le Studio : on recharge la page pour afficher le brouillon
+        refresh: () => {
+          location.reload();
+          return new Promise(() => {});
+        },
+      });
+    });
+  }
+</script>

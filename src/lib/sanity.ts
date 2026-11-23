@@ -1,12 +1,38 @@
 import { createClient } from '@sanity/client';
+import { stegaClean } from '@sanity/client/stega';
 import { createImageUrlBuilder } from '@sanity/image-url';
+import { createDataAttribute } from '@sanity/visual-editing-standalone';
+
+/* ───────── Mode « aperçu » (édition visuelle dans le Studio) ─────────
+   Activé uniquement sur le site d'aperçu (PUBLIC_SANITY_VISUAL_EDITING=true) :
+   on lit les brouillons et on ajoute aux textes des repères invisibles (stega)
+   qui permettent au Studio de savoir quel champ ouvrir au clic.
+   Le site public, lui, reste statique et ne lit que le contenu publié. */
+export const visualEditing = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING === 'true';
+const studioUrl = import.meta.env.PUBLIC_SANITY_STUDIO_URL || 'https://maison-muses.sanity.studio';
 
 export const client = createClient({
   projectId: import.meta.env.SANITY_PROJECT_ID,
   dataset: import.meta.env.SANITY_DATASET || 'production',
   apiVersion: '2025-01-01',
-  useCdn: true,
+  useCdn: !visualEditing,
+  ...(visualEditing
+    ? {
+        perspective: 'drafts' as const,
+        token: import.meta.env.SANITY_API_READ_TOKEN,
+        stega: { enabled: true, studioUrl },
+      }
+    : {}),
 });
+
+// À utiliser pour toute valeur qui n'est pas du texte affiché (lien, classe, attribut alt, comparaison…)
+export const clean = <T,>(value: T): T => stegaClean(value);
+
+// Repère cliquable pour ce qui ne porte pas de texte (images, vidéos) : seulement en mode aperçu
+export const sanityAttr = (id: string | undefined, type: string, path: string) =>
+  visualEditing && id
+    ? createDataAttribute({ baseUrl: studioUrl, id: id.replace('drafts.', ''), type, path }).toString()
+    : undefined;
 
 const builder = createImageUrlBuilder(client);
 export const urlFor = (source: any) => builder.image(source);
@@ -48,3 +74,25 @@ export const getSettings = () =>
       copyright, legal ${link}
     }
   }`);
+
+/* ───────── Journal ───────── */
+// « chars » : longueur du texte, pour estimer le temps de lecture
+const journalCard = `_id, title, "slug": slug.current, category, publishedAt, author, cover, excerpt, featured, episode, "chars": length(pt::text(body))`;
+
+export const getJournalPosts = () =>
+  client.fetch(`*[_type == "journalPost" && defined(slug.current)] | order(publishedAt desc){ ${journalCard} }`);
+
+export const getJournalPost = (slug: string) =>
+  client.fetch(`*[_type == "journalPost" && slug.current == $slug][0]{ ${journalCard}, seoTitle, body, "audio": audio.asset->{ url, mimeType } }`, { slug });
+
+/* ───────── Pages espace coiffure / bien-être ───────── */
+export const getServicePage = (id: 'page-coiffure' | 'page-bien-etre') =>
+  client.fetch(`*[_id == $id][0]{
+    _id, _type, seoTitle, seoDescription,
+    hero { eyebrow, title, signature, "video": video.asset->url, poster },
+    approach,
+    gallery,
+    steps[]{ _key, tag, title, paragraphs, ctaLabel, ctaUrl, image },
+    brands,
+    social
+  }`, { id });

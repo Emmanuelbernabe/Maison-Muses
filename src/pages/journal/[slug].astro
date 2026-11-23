@@ -1,0 +1,166 @@
+---
+// Journal — page article : titre centré, couverture, corps en richtext, « À lire aussi »
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Section9 from '../../components/Section9.astro';
+import JournalCard from '../../components/JournalCard.astro';
+import JournalBody from '../../components/JournalBody.astro';
+import JournalPlayer from '../../components/JournalPlayer.astro';
+import { getSettings, getJournalPosts, getJournalPost } from '../../lib/sanity';
+import { journalCover, journalCategoryLabel, journalDate, journalReadingTime, journalBodyHtml } from '../../lib/journal';
+
+export async function getStaticPaths() {
+  const posts: any[] = (await getJournalPosts()) || [];
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { all: posts } }));
+}
+
+const { slug } = Astro.params;
+// En mode aperçu (rendu serveur), getStaticPaths n'est pas appelé : on recharge la liste
+const all: any[] = (Astro.props as any).all ?? ((await getJournalPosts()) || []);
+const [settings, post] = await Promise.all([getSettings(), getJournalPost(slug!)]);
+if (!settings || !post) {
+  throw new Error(`Article introuvable : ${slug}`);
+}
+
+const cover = journalCover(post, 1800);
+const html = journalBodyHtml(post.body);
+// À lire aussi : d'abord la même catégorie, puis les plus récents
+const others = all.filter((p) => p.slug !== post.slug);
+const related = [...others.filter((p) => p.category === post.category), ...others.filter((p) => p.category !== post.category)].slice(0, 3);
+---
+<Layout
+  title={`${post.seoTitle || post.title} – Journal Maison Muses`}
+  description={post.excerpt || `${journalCategoryLabel(post.category)} : un article du journal de Maison Muses.`}
+>
+  <Header logo={settings.logo} cta={settings.headerCta} />
+  <main id="top">
+    <article class="jr-article" data-anim="jr-article">
+      <header class="jr-art-head">
+        <p class="jr-cat"><a href="/journal">Journal</a> · <b>{journalCategoryLabel(post.category)}</b></p>
+        <h1 class="jr-art-title">{post.title}</h1>
+        <div class="jr-art-meta">
+          <span class="jr-date">{journalDate(post.publishedAt)}</span>
+          {post.category !== 'podcast' && <span class="jr-cat">{journalReadingTime(post.chars)} min de lecture</span>}
+          {post.author && <span class="jr-date">par {post.author}</span>}
+        </div>
+        <!-- Podcast : player audio si un fichier est ajouté dans Sanity -->
+        {post.category === 'podcast' && post.audio?.url && (
+          <JournalPlayer src={post.audio.url} type={post.audio.mimeType} episode={post.episode} title={post.title} />
+        )}
+      </header>
+
+      <figure class="jr-cover" data-jr-clip>
+        <img src={cover.src} srcset={cover.srcset} sizes="100vw" alt={cover.alt} decoding="async" />
+      </figure>
+
+      <div class="jr-art-body">
+        <JournalBody html={html} />
+        <a class="jr-art-cta" href="https://www.planity.com/" target="_blank" rel="noopener">Prendre rendez-vous</a>
+      </div>
+    </article>
+
+    {related.length > 0 && (
+      <section class="jr-related" aria-label="À lire aussi">
+        <h2 class="jr-related-title"><span>À lire</span> aussi</h2>
+        <div class="jr-related-grid">
+          {related.map((p) => <JournalCard post={p} />)}
+        </div>
+      </section>
+    )}
+  </main>
+  <Section9 />
+  <script>
+    import '../../scripts/main';
+  </script>
+</Layout>
+
+<style>
+  .jr-article, .jr-related {
+    --f: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
+    color: var(--orange, #e57851);
+  }
+
+  .jr-art-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(24 * var(--f));
+    padding: calc(170 * var(--f)) calc(40 * var(--f)) calc(50 * var(--f));
+    text-align: center;
+  }
+
+  .jr-cat {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(20 * var(--f));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .jr-cat b { font-weight: 700; }
+  .jr-cat a { color: inherit; text-decoration: none; }
+
+  .jr-art-title {
+    margin: 0;
+    max-width: calc(1100 * var(--f));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 700;
+    font-size: calc(110 * var(--f));
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  .jr-art-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(30 * var(--f)); align-items: baseline; }
+  .jr-date { font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(20 * var(--f)); }
+
+  .jr-cover { margin: 0 calc(40 * var(--f)); aspect-ratio: 16 / 7; overflow: hidden; }
+  .jr-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .jr-art-body {
+    max-width: calc(700 * var(--f));
+    margin: 0 auto;
+    padding: calc(80 * var(--f)) calc(40 * var(--f)) calc(120 * var(--f));
+    box-sizing: content-box;
+  }
+
+  .jr-art-cta {
+    display: inline-block;
+    margin-top: calc(50 * var(--f));
+    color: inherit;
+    font-size: calc(22 * var(--f));
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  .jr-related { margin: 0 calc(40 * var(--f)); padding: calc(80 * var(--f)) 0 calc(120 * var(--f)); border-top: 1px solid var(--orange, #e57851); }
+
+  .jr-related-title {
+    margin: 0 0 calc(30 * var(--f));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 700;
+    font-size: calc(48 * var(--f));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .jr-related-title span { font-weight: 200; }
+  .jr-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(30 * var(--f)); }
+
+  @media (max-width: 899px) {
+    .jr-art-head { padding: 6rem 1.25rem 2rem; }
+    .jr-art-title { font-size: 3rem; }
+    .jr-cat { font-size: 0.95rem; }
+    .jr-date { font-size: 1rem; }
+    .jr-cover { margin: 0; aspect-ratio: 4 / 3; }
+    .jr-art-body { padding: 2.5rem 1.25rem 4rem; }
+    .jr-art-cta { font-size: 1rem; }
+    .jr-related { margin: 0 1.25rem; padding: 3rem 0 4rem; }
+    .jr-related-title { font-size: 1.8rem; }
+    .jr-related-grid { grid-template-columns: 1fr 1fr; gap: 2rem 0.8rem; }
+    .jr-related-grid > :global(:nth-child(3)) { display: none; }
+  }
+</style>

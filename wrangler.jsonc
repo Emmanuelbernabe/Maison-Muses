@@ -1,0 +1,10 @@
+{
+  "name": "maison-muses",
+  // Date de référence de l'environnement Cloudflare
+  "compatibility_date": "2026-11-23",
+  "assets": {
+    "directory": "./dist",
+    // Sert ta page 404 si une adresse n'existe pas
+    "not_found_handling": "404-page"
+  }
+}

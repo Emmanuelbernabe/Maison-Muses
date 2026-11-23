@@ -1,0 +1,214 @@
+---
+// Page L'équipe — hero : titre, 3 médias en escalier (vidéo, Moussine, Violaine), la vidéo s'ouvre au scroll
+import { resolveImage, resolveVideo } from '../lib/images';
+
+// TODO : remplacer par la vraie vidéo de présentation (déposer public/video/equipe.mp4)
+const videoSrc = resolveVideo('equipe', 'prestige-big');
+const posterSrc = resolveImage('equipe-poster', 's4-team-left');
+
+const moussine = { base: resolveImage('marquee-follow-img'), hover: resolveImage('moussine') };
+const violaine = { base: resolveImage('violaine'), hover: resolveImage('load-3') };
+---
+
+<section class="eq" id="eq" aria-label="L’équipe Maison Muses">
+  <h1 class="eq-title">L’EQUIPE</h1>
+  <p class="eq-muses">MUSES</p>
+
+  <!-- Emblème en filigrane, coupé par le bord gauche -->
+  <svg class="eq-logo" width="324" height="333" viewBox="0 0 324 333" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <g fill="#EB8258" fill-opacity="0.6">
+      <path fill-rule="evenodd" d="M 162 14.5 A 152 152 0 1 0 162 318.5 A 152 152 0 1 0 162 14.5 Z M 162 30.5 A 136 136 0 1 1 162 302.5 A 136 136 0 1 1 162 30.5 Z" />
+      <path d="M 155.000 46.704 A 120.0 120.0 0 0 0 58.077 226.500 L 76.263 216.000 A 99.0 99.0 0 0 1 87.000 101.878 L 87.000 260.175 A 120.0 120.0 0 0 0 108.000 273.663 L 108.000 83.524 A 99.0 99.0 0 0 1 134.000 71.542 L 134.000 283.188 A 120.0 120.0 0 0 0 155.000 286.296 Z" />
+      <path d="M 169.000 46.704 A 120.0 120.0 0 0 1 265.923 226.500 L 247.737 216.000 A 99.0 99.0 0 0 0 237.000 101.878 L 237.000 260.175 A 120.0 120.0 0 0 1 216.000 273.663 L 216.000 83.524 A 99.0 99.0 0 0 0 190.000 71.542 L 190.000 283.188 A 120.0 120.0 0 0 1 169.000 286.296 Z" />
+    </g>
+  </svg>
+
+  <p class="eq-para">La coiffure d’un côté, le bien-être de l’autre. <br />Deux savoir-faire réunis pour prendre soin <br />de nos muses, au centre de Toulouse.</p>
+  <p class="eq-deux">Deux passions, <br />une maison.</p>
+
+  <!-- Emplacement (invisible) de la vidéo : repère du clip-path -->
+  <div class="eq-slot" data-anim="eq-slot" aria-hidden="true"></div>
+
+  <!-- Calque vidéo plein écran, découpé sur l'emplacement ; s'ouvre au scroll -->
+  <div class="eq-video" data-anim="eq-layer">
+    <div class="eq-video-inner" data-anim="eq-inner">
+      <video src={videoSrc} poster={posterSrc} autoplay muted loop playsinline preload="metadata" data-anim="eq-video"></video>
+    </div>
+    <button class="eq-play" type="button" data-anim="eq-play" aria-label="Lire la vidéo de présentation avec le son">
+      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 1.5v15L16 9z" fill="currentColor" /></svg>
+      <span data-anim="eq-play-label">Lire la vidéo</span>
+    </button>
+  </div>
+
+  <!-- Moussine (marche du milieu) : 2e photo au survol -->
+  <figure class="eq-photo eq-photo-m" data-anim="eq-photo" tabindex="0" aria-label="Moussine">
+    <img src={moussine.base} alt="Moussine en pleine coupe" loading="eager" decoding="async" />
+    <img class="eq-hover" src={moussine.hover} alt="Portrait de Moussine" loading="lazy" decoding="async" />
+  </figure>
+
+  <!-- Violaine (marche du haut, contre le bord droit) : 2e photo au survol -->
+  <figure class="eq-photo eq-photo-v" data-anim="eq-photo" tabindex="0" aria-label="Violaine">
+    <img src={violaine.base} alt="Portrait de Violaine" loading="eager" decoding="async" />
+    <img class="eq-hover" src={violaine.hover} alt="Soin du visage par Violaine" loading="lazy" decoding="async" />
+  </figure>
+</section>
+
+<style>
+  /* Unité calée sur la maquette 1440 : toute la composition suit la largeur de l'écran */
+  .eq {
+    --eq-u: min(calc(100vw / 1440), 1.35px);
+    --eq-green: #11311A;
+    --eq-pad: calc(40 * var(--eq-u));
+    --eq-h: calc(1411 * var(--eq-u));
+    position: relative;
+    height: var(--eq-h);
+    color: var(--orange, #e57851);
+    font-family: var(--font, 'DM Sans', sans-serif);
+    overflow-x: clip;
+  }
+
+  .eq > * { position: absolute; margin: 0; }
+
+  .eq-title {
+    left: calc(2 * var(--eq-u));
+    top: calc(80 * var(--eq-u));
+    z-index: 2;
+    font-family: 'Cormorant Infant', serif;
+    font-feature-settings: "calt" 1;          /* longue queue du Q */
+    font-variant-ligatures: contextual;
+    font-weight: 400;
+    font-size: calc(370 * var(--eq-u));
+    line-height: 1;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+  }
+
+  .eq-muses {
+    left: calc(950 * var(--eq-u));
+    top: calc(390 * var(--eq-u));
+    z-index: 2;
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: calc(97 * var(--eq-u));
+    line-height: 1;
+  }
+
+  .eq-logo {
+    left: calc(-159 * var(--eq-u));
+    top: calc(858 * var(--eq-u));
+    z-index: 1;
+    width: calc(324 * var(--eq-u));
+    height: auto;
+  }
+
+  .eq-para {
+    left: calc(38 * var(--eq-u));
+    top: calc(616 * var(--eq-u));
+    z-index: 2;
+    width: calc(800 * var(--eq-u));
+    font-size: calc(29.5 * var(--eq-u));
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .eq-deux {
+    left: calc(925 * var(--eq-u));
+    top: calc(1268 * var(--eq-u));
+    z-index: 2;
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-size: calc(30 * var(--eq-u));
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  .eq-slot {
+    left: calc(539 * var(--eq-u));
+    top: calc(901 * var(--eq-u));
+    width: calc(362 * var(--eq-u));
+    height: calc(441 * var(--eq-u));
+    pointer-events: none;
+  }
+
+  /* Le calque (agrandissement au scroll) et l'intérieur (apparition) ont chacun leur clip-path */
+  .eq-video {
+    left: 0;
+    top: calc(var(--eq-h) - 100vh);
+    z-index: 5;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .eq-video-inner {
+    position: absolute;
+    inset: 0;
+    background: var(--eq-green);
+  }
+
+  .eq-video-inner video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  :global(.js) .eq-video-inner { clip-path: inset(50% 50% 50% 50%); }
+
+  .eq-play {
+    position: absolute;
+    right: var(--eq-pad);
+    bottom: var(--eq-pad);
+    display: flex;
+    align-items: center;
+    gap: calc(14 * var(--eq-u));
+    padding: calc(16 * var(--eq-u)) calc(26 * var(--eq-u)) calc(14 * var(--eq-u));
+    border: 0;
+    border-radius: 999px;
+    background: var(--bg, #F7F2EC);
+    color: var(--orange, #e57851);
+    cursor: pointer;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(28 * var(--eq-u));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .eq-play svg { width: calc(18 * var(--eq-u)); height: calc(18 * var(--eq-u)); }
+
+  .eq-photo { z-index: 3; overflow: hidden; cursor: pointer; }
+  .eq-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .eq-photo .eq-hover { position: absolute; inset: 0; clip-path: inset(50% 50% 50% 50%); }
+  :global(.js) .eq-photo { clip-path: inset(50% 50% 50% 50%); }
+
+  .eq-photo-m { left: calc(901 * var(--eq-u)); top: calc(682 * var(--eq-u)); width: calc(292 * var(--eq-u)); height: calc(356 * var(--eq-u)); }
+  .eq-photo-v { left: calc(1190 * var(--eq-u)); top: calc(490 * var(--eq-u)); width: calc(250 * var(--eq-u)); height: calc(304 * var(--eq-u)); }
+
+  /* Caché jusqu'au découpage en lignes (revealTitle) */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .eq-para { visibility: hidden; }
+  }
+
+  /* Mobile : même composition en escalier, recalée sur une maquette 375, et même agrandissement de la vidéo */
+  @media (max-width: 899px) {
+    .eq {
+      --m: calc(100vw / 375);
+      /* au moins la hauteur de l'écran : l'agrandissement démarre au premier scroll, pas avant */
+      --eq-h: max(calc(700 * var(--m)), 100vh);
+      --eq-pad: 1rem;
+    }
+
+    .eq-title { left: calc(4 * var(--m)); top: calc(66 * var(--m)); font-size: calc(96 * var(--m)); }
+    .eq-muses { left: calc(244 * var(--m)); top: calc(146 * var(--m)); font-size: calc(26 * var(--m)); }
+    .eq-logo { left: calc(-58 * var(--m)); top: calc(362 * var(--m)); width: calc(112 * var(--m)); }
+    .eq-para { left: calc(20 * var(--m)); top: calc(196 * var(--m)); width: calc(335 * var(--m)); font-size: calc(14 * var(--m)); }
+    .eq-deux { left: calc(206 * var(--m)); top: calc(636 * var(--m)); font-size: calc(15 * var(--m)); }
+
+    .eq-slot { left: calc(20 * var(--m)); top: calc(468 * var(--m)); width: calc(176 * var(--m)); height: calc(222 * var(--m)); }
+    .eq-photo-m { left: calc(196 * var(--m)); top: calc(378 * var(--m)); width: calc(102 * var(--m)); height: calc(128 * var(--m)); }
+    .eq-photo-v { left: calc(298 * var(--m)); top: calc(300 * var(--m)); width: calc(77 * var(--m)); height: calc(96 * var(--m)); }
+
+    .eq-play { font-size: 1rem; padding: 0.65rem 1rem 0.55rem; gap: 0.5rem; }
+    .eq-play svg { width: 0.8rem; height: 0.8rem; }
+  }
+</style>

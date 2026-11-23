@@ -1,5 +1,6 @@
 import { link, cmsImage } from './objects';
-import { coffret, member, article, episode } from './documents';
+import { coffret, member, article, episode, journalPost } from './documents';
 import { homepage, siteSettings } from './singletons';
+import { servicePage } from './servicePage';
 
-export const schemaTypes = [homepage, siteSettings, coffret, member, article, episode, link, cmsImage];
+export const schemaTypes = [homepage, siteSettings, servicePage, coffret, member, article, episode, journalPost, link, cmsImage];

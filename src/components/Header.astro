@@ -3,19 +3,22 @@ import { resolveImage } from '../lib/images';
 const { cta, logo } = Astro.props;
 const logoSrc = logo?.asset?.url ?? resolveImage('logo');
 
+// Sur la home, les liens restent des ancres (#s2…) ; sur les autres pages, ils ramènent à la home (/#s2…)
+const home = Astro.url.pathname === '/' ? '' : '/';
+
 // Mêmes destinations que les liens « La maison » du footer, plus l'accueil
 const menuLinks = [
-  { label: 'Accueil',   url: '#top' },
-  { label: 'Espace bien-être', url: '#s2' },
-  { label: 'Espace coiffure',  url: '#s2' },
-  { label: 'Coffrets',  url: '#s5' },
-  { label: 'L’équipe',  url: '#s4' },
-  { label: 'Journal',   url: '#s8' },
+  { label: 'Accueil',   url: `${home}#top` },
+  { label: 'Bien-être', url: `${home}#s2` },
+  { label: 'Coiffure',  url: `${home}#s2` },
+  { label: 'Coffrets',  url: `${home}#s5` },
+  { label: 'L’équipe',  url: '/equipe' },
+  { label: 'Journal',   url: '/journal' },
 ];
 ---
 <header id="hd">
   <button class="nav-item nav-menu" type="button" aria-expanded="false" aria-controls="menu-panel" data-menu-open>MENU</button>
-  <a class="nav-logo" href="#top" aria-label="Maison Muses, accueil">
+  <a class="nav-logo" href={`${home}#top`} aria-label="Maison Muses, accueil">
     <img src={logoSrc} alt="Maison Muses" width="28" height="52" />
     <img class="nav-logo-cream" src={logoSrc} alt="" width="28" height="52" aria-hidden="true" />
   </a>
@@ -41,6 +44,9 @@ const menuLinks = [
 </nav>
 
 <style>
+  /* Le header n'est pas animé par la transition de page */
+  #hd { view-transition-name: navbar; }
+
   header#hd {
     position: fixed;
     inset: 0 0 auto 0;

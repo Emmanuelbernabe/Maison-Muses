@@ -1,6 +1,10 @@
 ---
 // Section 9 — Footer (CTA, adresses + cartes Google Maps, liens, MAISON MUSES)
 // TODO : URL Planity et liens Instagram / podcast
+// variant : « orange » par défaut, « green » pour la page bien-être (textes, filets, cartes en vert)
+interface Props { variant?: 'orange' | 'green'; }
+const { variant = 'orange' } = Astro.props;
+
 const planityUrl = 'https://www.planity.com/';
 const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 const year = new Date().getFullYear();
@@ -20,12 +24,15 @@ const places = [
   },
 ];
 
+// Sur la home, ancres (#s2…) ; sur les autres pages, retour vers la home (/#s2…)
+const home = Astro.url.pathname === '/' ? '' : '/';
+
 const maisonLinks = [
-  { label: 'BIEN-ÊTRE', url: '#s2' },
-  { label: 'COIFFURE', url: '#s2' },
-  { label: 'COFFRETS', url: '#s5' },
-  { label: 'L’ÉQUIPE', url: '#s4' },
-  { label: 'JOURNAL', url: '#s8' },
+  { label: 'BIEN-ÊTRE', url: `${home}#s2` },
+  { label: 'COIFFURE', url: `${home}#s2` },
+  { label: 'COFFRETS', url: `${home}#s5` },
+  { label: 'L’ÉQUIPE', url: '/equipe' },
+  { label: 'JOURNAL', url: '/journal' },
 ];
 
 const socialLinks = [
@@ -35,7 +42,7 @@ const socialLinks = [
 ];
 ---
 
-<footer class="s9" id="s9" data-anim="s9-section">
+<footer class:list={["s9", { "s9--green": variant === "green" }]} id="s9" data-anim="s9-section">
   <div class="s9-inner">
     <div class="s9-cta">
       <div class="s9-cta-left">
@@ -127,9 +134,11 @@ const socialLinks = [
     width: 100%;
     padding: calc(200 * var(--fpx)) 0 calc(28 * var(--fpx));
     background: var(--bg);
-    color: var(--orange, #e57851);
+    /* Couleur du footer : tout l'orange passe par cette variable */
+    --s9-c: var(--orange, #e57851);
+    color: var(--s9-c);
     font-family: var(--font);
-    overflow: visible;
+    overflow: hidden;
     box-sizing: border-box;
   }
 
@@ -141,6 +150,7 @@ const socialLinks = [
     justify-content: space-between;
     align-items: flex-end;
     gap: calc(40 * var(--fpx));
+    padding-top: calc(315 * var(--fpx));   /* place pour l'illustration au-dessus du titre */
     margin-bottom: calc(80 * var(--fpx));
   }
 
@@ -151,11 +161,11 @@ const socialLinks = [
   /* Illustration : juste à droite du titre, son bas au niveau de la première ligne */
   .s9-cta-deco {
     position: absolute;
-    left: calc(100% + 100 * var(--fpx));
+    left: calc(100% + 26 * var(--fpx));
     bottom: calc(143 * var(--fpx));
     width: calc(216 * var(--fpx));
     height: auto;
-    color: var(--orange, #e57851);
+    color: var(--s9-c);
     pointer-events: none;
   }
 
@@ -193,10 +203,10 @@ const socialLinks = [
     justify-content: space-between;
     gap: calc(40 * var(--fpx));
     padding: 1.5rem 0;
-    border-top: 1px solid var(--orange, #e57851);
+    border-top: 1px solid var(--s9-c);
   }
 
-  .s9-place:last-child { border-bottom: 1px solid var(--orange, #e57851); }
+  .s9-place:last-child { border-bottom: 1px solid var(--s9-c); }
 
   .s9-place-content {
     display: flex;
@@ -239,14 +249,17 @@ const socialLinks = [
     border: 0;
   }
 
-  /* Repli sans clé API : iframe teintée en orange */
+  /* Variante verte (page bien-être) */
+  .s9.s9--green { --s9-c: var(--green, #0F2F18); }
+
+  /* Repli sans clé API : iframe teintée à la couleur du footer */
   .s9-map-frame { filter: grayscale(1) contrast(1.1); }
 
   .s9-map:has(.s9-map-frame)::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--orange, #e57851);
+    background: var(--s9-c);
     mix-blend-mode: color;
     pointer-events: none;
   }
@@ -328,6 +341,9 @@ const socialLinks = [
   }
 
   @media (max-width: 1023px) {
+    /* Les variables viennent du hero de la home ; sur les autres pages, on reprend leurs valeurs mobiles */
+    .s9-brand-main { font-size: var(--hero-maison-fs, 26.667vw); }
+    .s9-brand-sub { font-size: var(--hero-muses-fs, 24vw); }
     .s9 { padding: 5rem 0 1.5rem; }
     .s9-inner { padding: 0 1.5rem; }
     .s9-cta { flex-direction: column; align-items: flex-start; gap: 2rem; margin-bottom: 3rem; }

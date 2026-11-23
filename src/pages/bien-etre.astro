@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import ServiceHero from '../components/ServiceHero.astro';
+import ServiceApproach from '../components/ServiceApproach.astro';
+import ServiceSlider from '../components/ServiceSlider.astro';
+import ServiceAccordion from '../components/ServiceAccordion.astro';
+import Section9 from '../components/Section9.astro';
+import { getSettings, getServicePage } from '../lib/sanity';
+import { buildServicePage } from '../lib/servicePage';
+
+const [settings, doc] = await Promise.all([getSettings(), getServicePage('page-bien-etre')]);
+if (!settings) {
+  throw new Error("Contenu introuvable : publiez « Réglages du site » dans Sanity (voir README).");
+}
+// Contenu modifiable dans le Studio : Pages du site → Espace bien-être
+const page = buildServicePage('bien-etre', doc);
+---
+<Layout
+  title={page.seoTitle || "L’espace bien-être – Maison Muses, Toulouse"}
+  description={page.seoDescription || "L’espace bien-être de Maison Muses par Violaine : soins du visage, du corps et esthétique, pour elle et pour lui, au centre de Toulouse."}
+>
+  <Header logo={settings.logo} cta={settings.headerCta} />
+  <main id="top" style="--sp-c: var(--green, #0F2F18);">
+    <ServiceHero hero={page.hero} label="Espace bien-être" />
+    <ServiceApproach approach={page.approach} />
+    <ServiceSlider slides={page.gallery} label="L’institut en images" />
+    <ServiceAccordion steps={page.steps} brands={page.brands} social={page.social} />
+  </main>
+  <!-- CTA « Prenez le temps » + footer -->
+  <Section9 variant="green" />
+  <script>
+    import '../scripts/main';
+  </script>
+</Layout>

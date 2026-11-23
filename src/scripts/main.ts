@@ -12,6 +12,9 @@ import { initSection6 } from './section6';
 import { initSection7 } from './section7';
 import { initSection8 } from './section8';
 import { initSection9 } from './section9';
+import { initEquipe } from './equipe';
+import { initCoiffure } from './coiffure';
+import { initJournal } from './journal';
 import { initMenu } from './menu';
 
 
@@ -32,7 +35,18 @@ function restoreScroll() {
   const isReturn = nav && (nav.type === 'reload' || nav.type === 'back_forward');
   let y = 0;
   try { y = isReturn ? Number(sessionStorage.getItem(SCROLL_KEY)) || 0 : 0; } catch {}
-  if (location.hash) return;   // une ancre dans l'URL garde la priorité
+  // Une ancre dans l'URL (ex. /#s5 depuis la page équipe) garde la priorité :
+  // on y va une fois les pins en place, sinon la position serait fausse
+  if (location.hash) {
+    const target = document.querySelector<HTMLElement>(location.hash);
+    if (target) {
+      const ty = location.hash === '#top' ? 0 : target.getBoundingClientRect().top + window.scrollY - 72;
+      if (lenis) lenis.scrollTo(ty, { immediate: true, force: true });
+      else window.scrollTo(0, ty);
+      ScrollTrigger.update();
+    }
+    return;
+  }
   if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
   else window.scrollTo(0, y);
   ScrollTrigger.update();
@@ -118,10 +132,9 @@ function initHeader() {
   });
 }
 
+// Une seule fois pour tout le site (ils survivent aux changements de page)
 initLenis();
-initHeader();
 initResize();
-initMenu((open) => lockScroll(open));
 
 /* ───────── Hero : parallaxe supprimée (remplacée par l'animation section2 pinnée) ───────── */
 function initHero() {
@@ -342,67 +355,133 @@ function initMarquee() {
   }
 }
 
-// Loader : une seule fois par visite (sessionStorage, effacé à la fermeture de l'onglet)
+/* ───────── Initialisation d'une page ─────────
+   Avec les View Transitions d'Astro (ClientRouter), on ne recharge plus la page : ce bloc est rejoué
+   à chaque arrivée sur une page, et tout ce qu'il crée est rangé dans un gsap.context
+   pour être nettoyé d'un coup avant le changement de page. */
 const LOADER_KEY = 'mm-loader-seen';
-const loaderSeen = (() => {
+const loaderWasSeen = () => {
   try { return sessionStorage.getItem(LOADER_KEY) === '1'; } catch { return false; }
-})();
-const loaderEl = document.getElementById('loader');
+};
 
-// Lance le loader, puis les animations de la page une fois terminé
-if (!reduce && loaderEl && !loaderSeen) {
-  // Pas de scroll possible tant que le loader tourne, et départ en haut de page
-  history.scrollRestoration = 'manual';
-  window.scrollTo(0, 0);
-  lockScroll(true);
-  initHero();
-  initLoader().then(async () => {
-    try { sessionStorage.setItem(LOADER_KEY, '1'); } catch {}
-    lockScroll(false);
-    await document.fonts.ready;
-    initSection2();
-    initSection3();
-    initSection4();
-    initSection5();
-    initSection6();
-    initSection7();
-    initSection8();
-    initSection9();
-    initSplit();
-    initReveals();
-    initAccordion();
-    initMarquee();
-    initHovers();
-    initAnchors();
-    ScrollTrigger.refresh();
-  });
-} else {
-  loaderEl?.classList.add('ld-done');
-  const hd = document.getElementById('hd');
-  if (hd) {
-    gsap.set(hd, { y: 0, opacity: 1 });
-    hd.classList.add('hd-ready');
-  }
-  initHero();
-  document.fonts.ready.then(() => {
-    initSection2();
-    initSection3();
-    initSection4();
-    initSection5();
-    initSection6();
-    initSection7();
-    initSection8();
-    initSection9();
-    initSplit();
-    initReveals();
-    initAccordion();
-    initMarquee();
-    initHovers();
-    initAnchors();
-    ScrollTrigger.refresh();
-    restoreScroll();
-    // La page n'apparaît qu'une fois tout en place (voir LoadingScreen.astro)
-    requestAnimationFrame(() => document.documentElement.classList.add('mm-ready'));
+let pageCtx: gsap.Context | null = null;
+
+function initSections() {
+  // En premier : les pins de la page équipe doivent exister avant les déclencheurs du CTA / footer
+  initEquipe();
+  initCoiffure();
+  initJournal();
+  initSection2();
+  initSection3();
+  initSection4();
+  initSection5();
+  initSection6();
+  initSection7();
+  initSection8();
+  initSection9();
+  initSplit();
+  initReveals();
+  initAccordion();
+  initMarquee();
+  initHovers();
+  initAnchors();
+}
+
+// Arrivée avec une ancre (ex. /#s5 depuis la page équipe) : on y va une fois les pins en place
+function scrollToHash(smooth: boolean) {
+  const target = location.hash ? document.querySelector<HTMLElement>(location.hash) : null;
+  if (!target || location.hash === '#top') return;
+  if (lenis) lenis.scrollTo(target, { offset: -72, immediate: !smooth, force: true, duration: 1.4 });
+  else target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+}
+
+function startPage(isFirstLoad: boolean) {
+  // Une seule initialisation par page (le body est remplacé à chaque navigation)
+  if (document.body.dataset.mmInit) return;
+  document.body.dataset.mmInit = '1';
+
+  const loaderEl = document.getElementById('loader');
+  // Le loader ne se joue qu'au premier chargement réel de la home, une fois par visite
+  const playLoader = isFirstLoad && !reduce && !!loaderEl && !loaderWasSeen();
+
+  pageCtx = gsap.context(() => {
+    initHeader();
+    initMenu((open) => lockScroll(open));
+    initHero();
+
+    if (playLoader) {
+      // Pas de scroll possible tant que le loader tourne, et départ en haut de page
+      window.scrollTo(0, 0);
+      lockScroll(true);
+      initLoader().then(async () => {
+        try { sessionStorage.setItem(LOADER_KEY, '1'); } catch {}
+        lockScroll(false);
+        await document.fonts.ready;
+        pageCtx?.add(() => {
+          initSections();
+          ScrollTrigger.refresh();
+          scrollToHash(true);
+        });
+      });
+      return;
+    }
+
+    loaderEl?.classList.add('ld-done');
+    const hd = document.getElementById('hd');
+    if (hd) {
+      gsap.set(hd, { y: 0, opacity: 1 });
+      hd.classList.add('hd-ready');
+    }
+    document.fonts.ready.then(() => {
+      pageCtx?.add(() => {
+        initSections();
+        ScrollTrigger.refresh();
+        // Premier chargement : position restaurée (rechargement / retour) ;
+        // navigation interne : Astro gère le haut de page, on ne s'occupe que des ancres
+        if (isFirstLoad) restoreScroll();
+        else scrollToHash(false);
+        // La page n'apparaît qu'une fois tout en place (voir LoadingScreen.astro)
+        requestAnimationFrame(() => document.documentElement.classList.add('mm-ready'));
+      });
+    });
   });
 }
+
+/* ───────── Changements de page (View Transitions) ───────── */
+// Clic sur un lien du menu : on masque le panneau avant la capture de l'ancienne page,
+// sinon il resterait affiché par-dessus toute la transition
+document.addEventListener('astro:before-preparation', () => {
+  document.querySelectorAll<HTMLElement>('[data-menu-panel], .menu-panel, .menu-backdrop').forEach((el) => {
+    el.style.visibility = 'hidden';
+  });
+});
+
+document.addEventListener('astro:before-swap', (e) => {
+  // L'ancienne page vient d'être capturée pour l'animation : on peut tout nettoyer
+  lockScroll(false);
+  pageCtx?.revert();
+  pageCtx = null;
+  ScrollTrigger.getAll().forEach((st) => st.kill());
+
+  // Astro remplace les attributs de <html> : on garde nos classes d'état (js, lenis, mm-ready…)
+  const nextHtml = (e as any).newDocument.documentElement as HTMLElement;
+  nextHtml.classList.add(...document.documentElement.classList, 'mm-ready');
+  // Pas de loader sur une navigation interne : il resterait affiché pendant la transition
+  if ((e as any).newDocument.getElementById('loader')) {
+    nextHtml.classList.add('ld-skip');
+    try { sessionStorage.setItem(LOADER_KEY, '1'); } catch {}
+  }
+});
+
+document.addEventListener('astro:after-swap', () => {
+  // Astro a remis la page en haut (ou à la position d'un retour arrière) : Lenis se resynchronise
+  if (lenis) {
+    lenis.resize();
+    lenis.scrollTo(window.scrollY, { immediate: true, force: true });
+  }
+});
+
+// Premier chargement, puis chaque navigation
+startPage(true);
+document.addEventListener('astro:page-load', () => startPage(false));
 addEventListener('load', () => ScrollTrigger.refresh());

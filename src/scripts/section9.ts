@@ -5,25 +5,35 @@ import { revealTitle } from './revealTitle';
 const S9_ORANGE = '#e57851';
 const S9_CREAM = '#F7F2EC';
 
-const s9MapStyles = [
-  { elementType: 'geometry', stylers: [{ color: S9_CREAM }] },
-  { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: S9_ORANGE }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: S9_CREAM }, { weight: 3 }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
-  { featureType: 'road', elementType: 'geometry.fill', stylers: [{ color: S9_ORANGE }] },
-  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ visibility: 'off' }] },
-  { featureType: 'road.highway', elementType: 'geometry.fill', stylers: [{ weight: 1.6 }] },
-  { featureType: 'road.arterial', elementType: 'geometry.fill', stylers: [{ weight: 1.1 }] },
-  { featureType: 'road.local', elementType: 'geometry.fill', stylers: [{ weight: 0.6 }] },
-  { featureType: 'road.local', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#F2DDD0' }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: S9_ORANGE }] },
-];
+// Styles de carte à la couleur du footer (orange par défaut, vert sur la page bien-être)
+function s9Mix(hex: string, into: string, amount: number) {
+  const a = hex.replace('#', '').match(/../g)!.map((x) => parseInt(x, 16));
+  const b = into.replace('#', '').match(/../g)!.map((x) => parseInt(x, 16));
+  return '#' + a.map((v, i) => Math.round(v * amount + b[i] * (1 - amount)).toString(16).padStart(2, '0')).join('');
+}
 
-const s9PinSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="${S9_ORANGE}"/><circle cx="20" cy="20" r="5" fill="${S9_CREAM}"/></svg>`;
+function s9MapStyles(color: string) {
+  const s9Water = s9Mix(color, S9_CREAM, 0.18);
+  return [
+    { elementType: 'geometry', stylers: [{ color: S9_CREAM }] },
+    { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: S9_CREAM }, { weight: 3 }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road', elementType: 'geometry.fill', stylers: [{ color }] },
+    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road.highway', elementType: 'geometry.fill', stylers: [{ weight: 1.6 }] },
+    { featureType: 'road.arterial', elementType: 'geometry.fill', stylers: [{ weight: 1.1 }] },
+    { featureType: 'road.local', elementType: 'geometry.fill', stylers: [{ weight: 0.6 }] },
+    { featureType: 'road.local', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: s9Water }] },
+    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color }] },
+  ];
+}
+
+const s9PinSvg = (color: string) => `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="${color}"/><circle cx="20" cy="20" r="5" fill="${S9_CREAM}"/></svg>`;
 
 // ============ GOOGLE MAPS ============
 function s9LoadGoogleMaps(key: string): Promise<any> {
@@ -40,7 +50,7 @@ function s9LoadGoogleMaps(key: string): Promise<any> {
   });
 }
 
-async function s9InitMaps(canvases: HTMLElement[]) {
+async function s9InitMaps(canvases: HTMLElement[], color: string) {
   const key = canvases[0].dataset.key;
   if (!key) return;
 
@@ -58,7 +68,7 @@ async function s9InitMaps(canvases: HTMLElement[]) {
       const s9Map = new Map(canvas, {
         center: s9Position,
         zoom: 15,
-        styles: s9MapStyles,
+        styles: s9MapStyles(color),
         disableDefaultUI: true,
         gestureHandling: 'cooperative',
         clickableIcons: false,
@@ -69,7 +79,7 @@ async function s9InitMaps(canvases: HTMLElement[]) {
         map: s9Map,
         position: s9Position,
         icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(s9PinSvg),
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(s9PinSvg(color)),
           scaledSize: new maps.Size(40, 40),
           anchor: new maps.Point(20, 20),
         },
@@ -91,7 +101,9 @@ export function initSection9() {
     const s9MapObserver = new IntersectionObserver((entries) => {
       if (!entries.some((entry) => entry.isIntersecting)) return;
       s9MapObserver.disconnect();
-      s9InitMaps(s9Canvases).catch(() => {});
+      // Couleur lue sur le footer (variable --s9-c) : orange, ou vert sur la page bien-être
+      const s9Color = getComputedStyle(s9).getPropertyValue('--s9-c').trim() || S9_ORANGE;
+      s9InitMaps(s9Canvases, /^#[0-9a-f]{6}$/i.test(s9Color) ? s9Color : S9_ORANGE).catch(() => {});
     }, { rootMargin: '600px 0px' });
 
     s9Canvases.forEach((canvas) => s9MapObserver.observe(canvas));
@@ -111,7 +123,7 @@ export function initSection9() {
     onSplit(self) {
       gsap.set(self.masks, { paddingBlock: '0.1em', marginBlock: '-0.1em' });
       return gsap.from(self.chars, {
-        yPercent: 80,
+        yPercent: 120,
         ease: 'none',
         stagger: 0.08,
         scrollTrigger: {
