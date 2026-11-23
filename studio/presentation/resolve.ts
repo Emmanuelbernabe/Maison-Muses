@@ -7,6 +7,7 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     { route: '/', filter: `_id == "homepage"` },
     { route: '/coiffure', filter: `_id == "page-coiffure"` },
     { route: '/bien-etre', filter: `_id == "page-bien-etre"` },
+    { route: '/marques/:slug', filter: `_type == "brand" && slug.current == $slug` },
     { route: '/journal/:slug', filter: `_type == "journalPost" && slug.current == $slug` },
   ]),
   // Document ouvert → pages où il apparaît
@@ -27,6 +28,10 @@ export const resolve: PresentationPluginOptions['resolve'] = {
           { title: 'Journal', href: '/journal' },
         ],
       }),
+    }),
+    brand: defineLocations({
+      select: { name: 'name', slug: 'slug.current' },
+      resolve: (doc) => ({ locations: [{ title: doc?.name || 'Marque', href: `/marques/${doc?.slug}` }] }),
     }),
     siteSettings: defineLocations({ message: 'Utilisé sur toutes les pages (header et footer)', locations: [{ title: 'Accueil', href: '/' }] }),
   },

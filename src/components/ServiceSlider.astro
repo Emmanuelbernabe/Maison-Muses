@@ -1,15 +1,26 @@
 ---
 // Pages espace — slider centré, en boucle, glissable, parallaxe dans les images (sans Swiper)
+// slides : { src, alt, attr?, title?, subtitle? } — avec un titre, une légende s'affiche sous la photo
+// et la diapositive devient cliquable (événement « cf-slide-click » envoyé par coiffure.ts)
 interface Props { slides: any[]; label: string; }
 const { slides, label } = Astro.props;
+const captions = slides.some((slide) => slide.title);
 ---
 
 <section class="cf-slider-section" aria-label={label}>
-  <div class="cf-slider" data-anim="cf-slider" tabindex="0" aria-roledescription="carrousel" aria-label="Réalisations, flèches gauche et droite pour naviguer">
-    {slides.map((slide) => (
-      <figure class="cf-slide" data-cf-slide data-sanity={slide.attr}>
-        <!-- data-parallax-x : déplacement de l'image dans sa diapositive (équivalent de data-swiper-parallax-x) -->
-        <img src={slide.src} alt={slide.alt} data-parallax-x="25" loading="lazy" decoding="async" draggable="false" />
+  <div class={`cf-slider${captions ? ' has-captions' : ''}`} data-anim="cf-slider" tabindex="0" aria-roledescription="carrousel" aria-label="Réalisations, flèches gauche et droite pour naviguer">
+    {slides.map((slide, i) => (
+      <figure class="cf-slide" data-cf-slide data-index={i} data-sanity={slide.attr}>
+        <div class="cf-slide-media">
+          <!-- data-parallax-x : déplacement de l'image dans sa diapositive (équivalent de data-swiper-parallax-x) -->
+          <img src={slide.src} alt={slide.alt} data-parallax-x="25" loading="lazy" decoding="async" draggable="false" />
+        </div>
+        {slide.title && (
+          <figcaption class="cf-slide-caption">
+            <span class="cf-slide-title">{slide.title}</span>
+            {slide.subtitle && <span class="cf-slide-sub">{slide.subtitle}</span>}
+          </figcaption>
+        )}
       </figure>
     ))}
     <div class="cf-slider-nav">
@@ -51,6 +62,18 @@ const { slides, label } = Astro.props;
     overflow: hidden;
     will-change: transform;
   }
+
+  /* Cadre de la photo : toute la diapositive, ou au-dessus de la légende */
+  .cf-slide-media { position: absolute; inset: 0; overflow: hidden; }
+
+  .cf-slider.has-captions { height: calc(660 * var(--f)); cursor: grab; }
+  .cf-slider.has-captions .cf-slide { display: flex; flex-direction: column; overflow: visible; }
+  .cf-slider.has-captions .cf-slide-media { position: relative; inset: auto; flex: 1; }
+  .cf-slider.has-captions .cf-slider-nav { bottom: calc(80 * var(--f) + 1.25rem); }
+
+  .cf-slide-caption { display: flex; flex-direction: column; gap: 2px; padding-top: calc(14 * var(--f)); height: calc(80 * var(--f)); }
+  .cf-slide-title { font-family: 'Cormorant Infant', serif; font-size: calc(30 * var(--f)); line-height: 1.05; color: var(--sp-c, #e57851); }
+  .cf-slide-sub { font-size: calc(14 * var(--f)); color: var(--mut, rgba(125, 67, 48, 0.55)); }
 
   /* Image plus large que sa diapositive, pour la parallaxe */
   .cf-slide img {
@@ -94,6 +117,11 @@ const { slides, label } = Astro.props;
   .cf-slider-nav button:focus-visible { outline: 2px solid var(--bg, #F7F2EC); outline-offset: 2px; }
 
   @media (max-width: 899px) {
+    .cf-slider.has-captions { height: 128vw; }
+    .cf-slide-caption { height: 64px; padding-top: 10px; }
+    .cf-slider.has-captions .cf-slider-nav { bottom: calc(64px + 1rem); }
+    .cf-slide-title { font-size: 22px; }
+    .cf-slide-sub { font-size: 13px; }
     .cf-slider { height: 95vw; }
   }
 </style>

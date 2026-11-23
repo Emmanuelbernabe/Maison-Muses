@@ -1,0 +1,41 @@
+---
+// Page marque (modèle) : une page par marque, créée depuis Sanity (Pages du site → Marques)
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import BrandHero from '../../components/BrandHero.astro';
+import BrandOverview from '../../components/BrandOverview.astro';
+import BrandProducts from '../../components/BrandProducts.astro';
+import Section9 from '../../components/Section9.astro';
+import { getSettings, getBrands, getBrand, clean } from '../../lib/sanity';
+import { buildBrandPage } from '../../lib/brand';
+
+export async function getStaticPaths() {
+  const brands: any[] = (await getBrands()) || [];
+  return brands.map((doc) => ({ params: { slug: clean(doc.slug) }, props: { doc } }));
+}
+
+const { slug } = Astro.params;
+// En mode aperçu (rendu serveur), getStaticPaths n'est pas appelé : on charge la marque ici
+const doc = (Astro.props as any).doc ?? (await getBrand(slug!));
+const settings = await getSettings();
+if (!settings) {
+  throw new Error("Contenu introuvable : publiez « Réglages du site » dans Sanity (voir README).");
+}
+if (!doc) return Astro.redirect('/404');
+const brand = buildBrandPage(doc);
+---
+<Layout
+  title={brand.seoTitle || `${clean(brand.name)} – Nos marques – Maison Muses, Toulouse`}
+  description={brand.seoDescription || clean(brand.intro) || `${clean(brand.name)}, une marque choisie par Maison Muses.`}
+>
+  <Header logo={settings.logo} cta={settings.headerCta} />
+  <main id="top" style="--br-ink: #7d4330; --br-mut: rgba(125, 67, 48, 0.55);">
+    <BrandHero brand={brand} />
+    <BrandOverview brand={brand} />
+    <BrandProducts brand={brand} />
+  </main>
+  <Section9 />
+  <script>
+    import '../../scripts/main';
+  </script>
+</Layout>

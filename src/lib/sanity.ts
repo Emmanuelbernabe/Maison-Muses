@@ -96,3 +96,14 @@ export const getServicePage = (id: 'page-coiffure' | 'page-bien-etre') =>
     brands,
     social
   }`, { id });
+
+/* ───────── Pages marques ───────── */
+const brandFields = `_id, _type, name, "slug": slug.current, intro, heroImage, statement, origin, qualities, overviewImage,
+  productsTitle, productsText, salonLabel, salonList, bookingUrl, seoTitle, seoDescription,
+  products[]{ _key, name, subtitle, image, description, specs[]{ label, value } }`;
+
+export const getBrands = () =>
+  client.fetch(`*[_type == "brand" && defined(slug.current)] | order(name asc){ ${brandFields} }`);
+
+export const getBrand = (slug: string) =>
+  client.fetch(`*[_type == "brand" && slug.current == $slug][0]{ ${brandFields} }`, { slug });

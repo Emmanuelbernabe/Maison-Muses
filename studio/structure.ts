@@ -30,6 +30,10 @@ export const structure: StructureResolver = (S) =>
               page(S, 'page-coiffure'),
               page(S, 'page-bien-etre'),
               S.listItem()
+                .title('Marques')
+                .id('marques')
+                .child(S.documentTypeList('brand').title('Marques (une page par marque)')),
+              S.listItem()
                 .title('Journal')
                 .id('journal')
                 .child(S.documentTypeList('journalPost').title('Articles du journal').defaultOrdering([{ field: 'publishedAt', direction: 'desc' }])),

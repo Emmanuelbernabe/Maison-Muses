@@ -87,8 +87,11 @@ function initCoiffureApproach() {
 
 // ============ SLIDER : centré, en boucle, glissable, parallaxe (sans Swiper) ============
 function initCoiffureSlider() {
-  const slider = document.querySelector<HTMLElement>('[data-anim="cf-slider"]');
-  if (!slider) return;
+  // Plusieurs sliders possibles (pages espace, pages marques)
+  document.querySelectorAll<HTMLElement>('[data-anim="cf-slider"]').forEach(initCoiffureSliderOne);
+}
+
+function initCoiffureSliderOne(slider: HTMLElement) {
   const slides = [...slider.querySelectorAll<HTMLElement>('[data-cf-slide]')];
   const count = slides.length;
   if (!count) return;
@@ -144,6 +147,10 @@ function initCoiffureSlider() {
   slider.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') { e.preventDefault(); sliderGoTo(Math.round(sliderState.pos) + 1); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); sliderGoTo(Math.round(sliderState.pos) - 1); }
+    if (e.key === 'Enter') {
+      const index = gsap.utils.wrap(0, count, Math.round(sliderState.pos));
+      slider.dispatchEvent(new CustomEvent('cf-slide-click', { detail: { index, slide: slides[index] } }));
+    }
   });
 
   // ── Glisser à la souris ou au doigt, avec élan au lâcher ──
@@ -176,9 +183,17 @@ function initCoiffureSlider() {
     sliderRender();
   });
 
-  const sliderRelease = () => {
+  const sliderRelease = (e: PointerEvent) => {
     if (!sliderDragging) return;
     sliderDragging = false;
+    // Simple clic (pas de glissé) sur une diapositive : on prévient la page (ex. pop-up produit)
+    if (Math.abs(e.clientX - dragStartX) < 6 && e.type === 'pointerup') {
+      const hit = slides.find((slide) => {
+        const r = slide.getBoundingClientRect();
+        return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      });
+      if (hit) slider.dispatchEvent(new CustomEvent('cf-slide-click', { detail: { index: Number(hit.dataset.index), slide: hit } }));
+    }
     slider.classList.remove('is-dragging');
     // Un geste rapide avance d'une diapositive de plus
     sliderGoTo(Math.round(sliderState.pos - (dragVelocity * 180) / slideStep));
