@@ -21,9 +21,13 @@ export function revealTitle(title: HTMLElement | null) {
     autoSplit: true,
     onSplit(self) {
       gsap.set(self.masks, { paddingBlock: '0.12em', marginBlock: '-0.12em' });
+      // Position de départ posée explicitement (lignes cachées sous leur masque) : avec un gsap.from(),
+      // elle n'était pas appliquée quand la page se recharge déjà défilée, et les lignes restaient visibles
+      // jusqu'au déclenchement, puis sautaient en bas avant de remonter (le « flick »)
+      gsap.set(self.lines, { yPercent: 130 });
       gsap.set(title, { autoAlpha: 1 });
-      return gsap.from(self.lines, {
-        yPercent: 130,
+      return gsap.to(self.lines, {
+        yPercent: 0,
         duration: 1.2,
         ease: 'musesEase',
         stagger: 0.12,

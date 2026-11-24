@@ -109,7 +109,7 @@ export const journalPost = defineType({
       title: 'Auteur',
       type: 'string',
       group: 'content',
-      options: { list: ['Moussine', 'Violaine', 'L’équipe Maison Muses'] },
+      options: { list: ['Moussine', 'Violaine', 'July', 'L’équipe Maison Muses'] },
     }),
     defineField({ name: 'cover', title: 'Image de couverture', type: 'cmsImage', group: 'content' }),
     // Podcast uniquement : le fichier audio lu par le player de la page

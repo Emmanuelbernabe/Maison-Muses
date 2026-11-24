@@ -205,13 +205,12 @@ function initCoiffureSliderOne(slider: HTMLElement) {
   // Suit la taille du slider (s'arrête de lui-même quand la page change)
   new ResizeObserver(sliderMeasure).observe(slider);
 
-  // Apparition des diapositives de haut en bas, l'une après l'autre
+  // Apparition des diapositives de haut en bas, toutes en même temps
   if (!reduce) {
     gsap.fromTo(slides, { clipPath: CLIP_HIDDEN }, {
       clipPath: CLIP_FULL,
       duration: 1.1,
       ease: 'musesEase',
-      stagger: 0.08,
       scrollTrigger: { trigger: slider, start: 'top 85%', once: true },
     });
   }

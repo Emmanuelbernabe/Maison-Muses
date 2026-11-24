@@ -28,8 +28,8 @@ const places = [
 const home = Astro.url.pathname === '/' ? '' : '/';
 
 const maisonLinks = [
-  { label: 'BIEN-ÊTRE', url: `${home}#s2` },
-  { label: 'COIFFURE', url: `${home}#s2` },
+  { label: 'BIEN-ÊTRE', url: '/bien-etre' },
+  { label: 'COIFFURE', url: '/coiffure' },
   { label: 'COFFRETS', url: `${home}#s5` },
   { label: 'L’ÉQUIPE', url: '/equipe' },
   { label: 'JOURNAL', url: '/journal' },
@@ -132,7 +132,6 @@ const socialLinks = [
   .s9 {
     position: relative;
     width: 100%;
-    padding: calc(200 * var(--fpx)) 0 calc(28 * var(--fpx));
     background: var(--bg);
     /* Couleur du footer : tout l'orange passe par cette variable */
     --s9-c: var(--orange, #e57851);
@@ -161,7 +160,7 @@ const socialLinks = [
   /* Illustration : juste à droite du titre, son bas au niveau de la première ligne */
   .s9-cta-deco {
     position: absolute;
-    left: calc(100% + 26 * var(--fpx));
+    left: calc(100% + 106 * var(--fpx));
     bottom: calc(143 * var(--fpx));
     width: calc(216 * var(--fpx));
     height: auto;
@@ -344,7 +343,6 @@ const socialLinks = [
     /* Les variables viennent du hero de la home ; sur les autres pages, on reprend leurs valeurs mobiles */
     .s9-brand-main { font-size: var(--hero-maison-fs, 26.667vw); }
     .s9-brand-sub { font-size: var(--hero-muses-fs, 24vw); }
-    .s9 { padding: 5rem 0 1.5rem; }
     .s9-inner { padding: 0 1.5rem; }
     .s9-cta { flex-direction: column; align-items: flex-start; gap: 2rem; margin-bottom: 3rem; }
     .s9-cta { padding-top: 0; }

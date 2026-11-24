@@ -3,8 +3,8 @@ import { resolveImage } from '../lib/images';
 import { siteImage, SIZES } from '../lib/siteImage';
 const { photos } = Astro.props;
 
-const ctaCoiffure = { label: 'ESPACE COIFFURE', url: '#coiffure' };
-const ctaBienetre = { label: 'ESPACE BIEN ÊTRE', url: '#bienetre' };
+const ctaCoiffure = { label: 'ESPACE COIFFURE', url: '/coiffure' };
+const ctaBienetre = { label: 'ESPACE BIEN ÊTRE', url: '/bien-etre' };
 const paraText = 'Notre équipe vous reçoit dans un environnement chaleureux et intimiste. Attentif à vos besoins, nous proposons systématiquement un diagnostic à toutes nos prestations. En cas de première visite, nous vous conseillons de réserver une consultation pour un diagnostique plus approfondi.';
 
 const ambianceImg = siteImage(photos?.s2?.ambiance, resolveImage('ambiance-img'), SIZES.ambiance);

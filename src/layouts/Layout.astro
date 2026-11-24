@@ -22,6 +22,19 @@ const { title, description } = Astro.props;
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,400;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet" />
     <!-- Les états « avant animation » du CSS ne s'appliquent que si le JS tourne -->
     <script is:inline>document.documentElement.classList.add('js')</script>
+    <!-- Rechargement de la page : la page reste masquée, puis apparaît avec la même transition
+         qu'entre deux pages (voir startPage dans scripts/main.ts) -->
+    <script is:inline>
+      try {
+        var nav = performance.getEntriesByType('navigation')[0];
+        if (nav && nav.type === 'reload' && document.startViewTransition
+            && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('mm-reload');
+          // Filet de sécurité : la page s'affiche quoi qu'il arrive
+          setTimeout(function () { document.documentElement.classList.add('mm-ready'); }, 4000);
+        }
+      } catch (e) {}
+    </script>
     <!-- Navigation sans rechargement, avec les View Transitions (animations dans global.css) -->
     <ClientRouter />
   </head>

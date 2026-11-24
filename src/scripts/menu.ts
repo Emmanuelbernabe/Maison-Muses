@@ -26,11 +26,32 @@ const title = closers[0];            // le titre « Menu » sert toujours de rep
     .fromTo(panel, { clipPath: 'inset(0% 100% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, ease: EXPO }, 0)
     .fromTo(links, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: EXPO, stagger: 0.07 }, 0.1);
 
+  // Sous-menu « Nos marques » : se déplie sous son titre
+  const subBtn = panel.querySelector<HTMLButtonElement>('[data-menu-sub]');
+  const sub = subBtn ? document.getElementById(subBtn.getAttribute('aria-controls') || '') : null;
+  let subOpen = false;
+  const setSub = (next: boolean, instant = false) => {
+    if (!subBtn || !sub) return;
+    subOpen = next;
+    subBtn.setAttribute('aria-expanded', String(next));
+    sub.toggleAttribute('inert', !next);
+    gsap.to(sub, {
+      height: next ? 'auto' : 0,
+      duration: instant || reduce ? 0 : next ? 0.6 : 0.4,
+      ease: next ? EXPO : 'expo.inOut',
+      overwrite: true,
+    });
+  };
+  subBtn?.addEventListener('click', () => setSub(!subOpen));
+
   let open = false;
   const setOpen = (next: boolean) => {
     if (next === open) return;
     open = next;
-    if (next) place();
+    if (next) {
+      setSub(false, true);   // le menu se rouvre toujours replié
+      place();
+    }
     btn.setAttribute('aria-expanded', String(next));
     panel.toggleAttribute('inert', !next);
     document.documentElement.classList.toggle('menu-open', next);

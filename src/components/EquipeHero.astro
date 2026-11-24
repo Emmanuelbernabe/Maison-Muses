@@ -2,8 +2,8 @@
 // Page L'équipe — hero : titre, 3 médias en escalier (vidéo, Moussine, Violaine), la vidéo s'ouvre au scroll
 import { resolveImage, resolveVideo } from '../lib/images';
 
-// TODO : remplacer par la vraie vidéo de présentation (déposer public/video/equipe.mp4)
-const videoSrc = resolveVideo('equipe', 'prestige-big');
+// Vidéo de présentation (avec le son) : aperçu muet en boucle, le bouton « Lire la vidéo » la lance avec le son
+const videoSrc = resolveVideo('presentation-video', 'prestige-big');
 const posterSrc = resolveImage('equipe-poster', 's4-team-left');
 
 const moussine = { base: resolveImage('marquee-follow-img'), hover: resolveImage('moussine') };
@@ -35,7 +35,9 @@ const violaine = { base: resolveImage('violaine'), hover: resolveImage('load-3')
       <video src={videoSrc} poster={posterSrc} autoplay muted loop playsinline preload="metadata" data-anim="eq-video"></video>
     </div>
     <button class="eq-play" type="button" data-anim="eq-play" aria-label="Lire la vidéo de présentation avec le son">
-      <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 1.5v15L16 9z" fill="currentColor" /></svg>
+      <!-- Icône play, remplacée par l'icône pause (deux barres) pendant la lecture avec le son -->
+      <svg class="eq-ico-play" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 1.5v15L16 9z" fill="currentColor" /></svg>
+      <svg class="eq-ico-pause" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2" width="4" height="14" rx="1" fill="currentColor" /><rect x="11" y="2" width="4" height="14" rx="1" fill="currentColor" /></svg>
       <span data-anim="eq-play-label">Lire la vidéo</span>
     </button>
   </div>
@@ -175,6 +177,9 @@ const violaine = { base: resolveImage('violaine'), hover: resolveImage('load-3')
   }
 
   .eq-play svg { width: calc(18 * var(--eq-u)); height: calc(18 * var(--eq-u)); }
+  .eq-play .eq-ico-pause { display: none; }
+  .eq-play[data-state="playing"] .eq-ico-play { display: none; }
+  .eq-play[data-state="playing"] .eq-ico-pause { display: block; }
 
   .eq-photo { z-index: 3; overflow: hidden; cursor: pointer; }
   .eq-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }

@@ -15,7 +15,9 @@ export const client = createClient({
   projectId: import.meta.env.SANITY_PROJECT_ID,
   dataset: import.meta.env.SANITY_DATASET || 'production',
   apiVersion: '2025-01-01',
-  useCdn: !visualEditing,
+  // Pas de CDN : le site est généré au build juste après une publication,
+  // le CDN pourrait encore servir l'ancienne version du contenu
+  useCdn: false,
   ...(visualEditing
     ? {
         perspective: 'drafts' as const,
@@ -104,6 +106,12 @@ const brandFields = `_id, _type, name, "slug": slug.current, intro, heroImage, s
 
 export const getBrands = () =>
   client.fetch(`*[_type == "brand" && defined(slug.current)] | order(name asc){ ${brandFields} }`);
+
+// Menu « Nos marques » : chaque marque publiée apparaît automatiquement
+export const getBrandLinks = async (): Promise<{ name: string; url: string }[]> => {
+  const brands: any[] = (await client.fetch(`*[_type == "brand" && defined(slug.current)] | order(name asc){ name, "slug": slug.current }`)) || [];
+  return brands.map((b) => ({ name: clean(b.name), url: `/marques/${clean(b.slug)}` }));
+};
 
 export const getBrand = (slug: string) =>
   client.fetch(`*[_type == "brand" && slug.current == $slug][0]{ ${brandFields} }`, { slug });

@@ -122,31 +122,51 @@ function initEquipeHero() {
     });
   });
 
-  // ============ BOUTON PLAY : relance depuis le début, avec le son ============
+  // ============ LECTEUR : aperçu muet en boucle → lecture avec le son, pause, reprise ============
+  const eqLabel = (text: string, aria: string) => {
+    playLabel.textContent = text;
+    playBtn.setAttribute('aria-label', aria);
+    // Icône pause (deux barres) quand le bouton propose « Pause », icône play sinon
+    playBtn.dataset.state = text === 'Pause' ? 'playing' : 'paused';
+  };
+  // Retour à l'aperçu muet en boucle (fin de la vidéo, ou retour tout en haut de la page)
+  const eqPreview = (label = 'Lire la vidéo') => {
+    video.muted = true;
+    video.loop = true;
+    video.play().catch(() => {});
+    eqLabel(label, 'Lire la vidéo de présentation avec le son');
+  };
+
   playBtn.addEventListener('click', () => {
-    if (video.muted || video.paused) {
+    if (video.muted) {
+      // Depuis l'aperçu : lecture depuis le début, avec le son, une seule fois
       video.muted = false;
+      video.loop = false;
       video.currentTime = 0;
-      video.play().catch(() => {});
-      playLabel.textContent = 'Pause';
-      playBtn.setAttribute('aria-label', 'Mettre la vidéo en pause');
+      video.play().catch(() => eqPreview());   // lecture refusée par le navigateur : on revient à l'aperçu
+      eqLabel('Pause', 'Mettre la vidéo en pause');
+    } else if (video.paused) {
+      video.play().catch(() => {});            // reprise là où on s'était arrêté
+      eqLabel('Pause', 'Mettre la vidéo en pause');
     } else {
       video.pause();
-      playLabel.textContent = 'Reprendre';
-      playBtn.setAttribute('aria-label', 'Reprendre la vidéo');
+      eqLabel('Reprendre', 'Reprendre la vidéo');
     }
   });
+
+  // Filet de sécurité : le libellé suit aussi l'état réel de la vidéo (pause ou lecture déclenchée ailleurs)
+  video.addEventListener('play', () => { if (!video.muted) eqLabel('Pause', 'Mettre la vidéo en pause'); });
+  video.addEventListener('pause', () => { if (!video.muted && !video.ended) eqLabel('Reprendre', 'Reprendre la vidéo'); });
+
+  // Vidéo terminée : elle redevient un aperçu muet, le bouton propose de la revoir
+  video.addEventListener('ended', () => eqPreview('Revoir la vidéo'));
 
   // En remontant tout en haut, la vidéo redevient un aperçu muet
   ScrollTrigger.create({
     trigger: eq,
     start: 'top top',
     onLeaveBack: () => {
-      if (video.muted) return;
-      video.muted = true;
-      video.play().catch(() => {});
-      playLabel.textContent = 'Lire la vidéo';
-      playBtn.setAttribute('aria-label', 'Lire la vidéo de présentation avec le son');
+      if (!video.muted) eqPreview();
     },
   });
 

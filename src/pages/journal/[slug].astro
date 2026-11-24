@@ -49,7 +49,7 @@ const related = [...others.filter((p) => p.category === post.category), ...other
         )}
       </header>
 
-      <figure class="jr-cover" data-jr-clip>
+      <figure class="jr-cover" data-jr-parallax>
         <img src={cover.src} srcset={cover.srcset} sizes="100vw" alt={cover.alt} decoding="async" />
       </figure>
 
@@ -115,7 +115,8 @@ const related = [...others.filter((p) => p.category === post.category), ...other
   .jr-date { font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(20 * var(--f)); }
 
   .jr-cover { margin: 0 calc(40 * var(--f)); aspect-ratio: 16 / 7; overflow: hidden; }
-  .jr-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Parallaxe (journal.ts) : image 12 % plus haute que son cadre, décalée de 6 % vers le haut */
+  .jr-cover img { position: relative; top: -6%; width: 100%; height: 112%; object-fit: cover; display: block; }
 
   .jr-art-body {
     max-width: calc(700 * var(--f));

@@ -122,7 +122,7 @@ function initMarqueModal(reduce: boolean) {
       gsap.fromTo(dlg, { clipPath: 'inset(46% 46% 46% 46% round 4px)', scale: 0.92, y: 24, autoAlpha: 0 }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', scale: 1, y: 0, autoAlpha: 1, duration: 0.9, ease: 'musesEase' });
       gsap.fromTo(body, { y: 14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, ease: 'musesEase', stagger: 0.07, delay: 0.35 });
     }
-    setTimeout(() => modal.querySelector<HTMLElement>('.br-close')?.focus(), 50);
+    setTimeout(() => modal.querySelector<HTMLElement>('.br-close')?.focus({ preventScroll: true }), 50);
   };
 
   const marqueModalClose = () => {
@@ -131,7 +131,8 @@ function initMarqueModal(reduce: boolean) {
       modal.hidden = true;
       document.documentElement.classList.remove('is-modal-open');
       (window as any).__lenis?.start();
-      marqueLastFocus?.focus();
+      // preventScroll : on rend le focus sans faire défiler la page jusqu'au slider
+      marqueLastFocus?.focus({ preventScroll: true });
     };
     if (reduce) return done();
     gsap.to(veil, { autoAlpha: 0, duration: 0.45, ease: 'power2.out' });

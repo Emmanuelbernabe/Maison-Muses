@@ -28,7 +28,7 @@ export function buildServicePage(slug: 'coiffure' | 'bien-etre', doc: any) {
     title: pick(h.title, d.hero.title),
     signature: pick(h.signature, d.hero.signature),
     video: h.video || resolveVideo(d.hero.video[0], d.hero.video[1]),
-    poster: serviceImage(h.poster, { key: d.hero.poster[0] }).src,
+    poster: h.poster?.asset ? serviceImage(h.poster, undefined).src : resolveImage(...d.hero.poster),
     videoAttr: attr('hero.video'),
   };
 

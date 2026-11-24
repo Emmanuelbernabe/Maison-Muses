@@ -1,10 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Les images se dévoilent de haut en bas, comme sur les pages coiffure et bien-être
-const JR_HIDDEN = 'inset(0% 0% 100% 0%)';
-const JR_FULL = 'inset(0% 0% 0% 0%)';
-
 // Journal : hub (filtres) et article (apparitions) ; ne fait rien ailleurs
 export function initJournal() {
   const hub = document.querySelector<HTMLElement>('[data-anim="jr-hub"]');
@@ -14,12 +10,15 @@ export function initJournal() {
 
   // ============ APPARITIONS ============
   if (!reduce) {
-    document.querySelectorAll<HTMLElement>('[data-jr-clip]').forEach((el) => {
-      gsap.fromTo(el, { clipPath: JR_HIDDEN }, {
-        clipPath: JR_FULL,
-        duration: 1.1,
-        ease: 'musesEase',
-        scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' },
+    // Parallaxe dans les images (couverture, cartes, « À lire aussi », photos du texte),
+    // comme sur le reste du site : l'image glisse dans son cadre pendant le défilement
+    document.querySelectorAll<HTMLElement>('[data-jr-parallax]').forEach((frame) => {
+      const img = frame.querySelector('img');
+      if (!img) return;
+      gsap.fromTo(img, { yPercent: -5 }, {
+        yPercent: 5,
+        ease: 'none',
+        scrollTrigger: { trigger: frame, start: 'top bottom', end: 'bottom top', scrub: true },
       });
     });
 
@@ -52,13 +51,8 @@ export function initJournal() {
       const visible = jrCards.filter((card) => !card.hidden);
       if (!reduce) {
         gsap.fromTo(visible, { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7, ease: 'musesEase', stagger: 0.06 });
-        // Les cartes réaffichées ne doivent pas rester masquées par leur clip-path de départ
-        visible.forEach((card) => {
-          const photo = card.querySelector<HTMLElement>('[data-jr-clip]');
-          if (photo) gsap.set(photo, { clipPath: JR_FULL });
-        });
       }
-      ScrollTrigger.refresh();   // la page a changé de hauteur (footer)
+      ScrollTrigger.refresh();   // la page a changé de hauteur (footer) : parallaxes recalculées
     });
   });
 }

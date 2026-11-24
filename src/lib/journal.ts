@@ -59,7 +59,7 @@ export function journalBodyHtml(body: any[] = []) {
           if (!value?.asset) return '';
           const src = urlFor(value).width(1400).fit('max').auto('format').quality(80).url();
           const caption = value.caption ? `<figcaption>${escapeHTML(value.caption)}</figcaption>` : '';
-          return `<figure><div class="photo" data-jr-clip><img src="${src}" alt="${escapeHTML(value.alt || '')}" loading="lazy" decoding="async" /></div>${caption}</figure>`;
+          return `<figure><div class="photo" data-jr-parallax><img src="${src}" alt="${escapeHTML(value.alt || '')}" loading="lazy" decoding="async" /></div>${caption}</figure>`;
         },
         quote: ({ value }) => {
           const cite = value?.author ? `<cite>${escapeHTML(value.author)}</cite>` : '';

@@ -16,6 +16,7 @@ import { initEquipe } from './equipe';
 import { initCoiffure } from './coiffure';
 import { initJournal } from './journal';
 import { initMenu } from './menu';
+import { initMarque } from './marque';
 
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, SplitText);
@@ -154,8 +155,10 @@ function initSplit() {
         gsap.set(el, { visibility: 'visible' });
         // le masque (overflow: clip) ne doit pas rogner les jambages
         self.masks.forEach((m: HTMLElement) => gsap.set(m, { paddingBottom: '0.12em', marginBottom: '-0.12em' }));
-        return gsap.from(self.lines, {
-          yPercent: 120,
+        // Départ posé explicitement : un gsap.from() ne l'applique pas toujours quand la page se recharge déjà défilée
+        gsap.set(self.lines, { yPercent: 120 });
+        return gsap.to(self.lines, {
+          yPercent: 0,
           duration: 1.2,
           ease: EXPO,
           stagger: 0.1,
@@ -271,6 +274,18 @@ function initAnchors() {
       history.pushState(null, '', id);
     }),
   );
+
+  // Liens vers l'accueil (logo, « Accueil ») quand on y est déjà : retour en haut en douceur,
+  // sans recharger la page ni ajouter d'ancre dans l'adresse
+  if (location.pathname !== '/') return;
+  $$<HTMLAnchorElement>('a[href="/"]').forEach((a) =>
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (lenis) lenis.scrollTo(0, { duration: 1.4, easing: (x: number) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x)) });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (location.hash) history.replaceState(history.state, '', '/');
+    }),
+  );
 }
 
 /* ───────── Marquee empilé (cartes qui défilent en boucle, ralenties au survol) ───────── */
@@ -371,6 +386,7 @@ function initSections() {
   initEquipe();
   initCoiffure();
   initJournal();
+  initMarque();
   initSection2();
   initSection3();
   initSection4();
@@ -410,6 +426,8 @@ function startPage(isFirstLoad: boolean) {
     initHero();
 
     if (playLoader) {
+      // Le loader fait office d'entrée : pas de transition de rechargement en plus
+      document.documentElement.classList.remove('mm-reload');
       // Pas de scroll possible tant que le loader tourne, et départ en haut de page
       window.scrollTo(0, 0);
       lockScroll(true);
@@ -441,7 +459,16 @@ function startPage(isFirstLoad: boolean) {
         if (isFirstLoad) restoreScroll();
         else scrollToHash(false);
         // La page n'apparaît qu'une fois tout en place (voir LoadingScreen.astro)
-        requestAnimationFrame(() => document.documentElement.classList.add('mm-ready'));
+        const html = document.documentElement;
+        const reveal = () => html.classList.add('mm-ready');
+        requestAnimationFrame(() => {
+          // Rechargement : entrée avec la même transition qu'entre deux pages (classes page-exit / page-enter de global.css)
+          if (isFirstLoad && html.classList.contains('mm-reload') && !html.classList.contains('mm-ready') && document.startViewTransition) {
+            document.startViewTransition(reveal);
+          } else {
+            reveal();
+          }
+        });
       });
     });
   });
@@ -476,10 +503,17 @@ document.addEventListener('astro:before-swap', (e) => {
 document.addEventListener('astro:after-swap', () => {
   // Astro a remis la page en haut (ou à la position d'un retour arrière) : Lenis se resynchronise
   if (lenis) {
+    // Un défilement encore en cours sur l'ancienne page (molette, trackpad, ancre) doit s'arrêter net :
+    // sinon Lenis le termine sur la nouvelle page et l'emmène vers le bas (footer, même section).
+    // stop() + start() coupent l'animation et recalent Lenis sur la position réelle (le haut de page).
+    lenis.stop();
+    lenis.start();
     lenis.resize();
-    lenis.scrollTo(window.scrollY, { immediate: true, force: true });
   }
 });
+
+// Ancienne adresse en /#top (favori, historique) : on retire l'ancre, inutile (la page s'ouvre déjà en haut)
+if (location.hash === '#top') history.replaceState(history.state, '', location.pathname + location.search);
 
 // Premier chargement, puis chaque navigation
 startPage(true);

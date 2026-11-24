@@ -8,7 +8,7 @@ export const SERVICE_DEFAULTS: Record<string, any> = {
       "title": "Coiffure",
       "signature": "par Moussine",
       "video": [
-        "coiffure",
+        "muses-coiffure-bg",
         "prestige-big"
       ],
       "poster": [

@@ -1,15 +1,23 @@
 ---
-// Section 8 — Journal des Muses (articles + podcast, aperçu image au survol)
-import { resolveImage } from '../lib/images';
+// Section 8 — Journal des Muses : les 5 derniers articles du journal (Sanity), couverture en aperçu au survol
+import { getJournalPosts, clean } from '../lib/sanity';
+import { journalCover, journalReadingTime } from '../lib/journal';
 
-// TODO : brancher sur les vrais articles / épisodes
-const entries = [
-  { type: 'article', label: 'Article', title: 'PRÉPARER SES CHEVEUX À L’HIVER', meta: '4 MIN DE LECTURE', url: '#', img: resolveImage('slide-5') },
-  { type: 'podcast', label: 'Podcast', title: 'ÉPISODE 7 : POURQUOI ON TIENT AU DIAGNOSTIC', meta: 'ÉCOUTER, 32 MIN', url: '#', img: resolveImage('marquee-4') },
-  { type: 'article', label: 'Article', title: 'BALAYAGE OU OMBRÉ : CE QUI CHANGE VRAIMENT', meta: '6 MIN DE LECTURE', url: '#', img: resolveImage('slide-4') },
-  { type: 'podcast', label: 'Podcast', title: 'ÉPISODE 6 : PRENDRE SOIN DE SOI SANS CULPABILISER', meta: 'ÉCOUTER, 41 MIN', url: '#', img: resolveImage('moussine') },
-  { type: 'article', label: 'Article', title: 'MASSAGE DU CUIR CHEVELU, LE SOIN QU’ON OUBLIE', meta: '3 MIN DE LECTURE', url: '#', img: resolveImage('marquee-6') },
-];
+// Les articles arrivent déjà triés du plus récent au plus ancien
+const posts: any[] = ((await getJournalPosts()) || []).slice(0, 5);
+const entries = posts.map((p) => {
+  const podcast = clean(p.category) === 'podcast';
+  return {
+    type: podcast ? 'podcast' : 'article',
+    label: podcast ? 'Podcast' : 'Article',
+    title: p.title,
+    meta: podcast ? (p.episode ? `ÉPISODE ${p.episode}` : 'ÉCOUTER') : `${journalReadingTime(p.chars)} MIN DE LECTURE`,
+    url: `/journal/${clean(p.slug)}`,
+    img: journalCover(p, 800).src,
+  };
+});
+// Les filtres n'ont de sens que si les deux types sont présents
+const showFilters = entries.some((e) => e.type === 'podcast') && entries.some((e) => e.type === 'article');
 ---
 
 <section class="s8" id="s8" data-anim="s8-section">
@@ -17,11 +25,13 @@ const entries = [
     <h2 class="s8-title" data-anim="s8-title">
       <span class="s8-thin">LE JOURNAL</span> DES MUSES
     </h2>
-    <div class="s8-filters" role="group" aria-label="Filtrer le journal">
-      <button class="s8-filter" type="button" data-filter="all" aria-pressed="true">TOUT</button>
-      <button class="s8-filter" type="button" data-filter="article" aria-pressed="false">ARTICLES</button>
-      <button class="s8-filter" type="button" data-filter="podcast" aria-pressed="false">PODCAST</button>
-    </div>
+    {showFilters && (
+      <div class="s8-filters" role="group" aria-label="Filtrer le journal">
+        <button class="s8-filter" type="button" data-filter="all" aria-pressed="true">TOUT</button>
+        <button class="s8-filter" type="button" data-filter="article" aria-pressed="false">ARTICLES</button>
+        <button class="s8-filter" type="button" data-filter="podcast" aria-pressed="false">PODCAST</button>
+      </div>
+    )}
   </div>
 
   <ul class="s8-list" data-anim="s8-list">
@@ -131,6 +141,7 @@ const entries = [
     font-weight: 200;
     font-size: calc(56 * var(--fpx));
     line-height: 0.95;
+    text-transform: uppercase;          /* titres saisis en casse normale dans Sanity */
     transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 

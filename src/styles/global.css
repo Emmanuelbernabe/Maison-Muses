@@ -8,7 +8,7 @@
 }
 
 :root{
-  --bg:#F7F2EC; --surface:#f7f7f5; --ink:#2C2C2C; --muted:#8a8a8a; --orange:#e57851; --line:#111;
+  --bg:#F7F2EC; --surface:#f7f7f5; --ink:#2C2C2C; --muted:#8a8a8a; --orange:#e57851; --green:#0F2F18; --line:#111;
   --tag-bg:rgba(229,120,81,.16);
   --font:"DM Sans","Helvetica Neue",Arial,sans-serif; --mono:"DM Mono",ui-monospace,Menlo,monospace;
   --pad:clamp(20px,3.4vw,48px);
@@ -94,6 +94,10 @@ section.s5, section#s5 { padding: 0 !important; }
   from { transform: translateY(40%); clip-path: polygon(35% 50%, 65% 50%, 65% 50%, 35% 50%); }
   to   { transform: translateY(0%); clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
 }
+
+/* Rechargement : page masquée jusqu'à son entrée animée (main.ts), sans le fondu du loader */
+html.mm-reload:not(.mm-ready) body { opacity: 0; }
+html.mm-reload body { transition: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(.page-exit),
