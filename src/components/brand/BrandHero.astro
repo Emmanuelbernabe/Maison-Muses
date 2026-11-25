@@ -1,0 +1,63 @@
+---
+// Page marque — hero : nom en très grand, introduction, une même photo vue à travers deux fenêtres
+// (la fenêtre de droite s'agrandit au scroll : voir scripts/pages/brand.ts)
+interface Props { brand: any; }
+const { brand } = Astro.props;
+---
+
+<section class="br-hero" data-anim="br-hero" aria-label={brand.name}>
+  <h1 class="br-title">
+    {brand.titleLines.map((line: string) => <span class="br-title-line"><span data-br-line>{line}</span></span>)}
+  </h1>
+  {brand.intro && <p class="br-intro" data-br-fade>{brand.intro}</p>}
+  <div class="br-mask" data-br-mask data-sanity={brand.hero.attr}>
+    <div class="br-win is-left" data-br-win><img src={brand.hero.src} alt={brand.hero.alt} decoding="async" /></div>
+    <div class="br-win is-right" data-br-win data-br-grow><img src={brand.hero.src} alt="" aria-hidden="true" decoding="async" /></div>
+  </div>
+</section>
+
+<style>
+  .br-hero {
+    padding: calc(145 * var(--fpx)) calc(40 * var(--fpx)) 0;
+    color: var(--orange, #e57851);
+  }
+
+  .br-title {
+    margin: 0;
+    font-family: 'Cormorant Infant', serif;
+    font-weight: 400;
+    font-size: calc(183 * var(--fpx));
+    line-height: 0.815;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+  }
+
+  .br-title-line { display: block; overflow: hidden; padding-bottom: 0.04em; margin-left: calc(196 * var(--fpx)); }
+  .br-title-line + .br-title-line { margin-left: calc(639 * var(--fpx)); }
+  .br-title-line > span { display: inline-block; }
+
+  .br-intro {
+    margin: calc(48 * var(--fpx)) 0 0 calc(484 * var(--fpx));
+    max-width: calc(370 * var(--fpx));
+    font-size: calc(19 * var(--fpx));
+    line-height: calc(26 * var(--fpx));
+  }
+
+  /* Deux fenêtres, une seule image : chaque <img> couvre toute la zone (positionnée par le script) */
+  .br-mask { position: relative; display: flex; align-items: flex-start; gap: 32px; margin-top: calc(67 * var(--fpx)); }
+  .br-win { position: relative; flex: none; overflow: hidden; background: #0f2f33; }
+  .br-win img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; will-change: transform; }
+  .br-win.is-left { width: calc(450 * var(--fpx)); height: calc(595 * var(--fpx)); }
+  .br-win.is-right { width: calc(299 * var(--fpx)); height: calc(395 * var(--fpx)); }
+
+  @media (max-width: 899px) {
+    .br-hero { padding: 110px 20px 0; }
+    .br-title { font-size: 25vw; }
+    .br-title-line, .br-title-line + .br-title-line { margin-left: 0; }
+    .br-title-line + .br-title-line { text-align: right; }
+    .br-intro { margin: 28px 0 0 22vw; max-width: none; font-size: 16px; line-height: 1.4; }
+    .br-mask { gap: 16px; margin-top: 36px; }
+    .br-win.is-left { width: 52vw; height: 72vw; }
+    .br-win.is-right { width: 28vw; height: 46vw; }
+  }
+</style>

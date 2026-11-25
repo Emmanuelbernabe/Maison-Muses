@@ -1,0 +1,126 @@
+---
+// Pages espace — slider centré, en boucle, glissable, parallaxe dans les images (sans Swiper)
+// slides : { src, alt, attr?, title?, subtitle? } — avec un titre, une légende s'affiche sous la photo
+// et la diapositive devient cliquable (événement « service-slide-click » envoyé par scripts/pages/service.ts)
+interface Props { slides: any[]; label: string; }
+const { slides, label } = Astro.props;
+const captions = slides.some((slide) => slide.title);
+---
+
+<section class="service-slider-section" aria-label={label}>
+  <div class={`service-slider${captions ? ' has-captions' : ''}`} data-anim="service-slider" tabindex="0" aria-roledescription="carrousel" aria-label="Réalisations, flèches gauche et droite pour naviguer">
+    {slides.map((slide, i) => (
+      <figure class="service-slide" data-service-slide data-index={i} data-sanity={slide.attr}>
+        <div class="service-slide-media">
+          <!-- data-parallax-x : déplacement de l'image dans sa diapositive (équivalent de data-swiper-parallax-x) -->
+          <img src={slide.src} alt={slide.alt} data-parallax-x="25" loading="lazy" decoding="async" draggable="false" />
+        </div>
+        {slide.title && (
+          <figcaption class="service-slide-caption">
+            <span class="service-slide-title">{slide.title}</span>
+            {slide.subtitle && <span class="service-slide-sub">{slide.subtitle}</span>}
+          </figcaption>
+        )}
+      </figure>
+    ))}
+    <div class="service-slider-nav">
+      <button type="button" data-service-prev aria-label="Photo précédente">
+        <svg width="9" height="7" viewBox="0 0 9 7" fill="none" aria-hidden="true"><path d="M3.70703 6.35352L0.707031 3.35352L3.70703 0.353516M0.707031 3.35352L8.70703 3.35351" stroke="currentColor" /></svg>
+      </button>
+      <button type="button" data-service-next aria-label="Photo suivante">
+        <svg width="9" height="7" viewBox="0 0 9 7" fill="none" aria-hidden="true"><path d="M4.93151 5.99004L7.89041 3.17617L4.93151 0.362305M7.89041 3.17617L0 3.17617" stroke="currentColor" /></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Pleine largeur : aucune marge héritée, le slider touche les bords de l'écran */
+  .service-slider-section { padding: 0; margin: 0; width: 100%; }
+
+  .service-slider {
+    position: relative;
+    height: calc(580 * var(--fpx));
+    overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+    outline: none;
+  }
+
+  .service-slider:focus-visible { outline: 2px solid var(--sp-c, #e57851); outline-offset: -2px; }
+  .service-slider.is-dragging { cursor: grabbing; }
+
+  .service-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--slide-w, 31vw);
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  /* Cadre de la photo : toute la diapositive, ou au-dessus de la légende */
+  .service-slide-media { position: absolute; inset: 0; overflow: hidden; }
+
+  .service-slider.has-captions { height: calc(660 * var(--fpx)); cursor: grab; }
+  .service-slider.has-captions .service-slide { display: flex; flex-direction: column; overflow: visible; }
+  .service-slider.has-captions .service-slide-media { position: relative; inset: auto; flex: 1; }
+  .service-slider.has-captions .service-slider-nav { bottom: calc(80 * var(--fpx) + 1.25rem); }
+
+  .service-slide-caption { display: flex; flex-direction: column; gap: 2px; padding-top: calc(14 * var(--fpx)); height: calc(80 * var(--fpx)); }
+  .service-slide-title { font-family: 'Cormorant Infant', serif; font-size: calc(30 * var(--fpx)); line-height: 1.05; color: var(--sp-c, #e57851); }
+  .service-slide-sub { font-size: calc(14 * var(--fpx)); color: var(--mut, rgba(125, 67, 48, 0.55)); }
+
+  /* Image plus large que sa diapositive, pour la parallaxe */
+  .service-slide img {
+    position: absolute;
+    top: 0;
+    left: -25%;
+    width: 150%;
+    max-width: none;   /* sinon le reset global (max-width: 100%) recoupe l'image */
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    will-change: transform;
+  }
+
+  /* Flèches : en bas à droite de la diapositive du centre, à 1,25rem de ses bords */
+  .service-slider-nav {
+    position: absolute;
+    z-index: 3;
+    right: calc(50% - var(--slide-w, 31vw) / 2 + 1.25rem);
+    bottom: 1.25rem;
+    display: flex;
+    gap: 8px;
+  }
+
+  .service-slider-nav button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--bg, #F7F2EC);
+    color: var(--sp-c, #e57851);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .service-slider-nav svg { width: 9px; height: 7px; display: block; }
+  .service-slider-nav button:focus-visible { outline: 2px solid var(--bg, #F7F2EC); outline-offset: 2px; }
+
+  @media (max-width: 899px) {
+    .service-slider.has-captions { height: 128vw; }
+    .service-slide-caption { height: 64px; padding-top: 10px; }
+    .service-slider.has-captions .service-slider-nav { bottom: calc(64px + 1rem); }
+    .service-slide-title { font-size: 22px; }
+    .service-slide-sub { font-size: 13px; }
+    .service-slider { height: 95vw; }
+  }
+</style>

@@ -1,9 +1,9 @@
 ---
 // Journal — hub : article à la une, filtres par catégorie, grille
 import Layout from '../../layouts/Layout.astro';
-import Header from '../../components/Header.astro';
-import Section9 from '../../components/Section9.astro';
-import JournalCard from '../../components/JournalCard.astro';
+import Header from '../../components/layout/Header.astro';
+import SiteFooter from '../../components/layout/SiteFooter.astro';
+import JournalCard from '../../components/journal/JournalCard.astro';
 import { getSettings, getJournalPosts } from '../../lib/sanity';
 import { JOURNAL_CATEGORIES, journalCover, journalCategoryLabel, journalDate, journalReadingTime } from '../../lib/journal';
 
@@ -60,7 +60,7 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
       )}
     </section>
   </main>
-  <Section9 />
+  <SiteFooter />
   <script>
     import '../../scripts/main';
   </script>
@@ -68,18 +68,17 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
 
 <style>
   .jr-hub {
-    --f: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
-    padding: calc(150 * var(--f)) calc(40 * var(--f)) calc(120 * var(--f));
+    padding: calc(150 * var(--fpx)) calc(40 * var(--fpx)) calc(120 * var(--fpx));
     color: var(--orange, #e57851);
   }
 
-  .jr-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; margin-bottom: calc(50 * var(--f)); }
+  .jr-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; margin-bottom: calc(50 * var(--fpx)); }
 
   .jr-title {
     margin: 0;
     font-family: 'Cormorant Infant', serif;
     font-weight: 400;
-    font-size: calc(200 * var(--f));
+    font-size: calc(200 * var(--fpx));
     line-height: 0.85;
     letter-spacing: -0.03em;
     text-transform: uppercase;
@@ -87,17 +86,17 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
 
   .jr-title-it { display: block; font-style: italic; font-size: 0.32em; letter-spacing: 0; text-transform: none; }
 
-  .jr-filters { display: flex; flex-wrap: wrap; gap: calc(10 * var(--f)); }
+  .jr-filters { display: flex; flex-wrap: wrap; gap: calc(10 * var(--fpx)); }
 
   .jr-filters button {
-    padding: calc(10 * var(--f)) calc(18 * var(--f)) calc(8 * var(--f));
+    padding: calc(10 * var(--fpx)) calc(18 * var(--fpx)) calc(8 * var(--fpx));
     border: 1px solid currentColor;
     border-radius: 999px;
     background: none;
     color: inherit;
     cursor: pointer;
     font-family: 'Thunder', sans-serif;
-    font-size: calc(20 * var(--f));
+    font-size: calc(20 * var(--fpx));
     line-height: 1;
     text-transform: uppercase;
     transition: background 0.3s, color 0.3s;
@@ -109,9 +108,9 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
   .jr-feat {
     display: grid;
     grid-template-columns: 1.25fr 1fr;
-    gap: calc(50 * var(--f));
+    gap: calc(50 * var(--fpx));
     align-items: end;
-    padding: calc(40 * var(--f)) 0;
+    padding: calc(40 * var(--fpx)) 0;
     border-top: 1px solid currentColor;
     border-bottom: 1px solid currentColor;
     color: inherit;
@@ -123,13 +122,13 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
   .jr-feat-photo img { position: relative; top: -6%; width: 100%; height: 112%; object-fit: cover; display: block; transition: scale 1s cubic-bezier(0.22, 1, 0.36, 1); }
   .jr-feat:hover .jr-feat-photo img { scale: 1.04; }
 
-  .jr-feat-text { display: flex; flex-direction: column; gap: calc(22 * var(--f)); }
+  .jr-feat-text { display: flex; flex-direction: column; gap: calc(22 * var(--fpx)); }
 
   .jr-cat {
     margin: 0;
     font-family: 'Thunder', sans-serif;
     font-weight: 200;
-    font-size: calc(20 * var(--f));
+    font-size: calc(20 * var(--fpx));
     line-height: 1;
     text-transform: uppercase;
   }
@@ -140,22 +139,22 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
     margin: 0;
     font-family: 'Thunder', sans-serif;
     font-weight: 700;
-    font-size: calc(76 * var(--f));
+    font-size: calc(76 * var(--fpx));
     line-height: 0.9;
     text-transform: uppercase;
   }
 
-  .jr-feat-excerpt { margin: 0; font-size: calc(17 * var(--f)); line-height: 1.5; }
-  .jr-date { font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(20 * var(--f)); }
+  .jr-feat-excerpt { margin: 0; font-size: calc(17 * var(--fpx)); line-height: 1.5; }
+  .jr-date { font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(20 * var(--fpx)); }
 
   .jr-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: calc(50 * var(--f)) calc(30 * var(--f));
-    margin-top: calc(60 * var(--f));
+    gap: calc(50 * var(--fpx)) calc(30 * var(--fpx));
+    margin-top: calc(60 * var(--fpx));
   }
 
-  .jr-empty { margin: 0; padding: calc(60 * var(--f)) 0; border-top: 1px solid currentColor; font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(30 * var(--f)); }
+  .jr-empty { margin: 0; padding: calc(60 * var(--fpx)) 0; border-top: 1px solid currentColor; font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(30 * var(--fpx)); }
 
   @media (max-width: 899px) {
     .jr-hub { padding: 6rem 1.25rem 4rem; }

@@ -66,15 +66,18 @@ export const SERVICE_DEFAULTS: Record<string, any> = {
         "tag": "Première visite",
         "title": "La consultation",
         "paragraphs": [
-          "Pour votre première visite, nous vous conseillons de réserver une consultation de 30 minutes. Cela nous offrira l’occasion de se rencontrer et de discuter de vos idées et inspirations.",
-          "Cette étape est essentielle, car elle nous permet de déterminer la faisabilité de votre projet. À l’issue de cette consultation, nous définirons ensemble la prestation la plus adaptée à vos besoins."
+          "La consultation est ouverte à toutes celles qui souhaitent faire évoluer leur couleur.",
+          "Elle est fortement recommandée pour toute première visite, même sans éclaircissement, et **obligatoire avant toute prestation impliquant un éclaircissement.**",
+          "Ce rendez-vous est essentiel pour échanger sur vos envies, étudier vos inspirations, analyser votre historique capillaire, vous conseiller et réaliser une mèche test si nécessaire.",
+          "Il nous permet de définir ensemble un projet couleur adapté à vos attentes et à vos cheveux."
         ],
         "ctaLabel": "Réserver une consultation",
         "ctaUrl": "https://www.planity.com/",
         "image": {
           "key": "marquee-1",
           "alt": "Consultation couleur"
-        }
+        },
+        "video": "consultation-video"
       },
       {
         "tag": "Pour toutes prestations",
@@ -117,7 +120,7 @@ export const SERVICE_DEFAULTS: Record<string, any> = {
       "title": "Bien-être",
       "signature": "par Violaine",
       "video": [
-        'bien-etre',
+        "bg-hero-bien-etre",
         "soin-bg-video"
       ],
       "poster": [

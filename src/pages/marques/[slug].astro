@@ -1,11 +1,11 @@
 ---
 // Page marque (modèle) : une page par marque, créée depuis Sanity (Pages du site → Marques)
 import Layout from '../../layouts/Layout.astro';
-import Header from '../../components/Header.astro';
-import BrandHero from '../../components/BrandHero.astro';
-import BrandOverview from '../../components/BrandOverview.astro';
-import BrandProducts from '../../components/BrandProducts.astro';
-import Section9 from '../../components/Section9.astro';
+import Header from '../../components/layout/Header.astro';
+import BrandHero from '../../components/brand/BrandHero.astro';
+import BrandOverview from '../../components/brand/BrandOverview.astro';
+import BrandProducts from '../../components/brand/BrandProducts.astro';
+import SiteFooter from '../../components/layout/SiteFooter.astro';
 import { getSettings, getBrands, getBrand, clean } from '../../lib/sanity';
 import { buildBrandPage } from '../../lib/brand';
 
@@ -34,7 +34,7 @@ const brand = buildBrandPage(doc);
     <BrandOverview brand={brand} />
     <BrandProducts brand={brand} />
   </main>
-  <Section9 />
+  <SiteFooter />
   <script>
     import '../../scripts/main';
   </script>

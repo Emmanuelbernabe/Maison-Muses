@@ -1,0 +1,70 @@
+---
+// Pages espace (coiffure, bien-être) — hero : vidéo plein écran, titre centré. Contenu : Sanity (voir lib/servicePage.ts)
+interface Props { hero: any; label: string; }
+const { hero, label } = Astro.props;
+---
+
+<section class="service-hero" data-anim="service-hero" aria-label={label}>
+  <video src={hero.video} poster={hero.poster} data-sanity={hero.videoAttr} autoplay muted loop playsinline preload="metadata"></video>
+  <div class="service-hero-text">
+    <p class="service-hero-small" data-service-in>{hero.eyebrow}</p>
+    <h1 class="service-hero-title" data-service-in>{hero.title}</h1>
+    <p class="service-hero-small" data-service-in>{hero.signature}</p>
+  </div>
+</section>
+
+<style>
+  .service-hero {
+    position: relative;
+    height: 100vh;
+    padding: 0;
+    overflow: hidden;
+    background: #1a120d;
+  }
+
+  .service-hero video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.8);
+  }
+
+  .service-hero-text {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(12 * var(--fpx));
+    color: var(--bg, #F7F2EC);
+    text-align: center;
+  }
+
+  .service-hero-small {
+    margin: 0;
+    font-family: var(--font, 'DM Sans', sans-serif);
+    font-size: calc(28 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .service-hero-title {
+    margin: 0;
+    font-family: 'Cormorant Infant', serif;
+    font-weight: 400;
+    font-size: calc(80 * var(--fpx));
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 899px) {
+    .service-hero { height: 100svh; }
+    .service-hero-small { font-size: 1.1rem; }
+    .service-hero-title { font-size: 3.2rem; }
+  }
+</style>

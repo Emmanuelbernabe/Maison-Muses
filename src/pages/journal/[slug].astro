@@ -1,11 +1,11 @@
 ---
 // Journal — page article : titre centré, couverture, corps en richtext, « À lire aussi »
 import Layout from '../../layouts/Layout.astro';
-import Header from '../../components/Header.astro';
-import Section9 from '../../components/Section9.astro';
-import JournalCard from '../../components/JournalCard.astro';
-import JournalBody from '../../components/JournalBody.astro';
-import JournalPlayer from '../../components/JournalPlayer.astro';
+import Header from '../../components/layout/Header.astro';
+import SiteFooter from '../../components/layout/SiteFooter.astro';
+import JournalCard from '../../components/journal/JournalCard.astro';
+import JournalBody from '../../components/journal/JournalBody.astro';
+import JournalPlayer from '../../components/journal/JournalPlayer.astro';
 import { getSettings, getJournalPosts, getJournalPost } from '../../lib/sanity';
 import { journalCover, journalCategoryLabel, journalDate, journalReadingTime, journalBodyHtml } from '../../lib/journal';
 
@@ -68,7 +68,7 @@ const related = [...others.filter((p) => p.category === post.category), ...other
       </section>
     )}
   </main>
-  <Section9 />
+  <SiteFooter />
   <script>
     import '../../scripts/main';
   </script>
@@ -76,7 +76,6 @@ const related = [...others.filter((p) => p.category === post.category), ...other
 
 <style>
   .jr-article, .jr-related {
-    --f: clamp(1px, calc(-0.05px + 0.0729167vw), 1.35px);
     color: var(--orange, #e57851);
   }
 
@@ -84,8 +83,8 @@ const related = [...others.filter((p) => p.category === post.category), ...other
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: calc(24 * var(--f));
-    padding: calc(170 * var(--f)) calc(40 * var(--f)) calc(50 * var(--f));
+    gap: calc(24 * var(--fpx));
+    padding: calc(170 * var(--fpx)) calc(40 * var(--fpx)) calc(50 * var(--fpx));
     text-align: center;
   }
 
@@ -93,7 +92,7 @@ const related = [...others.filter((p) => p.category === post.category), ...other
     margin: 0;
     font-family: 'Thunder', sans-serif;
     font-weight: 200;
-    font-size: calc(20 * var(--f));
+    font-size: calc(20 * var(--fpx));
     line-height: 1;
     text-transform: uppercase;
   }
@@ -103,33 +102,33 @@ const related = [...others.filter((p) => p.category === post.category), ...other
 
   .jr-art-title {
     margin: 0;
-    max-width: calc(1100 * var(--f));
+    max-width: calc(1100 * var(--fpx));
     font-family: 'Thunder', sans-serif;
     font-weight: 700;
-    font-size: calc(110 * var(--f));
+    font-size: calc(110 * var(--fpx));
     line-height: 0.88;
     text-transform: uppercase;
   }
 
-  .jr-art-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(30 * var(--f)); align-items: baseline; }
-  .jr-date { font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(20 * var(--f)); }
+  .jr-art-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(30 * var(--fpx)); align-items: baseline; }
+  .jr-date { font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(20 * var(--fpx)); }
 
-  .jr-cover { margin: 0 calc(40 * var(--f)); aspect-ratio: 16 / 7; overflow: hidden; }
+  .jr-cover { margin: 0 calc(40 * var(--fpx)); aspect-ratio: 16 / 7; overflow: hidden; }
   /* Parallaxe (journal.ts) : image 12 % plus haute que son cadre, décalée de 6 % vers le haut */
   .jr-cover img { position: relative; top: -6%; width: 100%; height: 112%; object-fit: cover; display: block; }
 
   .jr-art-body {
-    max-width: calc(700 * var(--f));
+    max-width: calc(700 * var(--fpx));
     margin: 0 auto;
-    padding: calc(80 * var(--f)) calc(40 * var(--f)) calc(120 * var(--f));
+    padding: calc(80 * var(--fpx)) calc(40 * var(--fpx)) calc(120 * var(--fpx));
     box-sizing: content-box;
   }
 
   .jr-art-cta {
     display: inline-block;
-    margin-top: calc(50 * var(--f));
+    margin-top: calc(50 * var(--fpx));
     color: inherit;
-    font-size: calc(22 * var(--f));
+    font-size: calc(22 * var(--fpx));
     line-height: 1;
     text-transform: uppercase;
     text-decoration: underline;
@@ -137,19 +136,19 @@ const related = [...others.filter((p) => p.category === post.category), ...other
     text-underline-offset: 0.18em;
   }
 
-  .jr-related { margin: 0 calc(40 * var(--f)); padding: calc(80 * var(--f)) 0 calc(120 * var(--f)); border-top: 1px solid var(--orange, #e57851); }
+  .jr-related { margin: 0 calc(40 * var(--fpx)); padding: calc(80 * var(--fpx)) 0 calc(120 * var(--fpx)); border-top: 1px solid var(--orange, #e57851); }
 
   .jr-related-title {
-    margin: 0 0 calc(30 * var(--f));
+    margin: 0 0 calc(30 * var(--fpx));
     font-family: 'Thunder', sans-serif;
     font-weight: 700;
-    font-size: calc(48 * var(--f));
+    font-size: calc(48 * var(--fpx));
     line-height: 1;
     text-transform: uppercase;
   }
 
   .jr-related-title span { font-weight: 200; }
-  .jr-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(30 * var(--f)); }
+  .jr-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(30 * var(--fpx)); }
 
   @media (max-width: 899px) {
     .jr-art-head { padding: 6rem 1.25rem 2rem; }

@@ -35,14 +35,14 @@ export const homepage = defineType({
         photo('load4', 'Photo 4'),
       ]),
       sub('hero', 'Hero', [
-        photo('portrait', 'Portrait du hero', `${BIG} Aussi utilisé à la fin du loader.`),
-        photo('reveal', 'Portrait révélé au scroll', `${BIG} Apparaît sur le portrait du hero puis reste en section 2.`),
-        photo('center', 'Portrait central du marquee', `${BIG} Fait le relais entre la section 2 et le marquee de la section 3.`),
+        photo('portrait', 'Portrait du hero (affiche de la vidéo)', `${BIG} Affichée le temps que la vidéo du hero se charge (ou si elle ne se charge pas), dans le loader et le hero.`),
+        photo('reveal', 'Portrait révélé au scroll', `${BIG} Apparaît sur le portrait du hero puis reste dans l’intro.`),
+        photo('center', 'Portrait central du marquee', `${BIG} Fait le relais entre l’intro et le marquee de la galerie.`),
       ]),
-      sub('s2', 'Section 2 : coiffure et bien-être', [
+      sub('intro', 'Intro : coiffure et bien-être', [
         photo('ambiance', 'Image ambiance', SMALL),
       ]),
-      sub('s3', 'Section 3 : marquee', [
+      sub('gallery', 'Galerie (marquee)', [
         defineField({
           name: 'marquee',
           title: 'Photos du marquee',
@@ -52,13 +52,13 @@ export const homepage = defineType({
           validation: (r) => r.max(5),
         }),
       ]),
-      sub('s4', 'Section 4 : équipe', [
+      sub('team', 'Équipe', [
         photo('thumb', 'Vignette du titre', SMALL),
         photo('teamLeft', 'Photo équipe gauche'),
         photo('teamMid', 'Photo équipe centre'),
         photo('teamRight', 'Photo équipe droite'),
       ]),
-      sub('coffrets', 'Section 5 : coffrets', [
+      sub('coffrets', 'Coffrets', [
         photo('initiationBig', 'Initiation, grande image'),
         photo('initiationSmall', 'Initiation, petite image', SMALL),
         photo('harmonieBig', 'Harmonie, grande image'),
@@ -67,7 +67,7 @@ export const homepage = defineType({
         photo('symbioseSmall', 'Symbiose, petite image', SMALL),
         photo('prestigeSmall', 'Prestige, petite image', `${SMALL} La grande reste la vidéo.`),
       ]),
-      sub('routines', 'Section 7 : routines', [
+      sub('routines', 'Routines', [
         photo('coiffure', 'Porte routine coiffure'),
         photo('bienEtre', 'Porte routine bien-être'),
       ]),

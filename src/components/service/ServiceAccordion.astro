@@ -1,0 +1,190 @@
+---
+// Pages espace — accordéon : lignes (consultation, diagnostic…), marques, Instagram (un seul ouvert à la fois)
+import { clean } from '../../lib/sanity';
+interface Props { steps: any[]; brands: any; social: any; }
+const { steps, brands, social } = Astro.props;
+// Les marques reprennent tour à tour les 5 styles typographiques du bandeau
+const brandStyles = ['nord', 'vert', 'origine', 'lab', 'pure'];
+const external = (url?: string) => (url?.startsWith('http') ? '_blank' : undefined);
+// Paragraphe → morceaux de texte, les passages entre **…** en gras (seule mise en forme possible depuis le Studio)
+const boldParts = (text: string) => text.split(/\*\*(.+?)\*\*/g).map((part, i) => ({ part, bold: i % 2 === 1 }));
+---
+
+<section class="service-acc" data-anim="service-acc" aria-label="Votre visite">
+  {steps.map((step, i) => (
+    <div class={`service-row${i === 0 ? ' is-open' : ''}`} data-service-row>
+      <button class="service-row-btn" type="button" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`service-d${i + 1}`}><span class="service-tag">{step.tag}</span><h3>{step.title}</h3><span class="service-plus" aria-hidden="true">+</span></button>
+      <div class="service-detail" id={`service-d${i + 1}`} inert={i !== 0}><div class="service-detail-inner">
+        <div class="service-detail-text">
+          {step.paragraphs.map((p: string) => <p>{boldParts(p).map(({ part, bold }) => (bold ? <strong>{part}</strong> : part))}</p>)}
+          {step.ctaLabel && step.ctaUrl && <a class="service-cta" href={step.ctaUrl} target={external(step.ctaUrl)} rel="noopener">{step.ctaLabel}</a>}
+        </div>
+        <!-- Vidéo à la place de la photo si elle existe : jouée seulement quand la ligne est ouverte et à l'écran (scripts/pages/service.ts) -->
+        {step.video ? (
+          <figure class="service-detail-photo" data-service-acc-clip data-sanity={step.videoAttr}>
+            <video src={step.video} poster={step.image.src} muted loop playsinline preload="none" aria-label={step.image.alt} data-service-acc-video></video>
+          </figure>
+        ) : (
+          <figure class="service-detail-photo" data-service-acc-clip data-sanity={step.image.attr}><img src={step.image.src} alt={step.image.alt} loading="lazy" decoding="async" /></figure>
+        )}
+      </div></div>
+    </div>
+  ))}
+
+  <div class="service-row" data-service-row>
+    <button class="service-row-btn" type="button" aria-expanded="false" aria-controls="service-db"><span class="service-tag">{brands.tag}</span><h3>{brands.title}</h3><span class="service-plus" aria-hidden="true">+</span></button>
+    <div class="service-detail" id="service-db" inert><div class="service-detail-inner">
+      <div class="service-detail-text">
+        <p>{brands.text}</p>
+      </div>
+      <div class="service-brands" aria-label="Nos marques partenaires">
+        <div class="service-brands-track" data-service-brands>
+          {[0, 1].map((copy) => brands.list.map((name: string, i: number) => (
+            <span class={`service-brand service-brand-${brandStyles[i % brandStyles.length]}`} aria-hidden={copy === 1 ? 'true' : undefined}>{copy === 1 ? clean(name) : name}</span>
+          )))}
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="service-row" data-service-row>
+    <button class="service-row-btn" type="button" aria-expanded="false" aria-controls="service-ds"><span class="service-tag">{social.tag}</span><h3>{social.title}</h3><span class="service-plus" aria-hidden="true">+</span></button>
+    <div class="service-detail" id="service-ds" inert><div class="service-detail-inner">
+      <div class="service-detail-text">
+        <p>{social.text}</p>
+        <a class="service-cta" href={social.url} target="_blank" rel="noopener">{social.handle}</a>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<style>
+  .service-acc {
+    padding: calc(100 * var(--fpx)) calc(40 * var(--fpx)) calc(140 * var(--fpx));
+    color: var(--sp-c, #e57851);
+  }
+
+  .service-row { border-top: 1px solid currentColor; }
+  .service-row:last-child { border-bottom: 1px solid currentColor; }
+
+  .service-row-btn {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: calc(288 * var(--fpx)) 1fr auto;
+    align-items: center;
+    width: 100%;
+    padding: calc(34 * var(--fpx)) 0 calc(30 * var(--fpx));
+  }
+
+  .service-row-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+  .service-tag {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(22 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .service-row-btn h3 {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(72 * var(--fpx));
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .service-plus {
+    width: calc(32 * var(--fpx));
+    height: calc(32 * var(--fpx));
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    display: grid;
+    place-items: center;
+    font-size: calc(18 * var(--fpx));
+    font-weight: 300;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .service-row.is-open .service-plus { transform: rotate(45deg); }
+
+  .service-detail { height: 0; overflow: hidden; }
+  .service-row.is-open .service-detail { height: auto; }
+
+  .service-detail-inner {
+    display: grid;
+    grid-template-columns: calc(288 * var(--fpx)) 1fr calc(300 * var(--fpx));
+    padding-bottom: calc(40 * var(--fpx));
+  }
+
+  .service-detail-text {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(26 * var(--fpx));
+    max-width: calc(510 * var(--fpx));
+    padding-top: calc(10 * var(--fpx));
+    font-size: calc(17 * var(--fpx));
+    line-height: 1.5;
+  }
+
+  .service-detail-text p { margin: 0; }
+
+  .service-cta {
+    margin-top: calc(14 * var(--fpx));
+    font-size: calc(22 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    color: inherit;
+  }
+
+  .service-detail-photo { grid-column: 3; width: calc(300 * var(--fpx)); height: calc(368 * var(--fpx)); margin: 0; overflow: hidden; }
+  .service-detail-photo img,
+  .service-detail-photo video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Marques : défilement en boucle, bords fondus, un filet au-dessus et en dessous */
+  .service-brands {
+    grid-column: 1 / -1;
+    margin-top: calc(40 * var(--fpx));
+    padding: calc(28 * var(--fpx)) 0;
+    border-top: 1px solid color-mix(in srgb, var(--sp-c, #e57851) 35%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--sp-c, #e57851) 35%, transparent);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .service-brands-track { display: flex; align-items: center; width: max-content; }
+  .service-brand { display: flex; align-items: center; white-space: nowrap; padding-right: calc(70 * var(--fpx)); }
+  .service-brand::after { content: '✦'; margin-left: calc(70 * var(--fpx)); font-size: calc(12 * var(--fpx)); font-family: var(--font, 'DM Sans', sans-serif); letter-spacing: 0; }
+  .service-brand-nord { font-family: 'Thunder', sans-serif; font-weight: 800; font-size: calc(32 * var(--fpx)); text-transform: uppercase; }
+  .service-brand-vert { font-family: 'Cormorant Infant', serif; font-size: calc(36 * var(--fpx)); }
+  .service-brand-origine { font-size: calc(18 * var(--fpx)); letter-spacing: 0.5em; text-transform: uppercase; }
+  .service-brand-lab { font-family: 'Thunder', sans-serif; font-weight: 600; font-size: calc(32 * var(--fpx)); text-transform: uppercase; }
+  .service-brand-pure { font-family: 'Cormorant Infant', serif; font-size: calc(34 * var(--fpx)); }
+
+  @media (max-width: 899px) {
+    .service-acc { padding: 3rem 1.25rem 5rem; }
+    .service-row-btn { grid-template-columns: 1fr auto; row-gap: 0.4rem; }
+    .service-row-btn .service-tag { grid-column: 1 / -1; }
+    .service-tag { font-size: 1rem; }
+    .service-row-btn h3 { font-size: 2.3rem; }
+    .service-plus { width: 2rem; height: 2rem; font-size: 1.1rem; }
+    .service-detail-inner { grid-template-columns: 1fr; gap: 1.2rem; }
+    .service-detail-text { grid-column: 1; max-width: none; font-size: 0.95rem; }
+    .service-cta { font-size: 1rem; }
+    .service-detail-photo { grid-column: 1; width: 75%; height: auto; aspect-ratio: 300 / 368; }
+    .service-brand-nord, .service-brand-lab { font-size: 1.5rem; }
+    .service-brand-vert, .service-brand-pure { font-size: 1.7rem; }
+    .service-brand-origine { font-size: 0.9rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { .service-plus { transition: none; } }
+</style>

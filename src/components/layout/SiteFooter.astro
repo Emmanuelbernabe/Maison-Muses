@@ -1,0 +1,364 @@
+---
+// Pied de page du site (CTA, adresses + cartes Google Maps, liens, MAISON MUSES)
+// TODO : URL Planity et liens Instagram / podcast
+// variant : « orange » par défaut, « green » pour la page bien-être (textes, filets, cartes en vert)
+interface Props { variant?: 'orange' | 'green'; }
+const { variant = 'orange' } = Astro.props;
+
+const planityUrl = 'https://www.planity.com/';
+const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
+const year = new Date().getFullYear();
+
+const places = [
+  {
+    name: 'MAISON MUSES COIFFURE',
+    lines: ['48, All. Jean Jaurès,', 'Toulouse, 31000'],
+    phone: '07 67 66 02 67',
+    address: '48 Allées Jean Jaurès, 31000 Toulouse, France',
+  },
+  {
+    name: 'MAISON MUSES BIEN-ÊTRE',
+    lines: ['11 Rue Bellegarde,', '31000 Toulouse'],
+    phone: '07 67 79 03 12',
+    address: '11 Rue Bellegarde, 31000 Toulouse, France',
+  },
+];
+
+// Sur la home, ancres (#coffrets…) ; sur les autres pages, retour vers la home (/#coffrets…)
+const home = Astro.url.pathname === '/' ? '' : '/';
+
+const maisonLinks = [
+  { label: 'BIEN-ÊTRE', url: '/bien-etre' },
+  { label: 'COIFFURE', url: '/coiffure' },
+  { label: 'COFFRETS', url: `${home}#coffrets` },
+  { label: 'L’ÉQUIPE', url: '/equipe' },
+  { label: 'JOURNAL', url: '/journal' },
+];
+
+const socialLinks = [
+  { label: 'MAISON MUSE COIFFURE', url: '#' },
+  { label: 'MAISON MUSE BIEN-ÊTRE', url: '#' },
+  { label: 'PODCAST', url: '#' },
+];
+---
+
+<footer class:list={["footer", { "footer--green": variant === "green" }]} id="footer" data-anim="footer-section">
+  <div class="footer-inner">
+    <div class="footer-cta">
+      <div class="footer-cta-left">
+        <h2 class="footer-title" data-anim="footer-title">
+          <span class="footer-thin">PRENEZ LE TEMPS.</span><br />ON S’OCCUPE DU RESTE
+        </h2>
+        <!-- Illustration Muse entre le titre et le bouton -->
+        <svg class="footer-cta-deco" width="216" height="376" viewBox="0 0 216 376" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M3.00073 3L212.101 3L212.101 372.091H3.00073L3.00073 3Z" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M51.5857 3C51.5857 56.3131 35.3907 90.1465 3.00073 104.5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M98.3257 3C98.3257 93.2222 66.5507 144.485 3.00073 156.788" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M140.761 3C144.451 52.2121 145.681 92.197 135.841 112.497C124.771 135.258 102.631 155.558 78.0308 166.015" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M3.00073 156.788C46.0507 158.018 70.6507 162.94 92.1757 171.552C141.376 193.697 190.576 249.061 212.101 304.424" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M135.841 112.497C145.681 135.258 169.051 150.636 188.116 164.17C193.651 169.091 191.191 178.933 180.121 183.239C173.971 186.93 169.001 192.388 169.001 201C169.001 213.921 169.666 218.852 170.896 233" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M105.706 154.327C112.471 162.324 129.691 164.17 145.681 154.942" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M3.00073 209.691C70.6507 209.691 167.821 249.061 167.821 372.091" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M3.00073 258.288C52.2007 258.288 116.161 270.591 116.161 372.091" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        <path d="M3.00073 304.424C36.8257 304.424 68.1907 322.879 68.1907 372.091" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+        </svg>
+      </div>
+      <a class="footer-btn" href={planityUrl} target="_blank" rel="noopener">PRENDRE RENDEZ-VOUS</a>
+    </div>
+
+    <div class="footer-places">
+      {places.map((p) => (
+        <div class="footer-place">
+          <div class="footer-place-content">
+            <h3 class="footer-place-name">{p.name}</h3>
+            <p class="footer-place-address">
+              {p.lines[0]}<br />{p.lines[1]}<br />
+              <a href={`tel:${p.phone.replace(/\s/g, '')}`}>{p.phone}</a>
+            </p>
+          </div>
+          <div class="footer-map">
+            {mapsKey ? (
+              <div class="footer-map-canvas" data-anim="footer-map" data-address={p.address} data-key={mapsKey} role="img" aria-label={`Carte : ${p.address}`}></div>
+            ) : (
+              <iframe
+                class="footer-map-frame"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(p.address)}&z=15&output=embed`}
+                title={`Carte : ${p.address}`}
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="footer-links">
+      <nav class="footer-links-group" aria-label="La maison">
+        <h3 class="footer-links-title">LA MAISON</h3>
+        <div class="footer-links-grid">
+          {maisonLinks.map((l) => <a href={l.url}>{l.label}</a>)}
+        </div>
+      </nav>
+      <nav class="footer-links-group footer-links-social" aria-label="Nous suivre">
+        <h3 class="footer-links-title">NOUS SUIVRE</h3>
+        <div class="footer-links-list">
+          {socialLinks.map((l) => <a href={l.url} target="_blank" rel="noopener">{l.label}</a>)}
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <div class="footer-brand" data-anim="footer-brand">
+    <p class="footer-brand-main" data-anim="footer-brand-main">MAISON</p>
+    <p class="footer-brand-sub">MUSES</p>
+  </div>
+
+  <div class="footer-legal">
+    <span>© MAISON MUSES {year}</span>
+    <span class="footer-legal-links">
+      <a href="#">MENTIONS LEGALES</a>
+      <a href="#">COOKIES</a>
+    </span>
+  </div>
+</footer>
+
+<style>
+  :root {
+    --footer-pad-x: calc(40 * var(--fpx));
+  }
+
+  .footer {
+    position: relative;
+    width: 100%;
+    background: var(--bg);
+    /* Couleur du footer : tout l'orange passe par cette variable */
+    --footer-c: var(--orange, #e57851);
+    color: var(--footer-c);
+    font-family: var(--font);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .footer-inner { padding: 0 var(--footer-pad-x); }
+
+  /* ── Header + CTA ── */
+  .footer-cta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(40 * var(--fpx));
+    padding-top: calc(315 * var(--fpx));   /* place pour l'illustration au-dessus du titre */
+    margin-bottom: calc(80 * var(--fpx));
+  }
+
+  .footer-cta-left {
+    position: relative;
+  }
+
+  /* Illustration : juste à droite du titre, son bas au niveau de la première ligne */
+  .footer-cta-deco {
+    position: absolute;
+    left: calc(100% + 106 * var(--fpx));
+    bottom: calc(143 * var(--fpx));
+    width: calc(216 * var(--fpx));
+    height: auto;
+    color: var(--footer-c);
+    pointer-events: none;
+  }
+
+  .footer-cta .footer-btn {
+    margin-right: calc(62 * var(--fpx));
+  }
+
+  .footer-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(120 * var(--fpx));
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+
+  .footer-thin { font-weight: 200; }
+
+  .footer-btn {
+    flex-shrink: 0;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+    transition: opacity 0.2s ease;
+  }
+
+  .footer-btn:hover { opacity: 0.7; }
+
+  /* ── Adresses + cartes ── */
+  .footer-place {
+    display: flex;
+    justify-content: space-between;
+    gap: calc(40 * var(--fpx));
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--footer-c);
+  }
+
+  .footer-place:last-child { border-bottom: 1px solid var(--footer-c); }
+
+  .footer-place-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+
+  .footer-place-name {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .footer-place-address {
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .footer-place-address a:hover { text-decoration: underline; }
+
+  .footer-map {
+    position: relative;
+    flex-shrink: 0;
+    width: 27.5rem;
+    height: 18.25rem;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .footer-map-canvas,
+  .footer-map-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Variante verte (page bien-être) */
+  .footer.footer--green { --footer-c: var(--green, #0F2F18); }
+
+  /* Repli sans clé API : iframe teintée à la couleur du footer */
+  .footer-map-frame { filter: grayscale(1) contrast(1.1); }
+
+  .footer-map:has(.footer-map-frame)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--footer-c);
+    mix-blend-mode: color;
+    pointer-events: none;
+  }
+
+  /* ── Liens ── */
+  .footer-links {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: calc(40 * var(--fpx));
+    margin-top: calc(110 * var(--fpx));
+    padding-right: calc(80 * var(--fpx));
+  }
+
+  .footer-links-title {
+    margin: 0 0 2rem;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 500;
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .footer-links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    column-gap: 2.5rem;
+  }
+
+  .footer-links-list { display: flex; flex-direction: column; }
+
+  .footer-links a {
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .footer-links a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+
+  /* ── MAISON MUSES : mêmes tailles fluides que le hero ── */
+  .footer-brand { margin-top: calc(60 * var(--fpx)); }
+
+  .footer-brand-main,
+  .footer-brand-sub {
+    margin: 0;
+    font-family: 'Cormorant Infant', 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.88;
+    white-space: nowrap;
+  }
+
+  .footer-brand-main {
+    font-size: var(--hero-maison-fs, 23.75rem);
+    text-align: center;
+  }
+
+  .footer-brand-sub {
+    font-size: var(--hero-muses-fs, 7.5rem);
+    text-align: right;
+    padding-right: var(--footer-pad-x);
+  }
+
+  /* ── Mentions ── */
+  .footer-legal {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: calc(60 * var(--fpx));
+    padding: 0 var(--footer-pad-x);
+    font-size: 1.25rem;
+  }
+
+  .footer-legal-links { display: flex; gap: 3.5rem; }
+
+  .footer-legal a:hover { text-decoration: underline; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .footer-title { visibility: hidden; }
+  }
+
+  @media (max-width: 1023px) {
+    /* Les variables viennent du hero de la home ; sur les autres pages, on reprend leurs valeurs mobiles */
+    .footer-brand-main { font-size: var(--hero-maison-fs, 26.667vw); }
+    .footer-brand-sub { font-size: var(--hero-muses-fs, 24vw); }
+    .footer-inner { padding: 0 1.5rem; }
+    .footer-cta { flex-direction: column; align-items: flex-start; gap: 2rem; margin-bottom: 3rem; }
+    .footer-cta { padding-top: 0; }
+    .footer-cta-left { display: flex; flex-direction: column; gap: 2rem; width: 100%; }
+    .footer-cta-deco { position: static; order: -1; align-self: flex-end; width: 34vw; }
+    .footer-cta .footer-btn { margin-right: 0; }
+    .footer-title { font-size: 3.5rem; }
+    .footer-btn { font-size: 1.4rem; }
+    .footer-place { flex-direction: column; }
+    .footer-place-name { font-size: 1.8rem; }
+    .footer-place-address { font-size: 1.15rem; }
+    .footer-map { width: 100%; height: auto; aspect-ratio: 3 / 2; }
+    .footer-links { grid-template-columns: 1fr; gap: 2.5rem; padding-right: 0; margin-top: 4rem; }
+    .footer-links-title { font-size: 1.5rem; margin-bottom: 1rem; }
+    .footer-links a { font-size: 1.15rem; }
+    .footer-brand-sub { padding-right: 1.5rem; }
+    .footer-legal { padding: 0 1.5rem; font-size: 0.95rem; }
+    .footer-legal-links { gap: 1.5rem; }
+  }
+</style>

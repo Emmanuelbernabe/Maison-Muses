@@ -1,0 +1,99 @@
+---
+// Pages espace — présentation : titre qui se remplit au scroll, deux photos
+import { clean } from '../../lib/sanity';
+interface Props { approach: any; }
+const { approach } = Astro.props;
+const words = String(approach.title).split(' ');
+---
+
+<section class="service-approach" aria-label={clean(approach.tag)}>
+  <div class="service-approach-text">
+    <div class="service-approach-top">
+      <p class="service-tag" data-service-fade>{approach.tag}</p>
+      <!-- Mots découpés : ils se remplissent un par un au scroll, comme le titre de la section équipe de l'accueil (HomeTeam) -->
+      <h2 class="service-approach-title" data-anim="service-fill">
+        {words.map((word) => <span class="service-word">{word}</span>)}
+      </h2>
+      <p class="service-body" data-service-fade>{approach.text}</p>
+      {approach.ctaLabel && <a class="service-cta" href={approach.ctaUrl} target={approach.ctaUrl?.startsWith('http') ? '_blank' : undefined} rel="noopener" data-service-fade>{approach.ctaLabel}</a>}
+    </div>
+    <!-- Petite photo : sans clip-path -->
+    <figure class="service-approach-small" data-sanity={approach.small.attr}><img src={approach.small.src} alt={approach.small.alt} loading="lazy" decoding="async" /></figure>
+  </div>
+  <figure class="service-approach-big" data-service-clip data-sanity={approach.big.attr}><img src={approach.big.src} alt={approach.big.alt} loading="lazy" decoding="async" /></figure>
+</section>
+
+<style>
+  .service-approach {
+    display: flex;
+    justify-content: space-between;
+    gap: calc(60 * var(--fpx));
+    padding: calc(200 * var(--fpx)) calc(40 * var(--fpx)) calc(74 * var(--fpx));
+    color: var(--sp-c, #e57851);
+  }
+
+  .service-approach figure { margin: 0; overflow: hidden; }
+  .service-approach img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .service-approach-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: calc(40 * var(--fpx));
+  }
+
+  .service-approach-top { display: flex; flex-direction: column; align-items: flex-start; }
+
+  .service-tag {
+    margin: 0 0 calc(12 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(22 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .service-approach-title {
+    margin: 0;
+    max-width: calc(700 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(50 * var(--fpx));
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  /* Couleur pleine : c'est l'opacité qui est animée au scroll (scripts/pages/service.ts) */
+  .service-word { display: inline-block; margin-right: 0.22em; color: var(--sp-c, #e57851); }
+
+  .service-body {
+    margin: calc(42 * var(--fpx)) 0 0;
+    max-width: calc(510 * var(--fpx));
+    font-size: calc(17 * var(--fpx));
+    line-height: 1.5;
+  }
+
+  .service-cta {
+    margin-top: calc(46 * var(--fpx));
+    font-size: calc(22 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    color: inherit;
+  }
+
+  .service-approach-small { width: calc(206 * var(--fpx)); height: calc(136 * var(--fpx)); }
+  .service-approach-big { flex-shrink: 0; width: calc(437 * var(--fpx)); height: calc(580 * var(--fpx)); }
+
+  @media (max-width: 899px) {
+    .service-approach { flex-direction: column; padding: 5rem 1.25rem 3rem; gap: 2.5rem; }
+    .service-approach-title { font-size: 2.2rem; }
+    .service-tag { font-size: 1rem; }
+    .service-body { font-size: 0.95rem; }
+    .service-cta { font-size: 1rem; }
+    .service-approach-small { display: none; }
+    .service-approach-big { width: 100%; height: 115vw; }
+  }
+</style>

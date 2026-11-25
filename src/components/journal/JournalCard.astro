@@ -1,0 +1,64 @@
+---
+// Journal — carte d'article (hub et « À lire aussi »)
+import { journalCover, journalCategoryLabel, journalDate } from '../../lib/journal';
+
+interface Props { post: any; }
+const { post } = Astro.props;
+const cover = journalCover(post, 800);
+---
+
+<a class="jr-card" href={`/journal/${post.slug}`} data-jr-card data-cat={post.category}>
+  <figure class="jr-card-photo" data-jr-parallax>
+    <img src={cover.src} srcset={cover.srcset} sizes="(max-width: 899px) 50vw, 30vw" alt={cover.alt} loading="lazy" decoding="async" />
+  </figure>
+  <div class="jr-card-meta">
+    <span class="jr-cat">{journalCategoryLabel(post.category)}</span>
+    <span class="jr-date">{journalDate(post.publishedAt, true)}</span>
+  </div>
+  <h3 class="jr-card-title">{post.title}</h3>
+</a>
+
+<style>
+  .jr-card {
+    display: flex;
+    flex-direction: column;
+    gap: calc(14 * var(--fpx));
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .jr-card[hidden] { display: none; }
+
+  .jr-card-photo { margin: 0; aspect-ratio: 4 / 5; overflow: hidden; }
+  /* Parallaxe (journal.ts) : image 12 % plus haute que son cadre, décalée de 6 % vers le haut */
+  .jr-card-photo img { position: relative; top: -6%; width: 100%; height: 112%; object-fit: cover; display: block; transition: scale 1s cubic-bezier(0.22, 1, 0.36, 1); }
+  /* « scale » (et non transform) : le transform est pris par la parallaxe */
+  .jr-card:hover .jr-card-photo img { scale: 1.04; }
+
+  .jr-card-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+
+  .jr-cat {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(20 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .jr-date { font-family: 'Cormorant Infant', serif; font-style: italic; font-size: calc(20 * var(--fpx)); }
+
+  .jr-card-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 700;
+    font-size: calc(36 * var(--fpx));
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 899px) {
+    .jr-cat { font-size: 0.95rem; }
+    .jr-date { font-size: 1rem; }
+    .jr-card-title { font-size: 1.4rem; }
+  }
+</style>

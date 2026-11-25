@@ -10,6 +10,7 @@ const paragraphs = (title = 'Paragraphes') =>
     title,
     type: 'array',
     of: [defineArrayMember({ type: 'text', rows: 3 })],
+    description: 'Mettre un passage en gras : l’entourer de deux astérisques, **comme ceci**.',
   });
 
 export const servicePage = defineType({
@@ -89,7 +90,8 @@ export const servicePage = defineType({
             paragraphs(),
             defineField({ name: 'ctaLabel', title: 'Texte du bouton (facultatif)', type: 'string' }),
             defineField({ name: 'ctaUrl', title: 'Lien du bouton', type: 'string' }),
-            defineField({ name: 'image', title: 'Photo', type: 'cmsImage' }),
+            defineField({ name: 'image', title: 'Photo', type: 'cmsImage', description: 'Avec une vidéo : sert d’affiche le temps qu’elle charge.' }),
+            defineField({ name: 'video', title: 'Vidéo (facultatif)', type: 'file', options: { accept: 'video/mp4,video/webm' }, description: 'Remplace la photo. MP4 court, idéalement moins de 5 Mo ; joué en boucle, sans son, quand la ligne est ouverte.' }),
           ],
           preview: { select: { title: 'title', subtitle: 'tag', media: 'image' } },
         }),

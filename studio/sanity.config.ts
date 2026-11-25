@@ -19,7 +19,9 @@ export default defineConfig({
     presentationTool({
       title: 'Modifier le site',
       resolve,
-      previewUrl: { initial: process.env.SANITY_STUDIO_PREVIEW_URL || 'http://localhost:4321' },
+      // Site d'aperçu en ligne (worker « maison-muses-preview », déployé avec npm run deploy:preview).
+      // Pour travailler en local : SANITY_STUDIO_PREVIEW_URL=http://localhost:4321 dans studio/.env
+      previewUrl: { initial: process.env.SANITY_STUDIO_PREVIEW_URL || 'https://maison-muses-preview.maison-muses.workers.dev' },
     }),
     structureTool({ title: 'Contenu', structure }),
     visionTool(),

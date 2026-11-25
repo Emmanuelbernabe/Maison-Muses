@@ -1,0 +1,68 @@
+# Déploiement automatique sur Cloudflare
+#
+# - Publication dans Sanity → webhook Sanity → « repository_dispatch » (type sanity-publish)
+#   → le site public est reconstruit avec le contenu publié et redéployé (worker « maison-muses »).
+# - Push sur main (modification du code) → site public ET site d'aperçu redéployés.
+# - Bouton « Run workflow » dans l'onglet Actions de GitHub : redéploiement manuel des deux.
+#
+# Secrets à créer dans GitHub (Settings → Secrets and variables → Actions) :
+#   CLOUDFLARE_API_TOKEN     jeton Cloudflare, modèle « Edit Cloudflare Workers »
+#   CLOUDFLARE_ACCOUNT_ID    identifiant du compte Cloudflare
+#   SANITY_API_READ_TOKEN    jeton Sanity en lecture (Viewer) : seulement pour le site d'aperçu
+#   PUBLIC_GOOGLE_MAPS_API_KEY  (facultatif) clé Google Maps des cartes du footer
+
+name: Déploiement
+
+on:
+  repository_dispatch:
+    types: [sanity-publish]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Plusieurs publications rapprochées : seul le dernier déploiement compte, le précédent est annulé
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SANITY_PROJECT_ID: i6tjenri
+  SANITY_DATASET: production
+  PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.PUBLIC_GOOGLE_MAPS_API_KEY }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+jobs:
+  public:
+    name: Site public
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Site statique : lit uniquement le contenu publié (aucun jeton nécessaire)
+      - run: npm run build
+      - name: Déploiement sur le worker « maison-muses »
+        run: npx wrangler deploy
+
+  preview:
+    name: Site d'aperçu
+    # Le site d'aperçu lit les brouillons en direct : une publication Sanity ne demande pas de le reconstruire
+    if: github.event_name != 'repository_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build + déploiement sur le worker « maison-muses-preview »
+        run: npm run deploy:preview
+        env:
+          SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}

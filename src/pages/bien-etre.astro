@@ -1,11 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import ServiceHero from '../components/ServiceHero.astro';
-import ServiceApproach from '../components/ServiceApproach.astro';
-import ServiceSlider from '../components/ServiceSlider.astro';
-import ServiceAccordion from '../components/ServiceAccordion.astro';
-import Section9 from '../components/Section9.astro';
+import Header from '../components/layout/Header.astro';
+import ServiceHero from '../components/service/ServiceHero.astro';
+import ServiceApproach from '../components/service/ServiceApproach.astro';
+import ServiceSlider from '../components/service/ServiceSlider.astro';
+import ServiceAccordion from '../components/service/ServiceAccordion.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
 import { getSettings, getServicePage } from '../lib/sanity';
 import { buildServicePage } from '../lib/servicePage';
 
@@ -28,7 +28,7 @@ const page = buildServicePage('bien-etre', doc);
     <ServiceAccordion steps={page.steps} brands={page.brands} social={page.social} />
   </main>
   <!-- CTA « Prenez le temps » + footer -->
-  <Section9 variant="green" />
+  <SiteFooter variant="green" />
   <script>
     import '../scripts/main';
   </script>

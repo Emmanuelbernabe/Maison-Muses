@@ -31,8 +31,33 @@ maison-muses/
    cp .env.example .env                 # SANITY_PROJECT_ID, SANITY_DATASET
    npm install && npm run dev
    ```
-4. **Production** : déployez sur Netlify/Vercel/Cloudflare, puis créez un webhook Sanity (document publié) qui relance le build.
-   Pensez à ajouter l'URL du site dans *API → CORS origins* si vous passez un jour à un fetch côté navigateur (inutile en statique).
+4. **Production** : déploiement automatique, voir ci-dessous.
+
+## Déploiement automatique (`.github/workflows/deploy.yml`)
+
+| Événement | Ce qui se passe |
+|---|---|
+| Publication dans Sanity | webhook → GitHub Actions → site public reconstruit et redéployé (worker `maison-muses`) |
+| Push sur `main` | site public **et** site d'aperçu (`maison-muses-preview`) redéployés |
+| Onglet *Actions* → *Run workflow* | redéploiement manuel des deux |
+
+Le site d'aperçu (onglet « Modifier le site » du Studio) lit les brouillons en direct : il n'a pas besoin d'être reconstruit à chaque publication.
+
+**Mise en place (une seule fois)**
+
+1. **Cloudflare** — *My Profile → API Tokens → Create Token*, modèle **Edit Cloudflare Workers**. Noter aussi l'**Account ID** (page d'accueil du compte, colonne de droite).
+2. **GitHub, secrets** — dépôt → *Settings → Secrets and variables → Actions → New repository secret* :
+   `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SANITY_API_READ_TOKEN` (jeton Sanity *Viewer*), et si besoin `PUBLIC_GOOGLE_MAPS_API_KEY`.
+3. **GitHub, jeton pour Sanity** — *Settings (du compte) → Developer settings → Fine-grained tokens → Generate* :
+   dépôt **Maison-Muses** uniquement, permission **Contents : Read and write**. Il sert seulement à déclencher le workflow.
+4. **Sanity, webhook** — sanity.io/manage → projet → *API → Webhooks → Create webhook* :
+   - URL : `https://api.github.com/repos/Emmanuelbernabe/Maison-Muses/dispatches`
+   - Dataset : `production` · Trigger on : *Create*, *Update*, *Delete* · Filtre : (vide) · Drafts : **décoché**
+   - Projection : `{"event_type": "sanity-publish"}`
+   - HTTP method : `POST` · API version : (par défaut)
+   - HTTP headers : `Authorization` = `Bearer <jeton GitHub de l'étape 3>`, `Accept` = `application/vnd.github+json`
+
+Test : publier une modification dans le Studio, puis suivre le déploiement dans l'onglet *Actions* du dépôt GitHub (1 à 2 minutes).
 
 ## Animations GSAP (`src/scripts/main.ts`)
 

@@ -1,0 +1,191 @@
+---
+// Page L'équipe — Moussine puis Violaine : la section se fige et le scroll fait le relais entre les deux
+import { resolveImage } from '../../lib/images';
+
+// Photos pour l'instant (les vidéos de présentation viendront plus tard)
+const moussine = { big: resolveImage('marquee-follow-img'), small: resolveImage('moussine') };
+const violaine = { big: resolveImage('violaine'), small: resolveImage('load-3') };
+---
+
+<section class="em" id="em" data-anim="em-relay" aria-label="Moussine et Violaine">
+  <!-- ============ MOUSSINE ============ -->
+  <div class="em-panel em-m" data-em-panel="m">
+    <div class="em-head">
+      <p class="em-tag em-mask" data-em-line><span><i>Muses</i> Coiffure</span></p>
+      <p class="em-lead">
+        <span class="em-mask em-l1" data-em-line><span>L’expérience internationale,</span></span>
+<span class="em-mask" data-em-line><span>le <img class="em-heart" src="/images/coeur_orange.svg" alt="cœur" width="80" height="80" /> à Toulouse.</span></span>
+      </p>
+    </div>
+
+    <figure class="em-photo em-big" data-em-clip><img src={moussine.big} alt="Moussine en pleine coupe" loading="lazy" decoding="async" /></figure>
+    <figure class="em-photo em-small" data-em-clip><img src={moussine.small} alt="Portrait de Moussine" loading="lazy" decoding="async" /></figure>
+
+    <div class="em-col">
+      <div class="em-id">
+        <h2 class="em-name em-mask" data-em-line><span>Moussine</span></h2>
+        <p class="em-role em-mask" data-em-line><span>Coiffeur, fondateur</span></p>
+      </div>
+      <p class="em-bio" data-em-fade>Coiffeur passionné de 34 ans, j’ai exercé à Toulouse, Paris, en Australie et à Dubaï. Aujourd’hui de retour dans ma ville de cœur, je vous accueille chez <b>Maison Muses</b> pour une expérience capillaire unique, guidée par l’expertise et la créativité.</p>
+      <a class="em-cta" href="https://www.planity.com/" target="_blank" rel="noopener" data-em-fade>Réserver avec Moussine</a>
+    </div>
+  </div>
+
+  <!-- ============ VIOLAINE ============ -->
+  <div class="em-panel em-v" data-em-panel="v" hidden>
+    <div class="em-head">
+      <p class="em-tag em-mask" data-em-line><span><i>Muses</i> Bien-être</span></p>
+      <p class="em-lead">
+        <span class="em-mask" data-em-line><span>Une parenthèse pour</span></span>
+        <span class="em-mask" data-em-line><span>harmoniser le corps et l’esprit.</span></span>
+      </p>
+    </div>
+
+    <figure class="em-photo em-big" data-em-clip><img src={violaine.big} alt="Portrait de Violaine" loading="lazy" decoding="async" /></figure>
+    <figure class="em-photo em-small" data-em-clip><img src={violaine.small} alt="Soin du visage par Violaine" loading="lazy" decoding="async" /></figure>
+
+    <div class="em-col">
+      <div class="em-id">
+        <h2 class="em-name em-mask" data-em-line><span>Violaine</span></h2>
+        <p class="em-role em-mask" data-em-line><span>Praticienne bien-être</span></p>
+      </div>
+      <p class="em-bio" data-em-fade>Passionnée par l’esthétique et le bien-être depuis plus de douze ans, convaincue que la beauté extérieure reflète l’équilibre intérieur, j’aborde chaque soin de manière holistique, pour vous offrir une parenthèse sur-mesure.</p>
+      <a class="em-cta" href="https://www.planity.com/" target="_blank" rel="noopener" data-em-fade>Réserver avec Violaine</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Unité fluide --fpx (global.css), sur toute la largeur de l'écran */
+  .em {
+    --em-pad: calc(40 * var(--fpx));          /* padding gauche / droite des sections */
+    --em-top: calc(100 * var(--fpx));         /* haut du titre = haut de la grande image */
+    --em-small-top: calc(300 * var(--fpx));   /* haut de la petite image = haut de la colonne de texte */
+    --em-big-w: calc(399 * var(--fpx));
+    --em-small-w: calc(388 * var(--fpx));
+    --em-gap: calc(36 * var(--fpx));          /* espace entre les textes et les images */
+    --em-green: #11311A;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg, #F7F2EC);
+    transition: background-color 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .em.show-v { background: var(--em-green); }
+
+  .em-panel {
+    position: absolute;
+    inset: 0;
+    font-family: var(--font, 'DM Sans', sans-serif);
+  }
+
+  .em .em-panel[hidden] { display: none !important; }
+  .em-m { --c: var(--orange, #e57851); }
+  .em-v { --c: #F7F2EC; }
+  .em-panel > * { position: absolute; margin: 0; }
+
+  .em-mask { display: block; overflow: hidden; padding-block: 0.1em; margin-block: -0.1em; }
+  .em-mask > span { display: inline-block; }
+
+  /* ── Titre : aligné sur le haut de la grande image ── */
+  .em-head { top: var(--em-top); width: max-content; color: var(--c); }
+  .em-m .em-head { left: var(--em-pad); }
+  .em-v .em-head { right: var(--em-pad); text-align: right; }
+
+  .em-tag {
+    position: absolute;
+    left: 0;
+    top: calc(8 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 200;
+    font-size: calc(24 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  .em-tag i { font-family: 'Thunder LC', 'Thunder', sans-serif; font-style: normal; }
+
+  .em-lead {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(80 * var(--fpx));
+    line-height: 0.74;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Moussine : la 1re ligne commence après le tag */
+  .em-m .em-l1 { padding-left: calc(220 * var(--fpx)); }
+  /* Cœur : à la taille des capitales, posé sur la ligne de base comme une lettre */
+  .em-heart {
+    display: inline-block;
+    width: 0.95em;
+    height: 0.95em;
+    vertical-align: -0.1em;
+  }
+
+  /* ── Images : collées aux bords de l'écran, jusqu'en bas ── */
+  .em-photo { overflow: hidden; bottom: 0; }
+  .em-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .em-big { top: var(--em-top); width: var(--em-big-w); }
+  .em-small { top: var(--em-small-top); width: var(--em-small-w); }
+  .em-m .em-big { right: 0; }
+  .em-m .em-small { left: 0; }
+  .em-v .em-big { left: 0; }
+  .em-v .em-small { right: 0; }
+
+  /* ── Colonne de texte : nom + métier, paragraphe centré, bouton à 24 du bas ── */
+  .em-col {
+    top: var(--em-small-top);
+    bottom: calc(24 * var(--fpx));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: calc(24 * var(--fpx));
+    color: var(--c);
+  }
+
+  .em-m .em-col { left: calc(var(--em-small-w) + var(--em-gap)); right: calc(var(--em-big-w) + var(--em-gap)); align-items: flex-start; }
+  .em-v .em-col { left: calc(var(--em-big-w) + var(--em-gap)); right: calc(var(--em-small-w) + var(--em-gap)); align-items: flex-end; text-align: right; }
+
+  .em-id { display: flex; flex-direction: column; gap: calc(6 * var(--fpx)); }
+  .em-v .em-id { align-items: flex-end; }
+
+  .em-name {
+    font-family: 'Cormorant Infant', serif;
+    font-weight: 400;
+    font-size: calc(80 * var(--fpx));
+    line-height: 0.7;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .em-role { font-size: calc(26 * var(--fpx)); line-height: 1; text-transform: uppercase; }
+  .em-bio { max-width: calc(480 * var(--fpx)); font-size: calc(17.5 * var(--fpx)); line-height: 1.5; }
+  .em-bio b { font-weight: 700; }
+  .em-cta { font-size: calc(29 * var(--fpx)); line-height: 1; text-transform: uppercase; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; white-space: nowrap; }
+
+  /* Mobile : même relais, contenu empilé (deux photos côte à côte) */
+  @media (max-width: 899px) {
+    .em { height: 100svh; }
+    .em-panel { display: grid; grid-template-columns: 1.25fr 1fr; column-gap: 0.8rem; row-gap: 0.8rem; align-content: start; padding: 4.5rem 1.25rem 1.25rem; }
+    .em-panel > * { position: relative; inset: auto; left: auto !important; right: auto !important; top: auto !important; bottom: auto !important; width: auto !important; grid-column: 1 / -1; }
+    .em-head, .em-v .em-head { text-align: left; }
+    .em-tag { position: relative; top: 0; font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .em-lead { font-size: 1.85rem; white-space: normal; }
+    .em-m .em-l1 { padding-left: 0; }
+    /* « .em-panel > » : plus spécifique que « .em-panel > * » une fois scopé par Astro */
+    .em-panel > .em-big { grid-column: 1; height: 30vh; }
+    .em-panel > .em-small { grid-column: 2; height: 21vh; align-self: end; }
+    .em-col, .em-v .em-col { align-items: flex-start; text-align: left; justify-content: flex-start; gap: 0.8rem; }
+    .em-v .em-id { align-items: flex-start; }
+    .em-name { font-size: 2.8rem; }
+    .em-role { font-size: 0.95rem; }
+    .em-bio { max-width: none; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .em-cta { font-size: 1.05rem; }
+  }
+</style>

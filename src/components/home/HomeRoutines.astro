@@ -1,0 +1,317 @@
+---
+// Accueil — Routines personnalisées : deux portes, chacune ouvre son Typeform en pop-up (routines.ts)
+import { resolveImage } from '../../lib/images';
+import { siteImage, SIZES } from '../../lib/siteImage';
+const { photos } = Astro.props;
+
+// TODO : remplacer par les vraies URLs Typeform
+const doors = [
+  {
+    key: 'coiffure',
+    label: 'COIFFURE',
+    text: 'VOS CHEVEUX, VOS HABITUDES, VOS ENVIES.',
+    url: 'https://form.typeform.com/to/whoBdVpd',
+    embed: 'https://form.typeform.com/to/whoBdVpd?typeform-embed-id=5317714625339028&typeform-embed=embed-widget&typeform-source=maison-muses.fr&typeform-medium=snippet&typeform-medium-version=next&embed-opacity=100&typeform-embed-handles-redirect=1',
+    img: siteImage(photos?.routines?.coiffure, resolveImage('marquee-1'), SIZES.door),
+    alt: 'Cheveux longs blonds ondulés au salon Maison Muses',
+  },
+  {
+    key: 'bien-etre',
+    label: 'BIEN-ÊTRE',
+    text: 'VOTRE RYTHME, VOS TENSIONS, VOS BESOINS.',
+    url: 'https://form.typeform.com/to/EDlpdbdV',
+    embed: 'https://form.typeform.com/to/EDlpdbdV?typeform-embed-id=7111689052245918&typeform-embed=embed-widget&typeform-source=maison-muses.fr&typeform-medium=snippet&typeform-medium-version=next&embed-opacity=100&typeform-embed-handles-redirect=1',
+    img: siteImage(photos?.routines?.bienEtre, resolveImage('load-3'), SIZES.door),
+    alt: 'Massage du visage à Maison Muses Bien-être',
+  },
+];
+---
+
+<section class="routines" id="routines" data-anim="routines-section">
+  <div class="routines-head">
+    <h2 class="routines-title" data-anim="routines-title">
+      <span class="routines-thin">UNE ROUTINE</span><br />PENSÉE POUR VOUS.
+    </h2>
+    <p class="routines-para">
+      QUELQUES QUESTIONS, ET NOS EXPERTS VOUS COMPOSENT UNE ROUTINE ADAPTÉE. VOUS LA RECEVEZ PAR E-MAIL.
+    </p>
+  </div>
+
+  <div class="routines-doors" data-anim="routines-doors">
+    {doors.map((d, i) => (
+      <a class:list={['routines-door', `routines-door-${d.key}`, { 'is-open': i === 0 }]} href={d.url} target="_blank" rel="noopener" data-anim="routines-door" data-routines-form={d.embed} data-routines-title={`Routine ${d.label.toLowerCase()}`}>
+        <span class="routines-door-media">
+          <span class="routines-door-frame">
+            <img class="routines-door-img" src={d.img.src} srcset={d.img.srcset} sizes={d.img.sizes} alt={d.img.alt ?? d.alt} loading="lazy" decoding="async" />
+          </span>
+        </span>
+        <span class="routines-door-vertical" aria-hidden="true">{d.label}</span>
+        <span class="routines-door-content">
+          <span class="routines-door-text-wrap">
+            <span class="routines-door-name"><span class="routines-thin">ROUTINE</span> {d.label}</span>
+            <span class="routines-door-text">{d.text}</span>
+          </span>
+          <span class="routines-btn">FAIRE MON DIAGNOSTIC</span>
+        </span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<!-- Pop-up Typeform : même apparition que la pop-up produit des pages marques -->
+<div class="routines-modal" data-routines-modal role="dialog" aria-modal="true" aria-label="Diagnostic routine" hidden>
+  <div class="routines-veil" data-routines-close></div>
+  <div class="routines-dlg" data-routines-dlg>
+    <button class="routines-close" type="button" data-routines-close aria-label="Fermer">✕</button>
+    <iframe class="routines-form" data-routines-iframe title="Diagnostic routine" allow="camera; microphone; autoplay; encrypted-media; fullscreen"></iframe>
+  </div>
+</div>
+
+<style>
+  :root {
+    --routines-pad-x: calc(40 * var(--fpx));
+    --routines-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .routines {
+    position: relative;
+    width: 100%;
+    padding: calc(140 * var(--fpx)) var(--routines-pad-x);
+    background: var(--bg);
+    color: var(--orange, #e57851);
+    box-sizing: border-box;
+  }
+
+  /* ── En-tête ── */
+  .routines-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(40 * var(--fpx));
+    margin-bottom: calc(60 * var(--fpx));
+  }
+
+  .routines-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(120 * var(--fpx));
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+
+  .routines-thin { font-weight: 200; }
+
+  .routines-para {
+    width: calc(520 * var(--fpx));
+    max-width: 100%;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(28 * var(--fpx));
+    line-height: 1.05;
+    text-align: right;
+  }
+
+  /* ── Portes ── */
+  .routines-doors {
+    display: flex;
+    gap: calc(16 * var(--fpx));
+    height: calc(620 * var(--fpx));
+  }
+
+  .routines-door {
+    position: relative;
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* largeur finale posée par routines.ts au survol (l'animation se fait en transform), valeur CSS = état sans JS */
+  .routines-door.is-open { flex-grow: 2.4; }
+
+  /* Cadre de la photo. Porte ouverte : la photo s'arrête au-dessus du bandeau au lieu de passer dessous
+     (sinon un liseré de la photo apparaît sur le bord du bandeau). --routines-band = hauteur du bandeau (routines.ts).
+     Découpe sans clip-path : avec la photo sur sa propre couche GPU, clip-path passe par un masque rastérisé
+     qui laissait fuir la colonne de bord de la photo sous le bandeau pendant l'étirement de la porte.
+     Ici, .routines-door-media (overflow: hidden) remonte de la hauteur du bandeau et .routines-door-frame redescend
+     d'autant : la photo reste en place, son bas est rogné par une découpe rectangulaire, son haut par la porte. */
+  .routines-door-media,
+  .routines-door-frame {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transform: translateY(0);
+    transition: transform 0.6s var(--routines-ease);
+  }
+
+  .routines-door-frame { overflow: visible; }
+
+  .routines-door.is-open .routines-door-media,
+  .routines-door.is-open .routines-door-frame {
+    transition: transform 0.9s var(--routines-ease) 0.2s;   /* même rythme que le bandeau qui monte */
+  }
+
+  /* - 2px : débord bas du bandeau (voir .routines-door-content) */
+  .routines-door.is-open .routines-door-media { transform: translateY(calc(2px - var(--routines-band, 0px))); }
+  .routines-door.is-open .routines-door-frame { transform: translateY(calc(var(--routines-band, 0px) - 2px)); }
+
+  /* Photo : sur desktop, routines.ts la pose à sa taille finale (une fois par ouverture) ;
+     pendant l'animation, seul son transform change (--routines-ikx / --routines-iky), sans recalcul de mise en page */
+  .routines-door-img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: center 30%;
+    transform-origin: 50% 30%;
+    transform: scale(var(--routines-ikx, 1), var(--routines-iky, 1));
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  /* Couleur de chaque porte (texte, bouton) : orange, vert pour le bien-être */
+  .routines-door { --routines-door-c: var(--orange, #e57851); color: var(--routines-door-c); }
+  .routines-door-bien-etre { --routines-door-c: var(--green, #0F2F18); }
+
+  /* Nom vertical sur la porte fermée */
+  .routines-door-vertical {
+    position: absolute;
+    left: calc(24 * var(--fpx));
+    bottom: calc(24 * var(--fpx));
+    writing-mode: vertical-rl;
+    transform: rotate(180deg) scaleX(var(--routines-inv, 1));   /* contre-échelle pendant l'animation */
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(80 * var(--fpx));
+    line-height: 0.85;
+    color: var(--bg);
+    white-space: nowrap;
+    transition: opacity 0.5s var(--routines-ease);
+  }
+
+  .routines-door.is-open .routines-door-vertical { opacity: 0; }
+
+  /* Bandeau titre + lien : glisse depuis le bas quand la porte s'ouvre */
+  /* Le bandeau déborde de 2px à gauche, à droite et en bas (rogné par l'overflow de la porte) :
+     pendant l'animation en scaleX, le pixel de bord de la porte est anticrénelé et, si le bandeau
+     s'arrêtait pile au bord, la photo en dessous transparaissait en liseré vertical. */
+  .routines-door-content {
+    --routines-bleed: 2px;
+    position: absolute;
+    left: calc(-1 * var(--routines-bleed));
+    right: calc(-1 * var(--routines-bleed));
+    bottom: calc(-1 * var(--routines-bleed));
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(20 * var(--fpx));
+    padding: calc(28 * var(--fpx)) calc(28 * var(--fpx) + var(--routines-bleed)) calc(28 * var(--fpx) + var(--routines-bleed));
+    background: var(--bg);
+    transform: translateY(101%);
+    transition: transform 0.6s var(--routines-ease);
+  }
+
+  .routines-door.is-open .routines-door-content {
+    transform: translateY(0);
+    transition: transform 0.9s var(--routines-ease) 0.2s;
+  }
+
+  .routines-door-text-wrap { display: flex; flex-direction: column; min-width: 0; }
+
+  /* Contre-échelle pendant l'animation de largeur (la porte est étirée en scaleX) : le texte ne se déforme pas */
+  .routines-door-text-wrap { transform: scaleX(var(--routines-inv, 1)); transform-origin: 0 100%; }
+
+  .routines-door-name {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: calc(72 * var(--fpx));
+    line-height: 0.85;
+    white-space: nowrap;
+  }
+
+  .routines-door-text {
+    margin-top: calc(10 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(20 * var(--fpx));
+    line-height: 1.1;
+  }
+
+  .routines-btn {
+    flex-shrink: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(28 * var(--fpx));
+    line-height: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    white-space: nowrap;
+    transform: scaleX(var(--routines-inv, 1));
+    transform-origin: 100% 100%;
+    transition: opacity 0.2s ease;
+  }
+
+  .routines-door:hover .routines-btn { opacity: 0.8; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .routines-title { visibility: hidden; }
+    :global(.js) .routines-door { clip-path: inset(100% 0% 0% 0%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .routines-door-vertical,
+    .routines-door-media,
+    .routines-door.is-open .routines-door-media,
+    .routines-door-frame,
+    .routines-door.is-open .routines-door-frame,
+    .routines-door-content,
+    .routines-door.is-open .routines-door-content { transition: none; }
+  }
+
+  /* ───── Pop-up Typeform ───── */
+  :global(html.is-modal-open) { overflow: hidden; }   /* mobile (sans Lenis) : la page ne défile plus derrière */
+  .routines-modal { position: fixed; inset: 0; z-index: 1004; /* au-dessus du header (1001) et du menu (1003) */ display: grid; place-items: center; padding: 4vh 4vw; }
+  .routines-modal[hidden] { display: none; }
+  .routines-veil { position: absolute; inset: 0; background: rgba(15, 47, 51, 0.55); backdrop-filter: blur(10px); }
+  .routines-dlg { position: relative; width: min(980px, 100%); height: min(720px, 100%); background: var(--bg, #F7F2EC); overflow: hidden; }
+  .routines-form { display: block; width: 100%; height: 100%; border: 0; }
+  /* À gauche, centrée sur la hauteur du logo Typeform (en haut à droite, ~48px du haut, 20px du bord) */
+  .routines-close { position: absolute; top: 29px; left: 20px; z-index: 2; width: 38px; height: 38px; border: 1px solid rgba(15, 47, 24, 0.35); border-radius: 50%; background: var(--bg, #F7F2EC); color: var(--green, #0F2F18); cursor: pointer; }
+  .routines-close:focus-visible { outline: 2px solid var(--orange, #e57851); outline-offset: 3px; }
+
+  /* ── Tablette / mobile : portes empilées, toutes ouvertes ── */
+  @media (max-width: 1023px) {
+    .routines { padding: 5rem 1.5rem; }
+    .routines-head { flex-direction: column; align-items: flex-start; gap: 1.5rem; margin-bottom: 2.5rem; }
+    .routines-title { font-size: 3.5rem; }
+    .routines-para { width: 100%; text-align: left; font-size: 1.3rem; }
+    .routines-doors { flex-direction: column; height: auto; gap: 1rem; }
+    .routines-door { flex: none; height: 28rem; }
+    .routines-door-vertical { display: none; }
+    /* Bandeau toujours visible : la photo s'arrête toujours au-dessus */
+    .routines-door-media,
+    .routines-door.is-open .routines-door-media { transform: translateY(calc(-1 * var(--routines-band, 0px))); transition: none; }
+    .routines-door-frame,
+    .routines-door.is-open .routines-door-frame { transform: translateY(var(--routines-band, 0px)); transition: none; }
+    .routines-door-content {
+      --routines-bleed: 0px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transform: none;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.25rem;
+    }
+    .routines-door-name { font-size: 2.6rem; white-space: normal; }
+    .routines-door-text { font-size: 1.05rem; }
+    .routines-btn { font-size: 1.4rem; }
+    .routines-modal { padding: 0; }
+    .routines-dlg { width: 100%; height: 100%; }
+  }
+</style>

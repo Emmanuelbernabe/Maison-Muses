@@ -1,0 +1,343 @@
+---
+import { resolveImage } from '../../lib/images';
+import { siteImage, SIZES } from '../../lib/siteImage';
+const { photos } = Astro.props;
+
+const ctaCoiffure = { label: 'ESPACE COIFFURE', url: '/coiffure' };
+const ctaBienetre = { label: 'ESPACE BIEN ÊTRE', url: '/bien-etre' };
+const paraText = 'Notre équipe vous reçoit dans un environnement chaleureux et intimiste. Attentif à vos besoins, nous proposons systématiquement un diagnostic à toutes nos prestations. En cas de première visite, nous vous conseillons de réserver une consultation pour un diagnostique plus approfondi.';
+
+const ambianceImg = siteImage(photos?.intro?.ambiance, resolveImage('ambiance-img'), SIZES.ambiance);
+---
+
+<!-- Intro : section normale dans le flux après la hero -->
+<section class="intro" id="intro" data-anim="intro-section">
+
+  <!-- Mobile : emplacement où le portrait du hero vient se poser (hauteur posée par intro.ts) -->
+  <div class="intro-slot" data-anim="intro-slot" aria-hidden="true"></div>
+
+  <!-- Titre 3 lignes : flexbox gap 0, aligné à droite, centré verticalement dans les 100vh -->
+  <div class="intro-title-box" data-anim="intro-title-box">
+    <!-- Ligne 1 avec overflow mask -->
+    <div class="intro-line-mask">
+      <div class="intro-line intro-line-1" data-anim="intro-line">
+        <span class="thin">L'ART DE LA </span><span class="bold">COIFFURE</span>
+      </div>
+    </div>
+
+    <!-- Ligne 2 avec overflow mask -->
+    <div class="intro-line-mask">
+      <div class="intro-line intro-line-2" data-anim="intro-line">
+        <span class="thin">ET DU </span><span class="bold">BIEN ÊTRE</span>
+      </div>
+    </div>
+
+    <!-- Ligne 3 avec overflow mask -->
+    <div class="intro-line-mask">
+      <div class="intro-line intro-line-3" data-anim="intro-line">
+        <span class="thin">SE </span><span class="bold">MELENT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Colonne droite : centrée verticalement comme l'image centrale -->
+  <div class="intro-right-col">
+
+    <!-- Bloc du haut : vidéo soin + image ambiance + bouton espace bien être stretch/aligné en bas -->
+    <div class="intro-top-block" data-anim="intro-top-block">
+      <!-- Vidéo soin -->
+      <div class="intro-video-wrap">
+        <video class="intro-video" src="/video/soin-bg-video.mp4" preload="none" loop muted playsinline></video>
+      </div>
+
+      <!-- Colonne ambiance : image + bouton en bas -->
+      <div class="intro-ambiance-col">
+        <div class="intro-ambiance-wrap">
+          <img class="intro-ambiance-img" src={ambianceImg.src} srcset={ambianceImg.srcset} sizes={ambianceImg.sizes} alt={ambianceImg.alt ?? 'Ambiance Maison Muses'} width="376" height="500" loading="eager" decoding="async" />
+        </div>
+        <a class="intro-btn intro-btn-bienetre" href={ctaBienetre.url}>{ctaBienetre.label}</a>
+      </div>
+    </div>
+
+    <!-- Bloc du bas : espacement maîtrisé, paragraphe regular + bouton coiffure -->
+    <div class="intro-bottom-block" data-anim="intro-bottom-block">
+      <p class="intro-para">{paraText}</p>
+      <a class="intro-btn intro-btn-coiffure" href={ctaCoiffure.url}>{ctaCoiffure.label}</a>
+    </div>
+
+  </div>
+
+</section>
+
+<style>
+ :root {
+  --intro-pad:           3rem;
+  --intro-title-fs:      calc(100 * var(--fpx));
+  --intro-title-overlap: calc(150 * var(--fpx));
+  --intro-video-w:       calc(188 * var(--fpx));
+  --intro-video-h:       calc(333 * var(--fpx));
+  --intro-ambiance-h:    calc(250 * var(--fpx));
+  --intro-gap-media:     calc(16 * var(--fpx));
+  --intro-gap-blocks:    calc(16 * var(--fpx));  
+  --intro-btn-fs:        calc(20 * var(--fpx));
+  --intro-para-fs:       calc(20 * var(--fpx));  
+
+  --intro-right-w:  calc(var(--intro-video-w) * 2 + var(--intro-gap-media));
+  --intro-col-left: calc(50% + var(--hero-portrait-w) / 2 + var(--intro-gap-media));
+}
+
+  .intro {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    padding: var(--intro-pad);
+    box-sizing: border-box;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 5;
+    background: transparent;
+  }
+
+  /* ── Titre 3 lignes : flexbox gap 0, aligné à droite, centré verticalement ── */
+  .intro-title-box {
+    position: absolute;
+    right: calc(50% + var(--hero-portrait-w) / 2 - var(--intro-title-overlap));
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    max-width: calc(50% - var(--hero-portrait-w) / 2 + var(--intro-title-overlap) - var(--intro-pad));
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Masque d'overflow pour l'apparition ligne par ligne de bas en haut */
+  .intro-line-mask {
+    overflow: hidden;
+    display: block;
+    line-height: 0.92;
+    padding-bottom: 0.15em;
+  }
+
+  .intro-line {
+    display: block;
+    white-space: nowrap;
+    font-family: 'Thunder', sans-serif;
+    font-size: var(--intro-title-fs);
+    line-height: 0.92;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+    letter-spacing: 0;
+  }
+
+  .thin { font-weight: 200; }
+  .bold { font-weight: 700; }
+
+  /* ── Colonne de droite : centrée verticalement ── */
+  .intro-right-col {
+  position: absolute;
+  left: var(--intro-col-left);
+  top: calc(50% - var(--hero-portrait-h) / 2);  /* même haut que le portrait */
+  height: var(--hero-portrait-h);               /* même hauteur que le portrait */
+  width: var(--intro-right-w);
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 6;
+}
+
+  /* ── Bloc du haut : vidéo soin + image ambiance + bouton espace bien être ── */
+  .intro-top-block {
+    display: flex;
+    gap: var(--intro-gap-media);
+    align-items: stretch;
+    width: 100%;
+    height: var(--intro-video-h);
+    flex-shrink: 0;
+    opacity: 1;
+  }
+
+  /* Vidéo soin */
+  .intro-video-wrap {
+    width: var(--intro-video-w);
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+    flex-shrink: 0;
+  }
+
+  .intro-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Colonne ambiance + bouton en bas : même hauteur que la vidéo */
+  .intro-ambiance-col {
+    width: var(--intro-video-w);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+  }
+
+  .intro-ambiance-wrap {
+  width: 100%;
+  flex: none;                      /* au lieu de 1 1 auto */
+  height: var(--intro-ambiance-h);    /* nouveau */
+  overflow: hidden;
+}
+
+  .intro-ambiance-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Bouton espace bien être : aligné en bas du bloc du haut */
+  .intro-btn-bienetre {
+    margin-top: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Bloc du bas : gap maîtrisé ── */
+  .intro-bottom-block {
+  flex: 1 1 auto;            /* prend tout l'espace sous le top-block */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  opacity: 1;
+}
+
+  /* Paragraphe : regular 400, font-size fluide */
+  .intro-para {
+    margin-block: auto;
+    padding: 0;
+    width: 100%;
+    font-family: 'Thunder', sans-serif;
+    font-size: var(--intro-para-fs);
+    font-weight: 400;
+    color: var(--orange, #e57851);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  /* Boutons */
+  .intro-btn {
+    font-family: 'Thunder', sans-serif;
+    font-size: var(--intro-btn-fs);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    pointer-events: auto;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .intro-btn:hover {
+    opacity: 0.75;
+  }
+
+  .intro-btn-coiffure {
+    align-self: flex-start;
+  }
+
+  .intro-slot { display: none; }
+
+  /* ── Mobile / tablette : portrait en haut, titre par-dessus, contenu empilé ── */
+  @media (max-width: 1023px) {
+    .intro {
+      height: auto;
+      min-height: 0;
+      padding: 0 0 40vw;
+      overflow: visible;
+    }
+
+    .intro-slot {
+      display: block;
+      width: var(--hero-m-img-w, 72.8vw);
+      height: calc(var(--hero-m-img-w, 72.8vw) * 1.2288);
+      margin: 0 auto;
+    }
+
+    .intro-title-box {
+      top: 6.7vw;
+      right: 2vw;
+      left: auto;
+      transform: none;
+      max-width: none;
+    }
+
+    .intro-line { font-size: 16vw; }
+
+    .intro-right-col {
+      position: static;
+      left: auto;
+      top: auto;
+      width: 100%;
+      height: auto;
+      margin-top: 10.7vw;
+    }
+
+    /* Vidéo à gauche, image ambiance + bouton à droite, même hauteur */
+    .intro-top-block {
+      height: auto;
+      justify-content: flex-end;
+      align-items: stretch;
+      gap: 4.3vw;
+    }
+
+    .intro-video-wrap {
+      width: 45.7vw;
+      height: auto;
+    }
+
+    .intro-ambiance-col {
+      width: 50vw;
+      height: auto;
+      gap: 18vw;
+    }
+
+    .intro-ambiance-wrap { height: 66.7vw; }
+
+    .intro-btn {
+      font-family: var(--font, 'DM Sans', sans-serif);
+      font-size: 4.3vw;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-underline-offset: 0.2em;
+    }
+
+    .intro-btn-bienetre {
+      margin: 0 0 0 2.7vw;
+    }
+
+    .intro-bottom-block {
+      gap: 9vw;
+      margin-top: 13vw;
+      padding: 0 2vw 0 7.5vw;
+    }
+
+    .intro-para {
+      margin: 0;
+      font-size: 3.75vw;
+      line-height: 1.05;
+      text-transform: uppercase;
+    }
+
+    .intro-btn-coiffure { margin-left: 1.3vw; }
+  }
+</style>

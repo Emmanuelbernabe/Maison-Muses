@@ -1,16 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import Hero from '../components/Hero.astro';
-import Section2 from '../components/Section2.astro';
-import Section3 from '../components/Section3.astro';
-import Section4 from '../components/Section4.astro';
-import Section5 from '../components/Section5.astro';
-import Section6 from '../components/Section6.astro';
-import Section7 from '../components/Section7.astro';
-import Section8 from '../components/Section8.astro';
-import Section9 from '../components/Section9.astro';
-import LoadingScreen from '../components/LoadingScreen.astro';
+import Header from '../components/layout/Header.astro';
+import HomeHero from '../components/home/HomeHero.astro';
+import HomeIntro from '../components/home/HomeIntro.astro';
+import HomeGallery from '../components/home/HomeGallery.astro';
+import HomeTeam from '../components/home/HomeTeam.astro';
+import HomeCoffrets from '../components/home/HomeCoffrets.astro';
+import HomeReviews from '../components/home/HomeReviews.astro';
+import HomeRoutines from '../components/home/HomeRoutines.astro';
+import HomeJournal from '../components/home/HomeJournal.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
+import LoadingScreen from '../components/home/LoadingScreen.astro';
 import { getHome, getSettings } from '../lib/sanity';
 
 const [home, settings] = await Promise.all([getHome(), getSettings()]);
@@ -25,17 +25,17 @@ if (!home || !settings) {
   <LoadingScreen photos={home.photos} />
   <Header logo={settings.logo} cta={settings.headerCta} />
   <main id="top">
-    <!-- Hero et Section 2 dans le flux normal sans pin superposé -->
-    <Hero data={home.hero} photos={home.photos} />
-    <Section2 data={home.intro} photos={home.photos} />
-    <Section3 photos={home.photos} />
-    <Section4 photos={home.photos} />
-    <Section5 photos={home.photos} />
-    <Section6 />
-    <Section7 photos={home.photos} />
-    <Section8 />
+    <!-- Hero et intro dans le flux normal sans pin superposé -->
+    <HomeHero data={home.hero} photos={home.photos} />
+    <HomeIntro data={home.intro} photos={home.photos} />
+    <HomeGallery photos={home.photos} />
+    <HomeTeam photos={home.photos} />
+    <HomeCoffrets photos={home.photos} />
+    <HomeReviews />
+    <HomeRoutines photos={home.photos} />
+    <HomeJournal />
   </main>
-  <Section9 />
+  <SiteFooter />
   <script>
     import '../scripts/main';
   </script>

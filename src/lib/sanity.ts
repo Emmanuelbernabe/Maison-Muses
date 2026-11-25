@@ -94,7 +94,7 @@ export const getServicePage = (id: 'page-coiffure' | 'page-bien-etre') =>
     hero { eyebrow, title, signature, "video": video.asset->url, poster },
     approach,
     gallery,
-    steps[]{ _key, tag, title, paragraphs, ctaLabel, ctaUrl, image },
+    steps[]{ _key, tag, title, paragraphs, ctaLabel, ctaUrl, image, "video": video.asset->url },
     brands,
     social
   }`, { id });

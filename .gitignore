@@ -2,3 +2,6 @@ node_modules
 dist
 .astro
 .env
+.wrangler
+.dev.vars
+dist-preview

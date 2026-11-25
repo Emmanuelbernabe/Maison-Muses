@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import EquipeHero from '../components/EquipeHero.astro';
-import EquipeMembers from '../components/EquipeMembers.astro';
-import Section9 from '../components/Section9.astro';
+import Header from '../components/layout/Header.astro';
+import EquipeHero from '../components/equipe/EquipeHero.astro';
+import EquipeMembers from '../components/equipe/EquipeMembers.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
 import { getSettings } from '../lib/sanity';
 
 const settings = await getSettings();
@@ -21,7 +21,7 @@ if (!settings) {
     <EquipeMembers />
   </main>
   <!-- CTA « Prenez le temps » + footer -->
-  <Section9 />
+  <SiteFooter />
   <script>
     import '../scripts/main';
   </script>

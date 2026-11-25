@@ -46,13 +46,17 @@ export function buildServicePage(slug: 'coiffure' | 'bien-etre', doc: any) {
     ? doc.gallery.map((img: any) => ({ ...serviceImage(img, undefined, 1600), attr: attr(`gallery[_key=="${img._key}"]`) }))
     : d.gallery.map((g: any) => ({ src: resolveImage(g.key), alt: g.alt }));
 
-  const steps = (filled(doc?.steps) ? doc.steps : d.steps).map((s: any, i: number) => ({
+  const stepsFromSanity = filled(doc?.steps);
+  const steps = (stepsFromSanity ? doc.steps : d.steps).map((s: any, i: number) => ({
     tag: s.tag,
     title: s.title,
     paragraphs: s.paragraphs || [],
     ctaLabel: s.ctaLabel,
     ctaUrl: clean(s.ctaUrl),
     image: { ...serviceImage(s.image, d.steps[i]?.image), attr: s._key ? attr(`steps[_key=="${s._key}"].image`) : undefined },
+    // Vidéo facultative, à la place de la photo (la photo sert alors d'affiche)
+    video: stepsFromSanity ? s.video || undefined : s.video ? resolveVideo(s.video) : undefined,
+    videoAttr: s._key ? attr(`steps[_key=="${s._key}"].video`) : undefined,
   }));
 
   const b = doc?.brands || {};
