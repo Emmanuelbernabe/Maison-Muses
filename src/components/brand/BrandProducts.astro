@@ -4,11 +4,14 @@ import ServiceSlider from '../service/ServiceSlider.astro';
 interface Props { brand: any; }
 const { brand } = Astro.props;
 const modalData = JSON.stringify(brand.products.map((p: any) => p.modal));
+// Libellés communs des pages marques : Réglages du site (Sanity + valeurs par défaut, lib/content.ts)
+import { loadSettings } from '../../lib/content';
+const { brandLabels: labels } = await loadSettings();
 ---
 
 <section class="br-pr" aria-label="Les produits">
   <div class="br-pr-top">
-    <p class="br-lab">Les produits</p>
+    <p class="br-lab">{labels.products}</p>
     <div data-br-fade>
       {brand.productsTitle && <p class="br-pr-big">{brand.productsTitle}</p>}
       {brand.productsText && <p class="br-pr-txt">{brand.productsText}</p>}
@@ -39,7 +42,7 @@ const modalData = JSON.stringify(brand.products.map((p: any) => p.modal));
       <p class="br-mut" data-br-m="subtitle"></p>
       <p data-br-m="description"></p>
       <div data-br-m="specs"></div>
-      <a href={brand.bookingUrl} target="_blank" rel="noopener">Réserver un soin</a>
+      <a href={brand.bookingUrl} target="_blank" rel="noopener">{labels.booking}</a>
     </div>
   </div>
 </div>

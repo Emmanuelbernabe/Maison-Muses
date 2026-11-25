@@ -1,18 +1,11 @@
 ---
-import { resolveImage } from '../../lib/images';
-import { siteImage, SIZES } from '../../lib/siteImage';
-const { photos } = Astro.props;
-
-// La 2e photo est le portrait central (relais avec l'intro), mêmes réglages que dans le hero
-const marquee = photos?.gallery?.marquee ?? [];
-const slides = [
-  siteImage(marquee[0], resolveImage('marquee-1', 'slide-2'), SIZES.portrait),
-  siteImage(photos?.hero?.center, resolveImage('marquee-follow-img'), SIZES.portrait),
-  siteImage(marquee[1], resolveImage('marquee-3', 'slide-3'), SIZES.portrait),
-  siteImage(marquee[2], resolveImage('marquee-4', 'slide-4'), SIZES.portrait),
-  siteImage(marquee[3], resolveImage('marquee-5', 'slide-5'), SIZES.portrait),
-  siteImage(marquee[4], resolveImage('marquee-6', 'slide-6'), SIZES.portrait),
-];
+import { SIZES } from '../../lib/siteImage';
+import { HOME, merge, picture } from '../../lib/content';
+// gallery : 5 photos du marquee ; center : portrait central (relais avec l'intro), mêmes réglages que dans le hero
+const { gallery, center } = Astro.props;
+// La mise en page attend 5 photos : celles qui manquent dans Sanity reprennent la photo par défaut du même rang
+const at = (i: number) => gallery.images[i] ?? merge(HOME.gallery.images[i], undefined);
+const slides = [at(0), center, at(1), at(2), at(3), at(4)].map((m) => picture(m, SIZES.portrait));
 ---
 <section class="gallery" id="gallery" data-anim="gallery-section">
   <div class="gallery-row">

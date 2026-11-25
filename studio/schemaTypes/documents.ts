@@ -1,73 +1,46 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
+// Coffret : une carte de la section Coffrets de l'accueil (ordre et choix : Page d'accueil → Coffrets)
 export const coffret = defineType({
   name: 'coffret',
   title: 'Coffret',
   type: 'document',
   fields: [
-    defineField({ name: 'name', title: 'Nom', type: 'string', validation: (r) => r.required() }),
+    defineField({ name: 'name', title: 'Nom', type: 'string', description: 'Affiché après le mot « COFFRET » (ex. INITIATION).', validation: (r) => r.required() }),
     defineField({ name: 'tagline', title: 'Accroche', type: 'string' }),
-    defineField({ name: 'price', title: 'Prix (affiché tel quel)', type: 'string', description: 'Ex. « 80 € », « 185 à 305 € », « Sur devis »' }),
+    defineField({ name: 'price', title: 'Prix (affiché tel quel)', type: 'string', description: 'Ex. « 80€ », « 185 à 305€ », « SUR DEVIS ».' }),
     defineField({
-      name: 'includes',
-      title: 'Ce qui est inclus',
+      name: 'services',
+      title: 'Prestations incluses',
       type: 'array',
       of: [
         defineArrayMember({
           type: 'object',
+          name: 'service',
+          title: 'Prestation',
           fields: [
-            defineField({ name: 'label', title: 'Rubrique', type: 'string', description: 'Ex. Bien-être, Coiffure' }),
-            defineField({ name: 'title', title: 'Prestation', type: 'string' }),
+            defineField({ name: 'title', title: 'Rubrique', type: 'string', description: 'Ex. BIEN ÊTRE, COIFFURE' }),
+            defineField({ name: 'detail', title: 'Détail', type: 'text', rows: 2, description: 'Un retour à la ligne = une nouvelle ligne.' }),
           ],
-          preview: { select: { title: 'title', subtitle: 'label' } },
+          preview: { select: { title: 'title', subtitle: 'detail' } },
         }),
       ],
     }),
-    defineField({ name: 'description', title: 'Description', type: 'text', rows: 4 }),
-    defineField({ name: 'image', title: 'Image (carrée)', type: 'cmsImage' }),
-    defineField({ name: 'ctaLabel', title: 'Texte du bouton', type: 'string', initialValue: 'Réserver' }),
-    defineField({ name: 'ctaUrl', title: 'Lien de réservation', type: 'string' }),
+    defineField({ name: 'cta', title: 'Bouton', type: 'link' }),
+    defineField({
+      name: 'description',
+      title: 'Description',
+      type: 'array',
+      of: [defineArrayMember({ type: 'text', rows: 4 })],
+      description: 'Un élément par paragraphe. Mise en forme : **gras**, *italique* (un paragraphe entièrement en gras est mis en avant).',
+    }),
+    defineField({ name: 'bigImage', title: 'Grande image', type: 'cmsImage', description: 'Grand format : 1200 px minimum sur le petit côté.' }),
+    defineField({ name: 'smallImage', title: 'Petite image', type: 'cmsImage', description: 'Petit format : 800 px minimum sur le petit côté.' }),
+    defineField({ name: 'bigVideo', title: 'Grande vidéo (facultatif)', type: 'file', options: { accept: 'video/mp4,video/webm' }, description: 'Utilisée à la place de la grande image pour le 4e coffret (Prestige). MP4, sans son.' }),
   ],
-  preview: { select: { title: 'name', subtitle: 'price', media: 'image' } },
+  preview: { select: { title: 'name', subtitle: 'price', media: 'smallImage' } },
 });
 
-export const member = defineType({
-  name: 'member',
-  title: 'Membre de l’équipe',
-  type: 'document',
-  fields: [
-    defineField({ name: 'name', title: 'Prénom', type: 'string', validation: (r) => r.required() }),
-    defineField({ name: 'tag', title: 'Tag', type: 'string', description: 'Ex. #Muses Coiffure' }),
-    defineField({ name: 'photo', title: 'Portrait (4/5)', type: 'cmsImage' }),
-  ],
-  preview: { select: { title: 'name', subtitle: 'tag', media: 'photo' } },
-});
-
-export const article = defineType({
-  name: 'article',
-  title: 'Conseil d’expert',
-  type: 'document',
-  fields: [
-    defineField({ name: 'title', title: 'Titre', type: 'string', validation: (r) => r.required() }),
-    defineField({ name: 'url', title: 'URL de l’article', type: 'string' }),
-    defineField({ name: 'linkLabel', title: 'Texte du lien', type: 'string', initialValue: 'Lire l’article' }),
-  ],
-});
-
-export const episode = defineType({
-  name: 'episode',
-  title: 'Épisode du podcast',
-  type: 'document',
-  fields: [
-    defineField({ name: 'title', title: 'Titre', type: 'string', validation: (r) => r.required() }),
-    defineField({ name: 'date', title: 'Date', type: 'date', options: { dateFormat: 'DD/MM/YYYY' } }),
-    defineField({ name: 'url', title: 'URL de l’épisode', type: 'string' }),
-  ],
-  orderings: [{ title: 'Plus récent', name: 'dateDesc', by: [{ field: 'date', direction: 'desc' }] }],
-  preview: { select: { title: 'title', subtitle: 'date' } },
-});
-
-/* ───────── Journal : article avec corps en richtext ───────── */
 export const journalPost = defineType({
   name: 'journalPost',
   title: 'Journal : article',

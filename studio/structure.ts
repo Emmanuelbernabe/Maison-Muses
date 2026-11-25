@@ -7,6 +7,8 @@ export const singletons = [
   { id: 'homepage', type: 'homepage', title: 'Accueil' },
   { id: 'page-coiffure', type: 'servicePage', title: 'Espace coiffure' },
   { id: 'page-bien-etre', type: 'servicePage', title: 'Espace bien-être' },
+  { id: 'page-equipe', type: 'equipePage', title: 'L’équipe' },
+  { id: 'page-journal', type: 'journalPage', title: 'Journal : textes des pages' },
   { id: 'siteSettings', type: 'siteSettings', title: 'Réglages du site' },
 ];
 
@@ -29,12 +31,14 @@ export const structure: StructureResolver = (S) =>
               page(S, 'homepage'),
               page(S, 'page-coiffure'),
               page(S, 'page-bien-etre'),
+              page(S, 'page-equipe'),
+              page(S, 'page-journal'),
               S.listItem()
                 .title('Marques')
                 .id('marques')
                 .child(S.documentTypeList('brand').title('Marques (une page par marque)')),
               S.listItem()
-                .title('Journal')
+                .title('Journal : articles')
                 .id('journal')
                 .child(S.documentTypeList('journalPost').title('Articles du journal').defaultOrdering([{ field: 'publishedAt', direction: 'desc' }])),
             ]),
@@ -48,9 +52,6 @@ export const structure: StructureResolver = (S) =>
             .title('Contenus partagés')
             .items([
               S.documentTypeListItem('coffret').title('Coffrets'),
-              S.documentTypeListItem('member').title('Membres de l’équipe'),
-              S.documentTypeListItem('episode').title('Épisodes du podcast'),
-              S.documentTypeListItem('article').title('Conseils d’experts (accueil)'),
             ]),
         ),
       S.divider(),

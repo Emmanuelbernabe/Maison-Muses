@@ -28,7 +28,7 @@ const brand = buildBrandPage(doc);
   title={brand.seoTitle || `${clean(brand.name)} – Nos marques – Maison Muses, Toulouse`}
   description={brand.seoDescription || clean(brand.intro) || `${clean(brand.name)}, une marque choisie par Maison Muses.`}
 >
-  <Header logo={settings.logo} cta={settings.headerCta} />
+  <Header />
   <main id="top" style="--br-ink: #7d4330; --br-mut: rgba(125, 67, 48, 0.55);">
     <BrandHero brand={brand} />
     <BrandOverview brand={brand} />

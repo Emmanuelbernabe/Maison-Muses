@@ -1,13 +1,10 @@
 ---
-import { resolveImage } from '../../lib/images';
-import { siteImage, SIZES } from '../../lib/siteImage';
-const { photos } = Astro.props;
-
-const ctaCoiffure = { label: 'ESPACE COIFFURE', url: '/coiffure' };
-const ctaBienetre = { label: 'ESPACE BIEN ÊTRE', url: '/bien-etre' };
-const paraText = 'Notre équipe vous reçoit dans un environnement chaleureux et intimiste. Attentif à vos besoins, nous proposons systématiquement un diagnostic à toutes nos prestations. En cas de première visite, nous vous conseillons de réserver une consultation pour un diagnostique plus approfondi.';
-
-const ambianceImg = siteImage(photos?.intro?.ambiance, resolveImage('ambiance-img'), SIZES.ambiance);
+import { SIZES } from '../../lib/siteImage';
+import { picture, href } from '../../lib/content';
+import { rich, lines } from '../../lib/rich';
+// Section intro de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
+const { intro } = Astro.props;
+const ambianceImg = picture(intro.image, SIZES.ambiance);
 ---
 
 <!-- Intro : section normale dans le flux après la hero -->
@@ -18,26 +15,14 @@ const ambianceImg = siteImage(photos?.intro?.ambiance, resolveImage('ambiance-im
 
   <!-- Titre 3 lignes : flexbox gap 0, aligné à droite, centré verticalement dans les 100vh -->
   <div class="intro-title-box" data-anim="intro-title-box">
-    <!-- Ligne 1 avec overflow mask -->
-    <div class="intro-line-mask">
-      <div class="intro-line intro-line-1" data-anim="intro-line">
-        <span class="thin">L'ART DE LA </span><span class="bold">COIFFURE</span>
+    <!-- Une ligne par ligne du titre (Sanity), chacune dans son masque ; **gras** → .bold, le reste → .thin -->
+    {lines(intro.title).map((line, i) => (
+      <div class="intro-line-mask">
+        <div class={`intro-line intro-line-${i + 1}`} data-anim="intro-line">
+          {rich(line).map((p) => <span class={p.bold ? 'bold' : 'thin'}>{p.text}</span>)}
+        </div>
       </div>
-    </div>
-
-    <!-- Ligne 2 avec overflow mask -->
-    <div class="intro-line-mask">
-      <div class="intro-line intro-line-2" data-anim="intro-line">
-        <span class="thin">ET DU </span><span class="bold">BIEN ÊTRE</span>
-      </div>
-    </div>
-
-    <!-- Ligne 3 avec overflow mask -->
-    <div class="intro-line-mask">
-      <div class="intro-line intro-line-3" data-anim="intro-line">
-        <span class="thin">SE </span><span class="bold">MELENT</span>
-      </div>
-    </div>
+    ))}
   </div>
 
   <!-- Colonne droite : centrée verticalement comme l'image centrale -->
@@ -47,22 +32,22 @@ const ambianceImg = siteImage(photos?.intro?.ambiance, resolveImage('ambiance-im
     <div class="intro-top-block" data-anim="intro-top-block">
       <!-- Vidéo soin -->
       <div class="intro-video-wrap">
-        <video class="intro-video" src="/video/soin-bg-video.mp4" preload="none" loop muted playsinline></video>
+        <video class="intro-video" src={intro.video} preload="none" loop muted playsinline></video>
       </div>
 
       <!-- Colonne ambiance : image + bouton en bas -->
       <div class="intro-ambiance-col">
         <div class="intro-ambiance-wrap">
-          <img class="intro-ambiance-img" src={ambianceImg.src} srcset={ambianceImg.srcset} sizes={ambianceImg.sizes} alt={ambianceImg.alt ?? 'Ambiance Maison Muses'} width="376" height="500" loading="eager" decoding="async" />
+          <img class="intro-ambiance-img" src={ambianceImg.src} srcset={ambianceImg.srcset} sizes={ambianceImg.sizes} alt={ambianceImg.alt} width="376" height="500" loading="eager" decoding="async" />
         </div>
-        <a class="intro-btn intro-btn-bienetre" href={ctaBienetre.url}>{ctaBienetre.label}</a>
+        <a class="intro-btn intro-btn-bienetre" href={href(intro.ctaBienEtre.url)}>{intro.ctaBienEtre.label}</a>
       </div>
     </div>
 
     <!-- Bloc du bas : espacement maîtrisé, paragraphe regular + bouton coiffure -->
     <div class="intro-bottom-block" data-anim="intro-bottom-block">
-      <p class="intro-para">{paraText}</p>
-      <a class="intro-btn intro-btn-coiffure" href={ctaCoiffure.url}>{ctaCoiffure.label}</a>
+      <p class="intro-para">{intro.text}</p>
+      <a class="intro-btn intro-btn-coiffure" href={href(intro.ctaCoiffure.url)}>{intro.ctaCoiffure.label}</a>
     </div>
 
   </div>

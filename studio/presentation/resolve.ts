@@ -7,6 +7,8 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     { route: '/', filter: `_id == "homepage"` },
     { route: '/coiffure', filter: `_id == "page-coiffure"` },
     { route: '/bien-etre', filter: `_id == "page-bien-etre"` },
+    { route: '/equipe', filter: `_id == "page-equipe"` },
+    { route: '/journal', filter: `_id == "page-journal"` },
     { route: '/marques/:slug', filter: `_type == "brand" && slug.current == $slug` },
     { route: '/journal/:slug', filter: `_type == "journalPost" && slug.current == $slug` },
   ]),
@@ -33,6 +35,9 @@ export const resolve: PresentationPluginOptions['resolve'] = {
       select: { name: 'name', slug: 'slug.current' },
       resolve: (doc) => ({ locations: [{ title: doc?.name || 'Marque', href: `/marques/${doc?.slug}` }] }),
     }),
+    equipePage: defineLocations({ message: 'Page L’équipe', locations: [{ title: 'L’équipe', href: '/equipe' }] }),
+    journalPage: defineLocations({ message: 'Textes des pages journal', locations: [{ title: 'Journal', href: '/journal' }] }),
+    coffret: defineLocations({ message: 'Section Coffrets de l’accueil', locations: [{ title: 'Accueil', href: '/#coffrets' }] }),
     siteSettings: defineLocations({ message: 'Utilisé sur toutes les pages (header et footer)', locations: [{ title: 'Accueil', href: '/' }] }),
   },
 };

@@ -1,57 +1,44 @@
 ---
 // Accueil — Routines personnalisées : deux portes, chacune ouvre son Typeform en pop-up (routines.ts)
-import { resolveImage } from '../../lib/images';
-import { siteImage, SIZES } from '../../lib/siteImage';
-const { photos } = Astro.props;
-
-// TODO : remplacer par les vraies URLs Typeform
-const doors = [
-  {
-    key: 'coiffure',
-    label: 'COIFFURE',
-    text: 'VOS CHEVEUX, VOS HABITUDES, VOS ENVIES.',
-    url: 'https://form.typeform.com/to/whoBdVpd',
-    embed: 'https://form.typeform.com/to/whoBdVpd?typeform-embed-id=5317714625339028&typeform-embed=embed-widget&typeform-source=maison-muses.fr&typeform-medium=snippet&typeform-medium-version=next&embed-opacity=100&typeform-embed-handles-redirect=1',
-    img: siteImage(photos?.routines?.coiffure, resolveImage('marquee-1'), SIZES.door),
-    alt: 'Cheveux longs blonds ondulés au salon Maison Muses',
-  },
-  {
-    key: 'bien-etre',
-    label: 'BIEN-ÊTRE',
-    text: 'VOTRE RYTHME, VOS TENSIONS, VOS BESOINS.',
-    url: 'https://form.typeform.com/to/EDlpdbdV',
-    embed: 'https://form.typeform.com/to/EDlpdbdV?typeform-embed-id=7111689052245918&typeform-embed=embed-widget&typeform-source=maison-muses.fr&typeform-medium=snippet&typeform-medium-version=next&embed-opacity=100&typeform-embed-handles-redirect=1',
-    img: siteImage(photos?.routines?.bienEtre, resolveImage('load-3'), SIZES.door),
-    alt: 'Massage du visage à Maison Muses Bien-être',
-  },
-];
+// Section routines de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
+import { SIZES } from '../../lib/siteImage';
+import { HOME, merge, picture, href } from '../../lib/content';
+import { clean } from '../../lib/sanity';
+import { rich } from '../../lib/rich';
+const { routines } = Astro.props;
+// 2 portes : coiffure (orange) puis bien-être (vert) ; la clé fixe la couleur (CSS)
+const keys = ['coiffure', 'bien-etre'];
+const doors = [0, 1].map((i) => {
+  const d = routines.doors[i] ?? merge(HOME.routines.doors[i], undefined);
+  return { ...d, key: keys[i], url: href(d.url), embed: clean(d.embedUrl), img: picture(d.image, SIZES.door) };
+});
 ---
 
 <section class="routines" id="routines" data-anim="routines-section">
   <div class="routines-head">
     <h2 class="routines-title" data-anim="routines-title">
-      <span class="routines-thin">UNE ROUTINE</span><br />PENSÉE POUR VOUS.
+      {rich(routines.title).map((p) => (p.br ? <br /> : p.bold ? p.text : <span class="routines-thin">{p.text}</span>))}
     </h2>
     <p class="routines-para">
-      QUELQUES QUESTIONS, ET NOS EXPERTS VOUS COMPOSENT UNE ROUTINE ADAPTÉE. VOUS LA RECEVEZ PAR E-MAIL.
+      {routines.text}
     </p>
   </div>
 
   <div class="routines-doors" data-anim="routines-doors">
     {doors.map((d, i) => (
-      <a class:list={['routines-door', `routines-door-${d.key}`, { 'is-open': i === 0 }]} href={d.url} target="_blank" rel="noopener" data-anim="routines-door" data-routines-form={d.embed} data-routines-title={`Routine ${d.label.toLowerCase()}`}>
+      <a class:list={['routines-door', `routines-door-${d.key}`, { 'is-open': i === 0 }]} href={d.url} target="_blank" rel="noopener" data-anim="routines-door" data-routines-form={d.embed} data-routines-title={`${clean(routines.prefix)} ${clean(d.label)}`.toLowerCase().replace(/^./, (l) => l.toUpperCase())}>
         <span class="routines-door-media">
           <span class="routines-door-frame">
-            <img class="routines-door-img" src={d.img.src} srcset={d.img.srcset} sizes={d.img.sizes} alt={d.img.alt ?? d.alt} loading="lazy" decoding="async" />
+            <img class="routines-door-img" src={d.img.src} srcset={d.img.srcset} sizes={d.img.sizes} alt={d.img.alt} loading="lazy" decoding="async" />
           </span>
         </span>
         <span class="routines-door-vertical" aria-hidden="true">{d.label}</span>
         <span class="routines-door-content">
           <span class="routines-door-text-wrap">
-            <span class="routines-door-name"><span class="routines-thin">ROUTINE</span> {d.label}</span>
+            <span class="routines-door-name"><span class="routines-thin">{routines.prefix}</span> {d.label}</span>
             <span class="routines-door-text">{d.text}</span>
           </span>
-          <span class="routines-btn">FAIRE MON DIAGNOSTIC</span>
+          <span class="routines-btn">{routines.ctaLabel}</span>
         </span>
       </a>
     ))}

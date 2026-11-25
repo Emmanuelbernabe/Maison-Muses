@@ -1,32 +1,26 @@
 ---
 import { resolveImage } from '../../lib/images';
 import { getBrandLinks } from '../../lib/sanity';
-const { cta, logo } = Astro.props;
+import { loadSettings, href } from '../../lib/content';
+// Logo, libellés et menu : Réglages du site (Sanity + valeurs par défaut, lib/content.ts)
+const settings = await loadSettings();
 // Sous-menu « Nos marques » : les marques publiées dans Sanity (Pages du site → Marques)
 const brandLinks = await getBrandLinks();
-const logoSrc = logo?.asset?.url ?? resolveImage('logo');
+const logoSrc = settings.logo.image?.url ?? resolveImage(...settings.logo.local);
 
 // Sur la home, les liens restent des ancres (#coffrets…) ; sur les autres pages, ils ramènent à la home (/#coffrets…)
-const home = Astro.url.pathname === '/' ? '' : '/';
+const isHome = Astro.url.pathname === '/';
 
-// Mêmes destinations que les liens « La maison » du footer, plus l'accueil
-const menuLinks = [
-  { label: 'Accueil',   url: '/' },
-  { label: 'Bien-être', url: '/bien-etre' },
-  { label: 'Coiffure',  url: '/coiffure' },
-  { label: 'Nos marques', sub: brandLinks },
-  { label: 'Coffrets',  url: `${home}#coffrets` },
-  { label: 'L’équipe',  url: '/equipe' },
-  { label: 'Journal',   url: '/journal' },
-];
+// Une entrée « marques » affiche le sous-menu des marques publiées
+const menuLinks = settings.menu.map((l: any) => (l.brands ? { label: l.label, sub: brandLinks } : { label: l.label, url: href(l.url, isHome) }));
 ---
 <header id="hd">
-  <button class="nav-item nav-menu" type="button" aria-expanded="false" aria-controls="menu-panel" data-menu-open>MENU</button>
+  <button class="nav-item nav-menu" type="button" aria-expanded="false" aria-controls="menu-panel" data-menu-open>{settings.header.menuLabel}</button>
   <a class="nav-logo" href="/" aria-label="Maison Muses, accueil">
-    <img src={logoSrc} alt="Maison Muses" width="28" height="52" />
+    <img src={logoSrc} alt={settings.logo.alt || 'Maison Muses'} width="28" height="52" />
     <img class="nav-logo-cream" src={logoSrc} alt="" width="28" height="52" aria-hidden="true" />
   </a>
-  <a class="nav-item nav-reserver" href={cta?.url ?? "#reserver"}>RESERVER</a>
+  <a class="nav-item nav-reserver" href={href(settings.header.reserve.url, isHome)}>{settings.header.reserve.label}</a>
 </header>
 
 <div class="menu-backdrop" data-menu-backdrop aria-hidden="true"></div>

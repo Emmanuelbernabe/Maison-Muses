@@ -5,9 +5,10 @@ import Header from '../../components/layout/Header.astro';
 import SiteFooter from '../../components/layout/SiteFooter.astro';
 import JournalCard from '../../components/journal/JournalCard.astro';
 import { getSettings, getJournalPosts } from '../../lib/sanity';
+import { loadJournalPage } from '../../lib/content';
 import { JOURNAL_CATEGORIES, journalCover, journalCategoryLabel, journalDate, journalReadingTime } from '../../lib/journal';
 
-const [settings, posts] = await Promise.all([getSettings(), getJournalPosts()]);
+const [settings, posts, page] = await Promise.all([getSettings(), getJournalPosts(), loadJournalPage()]);
 if (!settings) {
   throw new Error("Contenu introuvable : publiez « Réglages du site » dans Sanity (voir README).");
 }
@@ -21,17 +22,17 @@ const featuredCover = featured ? journalCover(featured, 1600) : null;
 const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.category === c.value));
 ---
 <Layout
-  title="Le journal – Maison Muses, coiffure et bien-être à Toulouse"
-  description="Conseils coiffure, rituels bien-être et épisodes du podcast : le journal de Maison Muses."
+  title={page.seoTitle}
+  description={page.seoDescription}
 >
-  <Header logo={settings.logo} cta={settings.headerCta} />
+  <Header />
   <main id="top">
     <section class="jr-hub" data-anim="jr-hub" aria-label="Le journal">
       <div class="jr-head">
-        <h1 class="jr-title"><span class="jr-title-it">Le journal des</span>Muses</h1>
+        <h1 class="jr-title"><span class="jr-title-it">{page.titleItalic}</span>{page.titleMain}</h1>
         {categories.length > 1 && (
           <div class="jr-filters" role="group" aria-label="Filtrer par catégorie" data-jr-filters>
-            <button type="button" aria-pressed="true" data-filter="all">Tous</button>
+            <button type="button" aria-pressed="true" data-filter="all">{page.allLabel}</button>
             {categories.map((c) => <button type="button" aria-pressed="false" data-filter={c.value}>{c.label}</button>)}
           </div>
         )}
@@ -43,14 +44,14 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
             <img src={featuredCover!.src} srcset={featuredCover!.srcset} sizes="(max-width: 899px) 100vw, 55vw" alt={featuredCover!.alt} decoding="async" />
           </figure>
           <div class="jr-feat-text">
-            <p class="jr-cat">À la une · <b>{journalCategoryLabel(featured.category)}</b></p>
+            <p class="jr-cat">{page.featuredLabel} · <b>{journalCategoryLabel(featured.category)}</b></p>
             <h2 class="jr-feat-title">{featured.title}</h2>
             {featured.excerpt && <p class="jr-feat-excerpt">{featured.excerpt}</p>}
             <span class="jr-date">{journalDate(featured.publishedAt)} · {journalReadingTime(featured.chars)} min de lecture</span>
           </div>
         </a>
       ) : (
-        <p class="jr-empty">Les premiers articles arrivent bientôt.</p>
+        <p class="jr-empty">{page.emptyText}</p>
       )}
 
       {others.length > 0 && (

@@ -1,18 +1,22 @@
 ---
 // Page L'équipe — hero : titre, 3 médias en escalier (vidéo, Moussine, Violaine), la vidéo s'ouvre au scroll
-import { resolveImage, resolveVideo } from '../../lib/images';
-
 // Vidéo de présentation (avec le son) : aperçu muet en boucle, le bouton « Lire la vidéo » la lance avec le son
-const videoSrc = resolveVideo('presentation-video', 'prestige-big');
-const posterSrc = resolveImage('equipe-poster', 'team-left');
-
-const moussine = { base: resolveImage('marquee-follow-img'), hover: resolveImage('moussine') };
-const violaine = { base: resolveImage('violaine'), hover: resolveImage('load-3') };
+// Contenu : document « Page L'équipe » (Sanity + valeurs par défaut, lib/content.ts)
+import { picture } from '../../lib/content';
+import { rich } from '../../lib/rich';
+const { equipe } = Astro.props;
+const hero = equipe.hero;
+const poster = picture(hero.poster);
+// Les deux photos du hero = les deux photos de chaque membre (principale, puis celle du survol)
+const [m, v] = equipe.members;
+const photo = (member: any) => ({ name: member.name, base: picture(member.imageMain), hover: picture(member.imageSecond) });
+const moussine = photo(m);
+const violaine = photo(v);
 ---
 
 <section class="eq" id="eq" aria-label="L’équipe Maison Muses">
-  <h1 class="eq-title">L’EQUIPE</h1>
-  <p class="eq-muses">MUSES</p>
+  <h1 class="eq-title">{hero.title}</h1>
+  <p class="eq-muses">{hero.word}</p>
 
   <!-- Emblème en filigrane, coupé par le bord gauche -->
   <svg class="eq-logo" width="324" height="333" viewBox="0 0 324 333" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -23,8 +27,8 @@ const violaine = { base: resolveImage('violaine'), hover: resolveImage('load-3')
     </g>
   </svg>
 
-  <p class="eq-para">La coiffure d’un côté, le bien-être de l’autre. <br />Deux savoir-faire réunis pour prendre soin <br />de nos muses, au centre de Toulouse.</p>
-  <p class="eq-deux">Deux passions, <br />une maison.</p>
+  <p class="eq-para">{rich(hero.text).map((p) => (p.br ? <br /> : p.bold ? <b>{p.text}</b> : p.italic ? <i>{p.text}</i> : p.text))}</p>
+  <p class="eq-deux">{rich(hero.tagline).map((p) => (p.br ? <br /> : p.bold ? <b>{p.text}</b> : p.italic ? <i>{p.text}</i> : p.text))}</p>
 
   <!-- Emplacement (invisible) de la vidéo : repère du clip-path -->
   <div class="eq-slot" data-anim="eq-slot" aria-hidden="true"></div>
@@ -32,26 +36,26 @@ const violaine = { base: resolveImage('violaine'), hover: resolveImage('load-3')
   <!-- Calque vidéo plein écran, découpé sur l'emplacement ; s'ouvre au scroll -->
   <div class="eq-video" data-anim="eq-layer">
     <div class="eq-video-inner" data-anim="eq-inner">
-      <video src={videoSrc} poster={posterSrc} autoplay muted loop playsinline preload="metadata" data-anim="eq-video"></video>
+      <video src={hero.video} poster={poster.src} autoplay muted loop playsinline preload="metadata" data-anim="eq-video"></video>
     </div>
     <button class="eq-play" type="button" data-anim="eq-play" aria-label="Lire la vidéo de présentation avec le son">
       <!-- Icône play, remplacée par l'icône pause (deux barres) pendant la lecture avec le son -->
       <svg class="eq-ico-play" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 1.5v15L16 9z" fill="currentColor" /></svg>
       <svg class="eq-ico-pause" viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2" width="4" height="14" rx="1" fill="currentColor" /><rect x="11" y="2" width="4" height="14" rx="1" fill="currentColor" /></svg>
-      <span data-anim="eq-play-label">Lire la vidéo</span>
+      <span data-anim="eq-play-label">{hero.playLabel}</span>
     </button>
   </div>
 
   <!-- Moussine (marche du milieu) : 2e photo au survol -->
-  <figure class="eq-photo eq-photo-m" data-anim="eq-photo" tabindex="0" aria-label="Moussine">
-    <img src={moussine.base} alt="Moussine en pleine coupe" loading="eager" decoding="async" />
-    <img class="eq-hover" src={moussine.hover} alt="Portrait de Moussine" loading="lazy" decoding="async" />
+  <figure class="eq-photo eq-photo-m" data-anim="eq-photo" tabindex="0" aria-label={moussine.name}>
+    <img src={moussine.base.src} alt={moussine.base.alt} loading="eager" decoding="async" />
+    <img class="eq-hover" src={moussine.hover.src} alt={moussine.hover.alt} loading="lazy" decoding="async" />
   </figure>
 
   <!-- Violaine (marche du haut, contre le bord droit) : 2e photo au survol -->
-  <figure class="eq-photo eq-photo-v" data-anim="eq-photo" tabindex="0" aria-label="Violaine">
-    <img src={violaine.base} alt="Portrait de Violaine" loading="eager" decoding="async" />
-    <img class="eq-hover" src={violaine.hover} alt="Soin du visage par Violaine" loading="lazy" decoding="async" />
+  <figure class="eq-photo eq-photo-v" data-anim="eq-photo" tabindex="0" aria-label={violaine.name}>
+    <img src={violaine.base.src} alt={violaine.base.alt} loading="eager" decoding="async" />
+    <img class="eq-hover" src={violaine.hover.src} alt={violaine.hover.alt} loading="lazy" decoding="async" />
   </figure>
 </section>
 

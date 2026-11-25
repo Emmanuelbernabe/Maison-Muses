@@ -7,6 +7,7 @@ import JournalCard from '../../components/journal/JournalCard.astro';
 import JournalBody from '../../components/journal/JournalBody.astro';
 import JournalPlayer from '../../components/journal/JournalPlayer.astro';
 import { getSettings, getJournalPosts, getJournalPost } from '../../lib/sanity';
+import { loadJournalPage, href } from '../../lib/content';
 import { journalCover, journalCategoryLabel, journalDate, journalReadingTime, journalBodyHtml } from '../../lib/journal';
 
 export async function getStaticPaths() {
@@ -17,7 +18,7 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 // En mode aperçu (rendu serveur), getStaticPaths n'est pas appelé : on recharge la liste
 const all: any[] = (Astro.props as any).all ?? ((await getJournalPosts()) || []);
-const [settings, post] = await Promise.all([getSettings(), getJournalPost(slug!)]);
+const [settings, post, page] = await Promise.all([getSettings(), getJournalPost(slug!), loadJournalPage()]);
 if (!settings || !post) {
   throw new Error(`Article introuvable : ${slug}`);
 }
@@ -32,11 +33,11 @@ const related = [...others.filter((p) => p.category === post.category), ...other
   title={`${post.seoTitle || post.title} – Journal Maison Muses`}
   description={post.excerpt || `${journalCategoryLabel(post.category)} : un article du journal de Maison Muses.`}
 >
-  <Header logo={settings.logo} cta={settings.headerCta} />
+  <Header />
   <main id="top">
     <article class="jr-article" data-anim="jr-article">
       <header class="jr-art-head">
-        <p class="jr-cat"><a href="/journal">Journal</a> · <b>{journalCategoryLabel(post.category)}</b></p>
+        <p class="jr-cat"><a href="/journal">{page.backLabel}</a> · <b>{journalCategoryLabel(post.category)}</b></p>
         <h1 class="jr-art-title">{post.title}</h1>
         <div class="jr-art-meta">
           <span class="jr-date">{journalDate(post.publishedAt)}</span>
@@ -55,13 +56,13 @@ const related = [...others.filter((p) => p.category === post.category), ...other
 
       <div class="jr-art-body">
         <JournalBody html={html} />
-        <a class="jr-art-cta" href="https://www.planity.com/" target="_blank" rel="noopener">Prendre rendez-vous</a>
+        <a class="jr-art-cta" href={href(page.cta.url)} target="_blank" rel="noopener">{page.cta.label}</a>
       </div>
     </article>
 
     {related.length > 0 && (
       <section class="jr-related" aria-label="À lire aussi">
-        <h2 class="jr-related-title"><span>À lire</span> aussi</h2>
+        <h2 class="jr-related-title"><span>{page.relatedTitleStart}</span> {page.relatedTitleEnd}</h2>
         <div class="jr-related-grid">
           {related.map((p) => <JournalCard post={p} />)}
         </div>

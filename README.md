@@ -20,12 +20,16 @@ maison-muses/
    cd studio && cp .env.example .env   # renseignez SANITY_STUDIO_PROJECT_ID
    npm install
    npx sanity login
-   python3 seed/make_seed.py            # (déjà généré) → seed/seed.ndjson
-   npx sanity dataset import seed/seed.ndjson production --replace
    npm run dev                          # http://localhost:3333
    ```
-   Le seed reprend tout le texte de la maquette. Il ne contient pas d'images : ajoutez-les dans le Studio.
-   Pensez à **publier** « Page d'accueil », « Réglages du site » et les documents liés (coffrets, équipe…).
+   **Contenu** : tous les textes, images, vidéos et liens du site sont dans Sanity. Pour remplir un dataset vide
+   avec le contenu de référence (`src/lib/content-defaults.ts`), depuis la racine du projet :
+   ```bash
+   node --env-file=.env scripts/import-content.ts            # simulation : affiche ce qui serait écrit
+   node --env-file=.env scripts/import-content.ts --write    # écrit dans Sanity (SANITY_WRITE_TOKEN requis)
+   ```
+   Un champ vidé dans le Studio reprend sa valeur de référence : le site ne casse jamais.
+   Mise en forme dans les textes : `**gras**`, `*italique*`, retour à la ligne = nouvelle ligne.
 3. **Site** :
    ```bash
    cp .env.example .env                 # SANITY_PROJECT_ID, SANITY_DATASET

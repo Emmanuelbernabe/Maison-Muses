@@ -1,33 +1,27 @@
 ---
 // Accueil — Avis Planity (note + marquee de cartes)
-// TODO : remplacer l'URL, la note et les avis par ceux de la page Planity du salon
-const planityUrl = 'https://www.planity.com/';
-const rating = 5;
-
-const reviews = [
-  { quote: 'Un diagnostic précis, un balayage exactement comme je l’imaginais. Je ne vais plus ailleurs.', author: 'Léa M.', service: 'Balayage' },
-  { quote: 'Trente minutes de massage et j’ai oublié ma semaine. L’accueil est d’une douceur rare.', author: 'Camille D.', service: 'Massage relaxant' },
-  { quote: 'Le coffret Initiation offert par mon copain : meilleure idée cadeau de l’année.', author: 'Sarah B.', service: 'Coffret Initiation' },
-  { quote: 'On prend le temps de vous écouter. Mes cheveux n’ont jamais été aussi doux.', author: 'Inès T.', service: 'Soin profond' },
-  { quote: 'Le salon est magnifique, l’équipe passionnée. Une vraie maison.', author: 'Julie P.', service: 'Coupe et couleur' },
-];
+// Section avis de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
+import { href } from '../../lib/content';
+import { rich } from '../../lib/rich';
+const { reviews } = Astro.props;
+const rating = Number(reviews.rating) || 5;
 ---
 
 <section class="reviews" id="reviews" data-anim="reviews-section">
   <div class="reviews-top">
     <h2 class="reviews-title" data-anim="reviews-title">
-      <span class="reviews-thin">NOS MUSES</span> EN PARLENT MIEUX QUE NOUS.
+      {rich(reviews.title).map((p) => (p.br ? <br /> : p.bold ? p.text : <span class="reviews-thin">{p.text}</span>))}
     </h2>
     <div class="reviews-rating">
       <span class="reviews-rating-note" data-anim="reviews-note" data-value={rating}>{rating.toFixed(1).replace('.', ',')}</span>
-      <span class="reviews-rating-label">SUR 435, AVIS VÉRIFIÉS PLANITY</span>
-      <a class="reviews-btn" href={planityUrl} target="_blank" rel="noopener">LIRE TOUS LES AVIS</a>
+      <span class="reviews-rating-label">{reviews.ratingLabel}</span>
+      <a class="reviews-btn" href={href(reviews.cta.url)} target="_blank" rel="noopener">{reviews.cta.label}</a>
     </div>
   </div>
 
   <div class="reviews-marquee" data-anim="reviews-marquee">
     <div class="reviews-track" data-anim="reviews-track">
-      {reviews.map((r) => (
+      {reviews.items.map((r: any) => (
         <article class="reviews-card">
           <div>
             <div class="reviews-card-stars" aria-label="5 étoiles sur 5">★★★★★</div>

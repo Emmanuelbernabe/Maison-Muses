@@ -1,48 +1,38 @@
 ---
-import { resolveImage } from '../../lib/images';
-import { siteImage, SIZES } from '../../lib/siteImage';
-const { photos } = Astro.props;
-
-const titleLine1 = ['DES', 'PRESTATIONS', 'HAUT', 'DE', 'GAMME'];
-const titleLine2 = ['POUR', 'UNE', 'EXPÉRIENCE', 'BIEN', 'ÊTRE'];
-const titleLine3 = ['COMPLETE'];
-const thinWords = new Set(['DES', 'POUR', 'UNE']);
-const paraText = "NOTRE HISTOIRE, C'EST CELLE DE TROIS PASSIONNÉS QUI ONT RÉUNI LEUR SAVOIR-FAIRE POUR CRÉER BIEN PLUS QU'UN UNIVERS. ENSEMBLE, NOUS AVONS FAÇONNÉ MAISON MUSES, UN COCON OÙ L'ART DE LA COIFFURE ET DU BIEN-ÊTRE SE MÊLENT, DANS UNE QUÊTE COMMUNE D'EXCELLENCE ET D'ÉMOTION.";
-
-const team = photos?.team;
-const thumbImg = siteImage(team?.thumb, resolveImage('team-thumb'), SIZES.thumb, [160, 320, 480]);
-const teamLeftImg = siteImage(team?.teamLeft, resolveImage('team-left'), SIZES.team);
-const teamMidImg = siteImage(team?.teamMid, resolveImage('team-mid'), SIZES.team);
-const teamRightImg = siteImage(team?.teamRight, resolveImage('team-right'), SIZES.team);
+import { SIZES } from '../../lib/siteImage';
+import { picture, href } from '../../lib/content';
+import { rich, lines } from '../../lib/rich';
+// Section équipe de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
+const { team } = Astro.props;
+// Titre : une ligne par ligne du champ, un mot par <span> (animés un par un) ; hors **gras** → mot fin
+const titleLines = lines(team.title).map((line) =>
+  rich(line).flatMap((p) => p.text.split(/\s+/).filter(Boolean).map((w) => ({ w, thin: !p.bold }))),
+);
+const thumbImg = picture(team.thumb, SIZES.thumb, [160, 320, 480]);
+const teamLeftImg = picture(team.left, SIZES.team);
+const teamMidImg = picture(team.mid, SIZES.team);
+const teamRightImg = picture(team.right, SIZES.team);
 ---
 
 <section class="team" id="team" data-anim="team-section">
   <!-- ── 1. Header plein format en haut ── -->
   <h2 class="team-header" data-anim="team-header">
-    <div class="team-header-line">
-      <span class="team-thumb" data-anim="team-thumb">
-        <img src={thumbImg.src} srcset={thumbImg.srcset} sizes={thumbImg.sizes} alt={thumbImg.alt ?? 'Prestations soin'} width="180" height="85" loading="lazy" decoding="async" />
-      </span>
-      {titleLine1.map((w) => (
-  <span class:list={['team-word', { 'team-word--thin': thinWords.has(w) }]}>{w}</span>
-))}
-    </div>
-    <div class="team-header-line">
-     {titleLine2.map((w) => (
-  <span class:list={['team-word', { 'team-word--thin': thinWords.has(w) }]}>{w}</span>
-))}
-    </div>
-    <div class="team-header-line">
-      {titleLine3.map((w) => (
-        <span class="team-word">{w}</span>
-      ))}
-    </div>
+    {titleLines.map((words, i) => (
+      <div class="team-header-line">
+        {i === 0 && (
+          <span class="team-thumb" data-anim="team-thumb">
+            <img src={thumbImg.src} srcset={thumbImg.srcset} sizes={thumbImg.sizes} alt={thumbImg.alt} width="180" height="85" loading="lazy" decoding="async" />
+          </span>
+        )}
+        {words.map(({ w, thin }) => <span class:list={['team-word', { 'team-word--thin': thin }]}>{w}</span>)}
+      </div>
+    ))}
   </h2>
 
   <!-- ── 2. Paragraphe en dessous du header, aligné à droite ── -->
   <div class="team-mid">
     <p class="team-para">
-      {paraText}
+      {team.text}
     </p>
   </div>
 
@@ -51,24 +41,24 @@ const teamRightImg = siteImage(team?.teamRight, resolveImage('team-right'), SIZE
     <!-- Colonne 1 : photo gauche + bouton aligné au bas de l'image du milieu -->
     <div class="team-col team-col-left">
       <div class="team-img-frame team-frame-left">
-        <img class="team-parallax-img" src={teamLeftImg.src} srcset={teamLeftImg.srcset} sizes={teamLeftImg.sizes} alt={teamLeftImg.alt ?? 'Équipe Maison Muses'} loading="lazy" decoding="async" />
+        <img class="team-parallax-img" src={teamLeftImg.src} srcset={teamLeftImg.srcset} sizes={teamLeftImg.sizes} alt={teamLeftImg.alt} loading="lazy" decoding="async" />
       </div>
       <div class="team-action-wrap">
-        <a class="team-btn" href="/equipe">VOIR L'ÉQUIPE</a>
+        <a class="team-btn" href={href(team.cta.url)}>{team.cta.label}</a>
       </div>
     </div>
 
     <!-- Colonne 2 : image du milieu, plus haute, descend jusqu'en bas -->
     <div class="team-col team-col-mid">
       <div class="team-img-frame team-frame-mid">
-        <img class="team-parallax-img" src={teamMidImg.src} srcset={teamMidImg.srcset} sizes={teamMidImg.sizes} alt={teamMidImg.alt ?? 'Moussine et July'} loading="lazy" decoding="async" />
+        <img class="team-parallax-img" src={teamMidImg.src} srcset={teamMidImg.srcset} sizes={teamMidImg.sizes} alt={teamMidImg.alt} loading="lazy" decoding="async" />
       </div>
     </div>
 
     <!-- Colonne 3 : photo droite + MUSES en bas aligné à l'image du milieu -->
     <div class="team-col team-col-right">
       <div class="team-img-frame team-frame-right">
-        <img class="team-parallax-img" src={teamRightImg.src} srcset={teamRightImg.srcset} sizes={teamRightImg.sizes} alt={teamRightImg.alt ?? 'Violaine'} loading="lazy" decoding="async" />
+        <img class="team-parallax-img" src={teamRightImg.src} srcset={teamRightImg.srcset} sizes={teamRightImg.sizes} alt={teamRightImg.alt} loading="lazy" decoding="async" />
       </div>
       <div class="team-muses-wrap">
         <span class="team-muses" data-anim="team-muses">MUSES</span>

@@ -1,11 +1,13 @@
 ---
-import { resolveImage } from '../../lib/images';
-import { siteImage, SIZES } from '../../lib/siteImage';
-const { data, photos } = Astro.props;
+import { SIZES } from '../../lib/siteImage';
+import { picture } from '../../lib/content';
+import { rich } from '../../lib/rich';
+// Section hero de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
+const { hero } = Astro.props;
 
-const heroImg = siteImage(photos?.hero?.portrait, resolveImage('hero'), SIZES.portrait);
-const follow1Img = siteImage(photos?.hero?.reveal, resolveImage('follow-1'), SIZES.portrait);
-const marqueeFollowImg = siteImage(photos?.hero?.center, resolveImage('marquee-follow-img'), SIZES.portrait);
+const heroImg = picture(hero.portrait, SIZES.portrait);
+const follow1Img = picture(hero.reveal, SIZES.portrait);
+const marqueeFollowImg = picture(hero.center, SIZES.portrait);
 ---
 
 <section class="hero" id="hero" data-anim="hero-section">
@@ -23,7 +25,7 @@ const marqueeFollowImg = siteImage(photos?.hero?.center, resolveImage('marquee-f
         <!-- Vidéo du portrait : lancée par le loader quand elle y apparaît (home/loader.ts, qui la prête au loader
              puis la rend ici), puis mise en pause / relancée selon le scroll (home/hero.ts).
              L'image du portrait sert d'affiche le temps que la vidéo charge. -->
-        <video class="hero-video" data-anim="hero-video" src="/video/hero-bg-video.mp4" poster={heroImg.src} muted loop playsinline preload="auto" aria-hidden="true"></video>
+        <video class="hero-video" data-anim="hero-video" src={hero.video} poster={heroImg.src} muted loop playsinline preload="auto" aria-hidden="true"></video>
       </div>
       <!-- load-1 overlay révélé par clip-path lors du scroll vers l'intro -->
       <div class="load1-overlay" data-anim="intro-load1">
@@ -42,7 +44,7 @@ const marqueeFollowImg = siteImage(photos?.hero?.center, resolveImage('marquee-f
 
     <!-- Paragraphe sous l'image / en bas à gauche -->
     <p class="hero-sub" id="hero-sub" data-anim="hero-sub">
-      Sublimer vos cheveux, <br />éveiller vos sens.
+      {rich(hero.subtitle).map((p) => (p.br ? <br /> : p.bold ? <b>{p.text}</b> : p.italic ? <i>{p.text}</i> : p.text))}
     </p>
   </div>
 </section>

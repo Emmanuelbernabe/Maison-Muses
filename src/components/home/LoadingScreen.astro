@@ -1,15 +1,17 @@
 ---
 // LoadingScreen.astro — Nouveau design loader
-import { resolveImage } from '../../lib/images';
-import { siteImage, SIZES } from '../../lib/siteImage';
-const { photos } = Astro.props;
+import { SIZES } from '../../lib/siteImage';
+import { picture } from '../../lib/content';
+import { rich } from '../../lib/rich';
+// loader / hero : sections fusionnées de la page d'accueil (lib/content.ts)
+const { loader, hero } = Astro.props;
 
 // Mêmes sizes que le hero : la zone du loader finit à la taille du portrait
-const ldImg1 = siteImage(photos?.loader?.load1, resolveImage('load-1'), SIZES.portrait);
-const ldImg2 = siteImage(photos?.loader?.load2, resolveImage('load-2'), SIZES.portrait);
-const ldImg3 = siteImage(photos?.loader?.load3, resolveImage('load-3'), SIZES.portrait);
-const ldImg4 = siteImage(photos?.loader?.load4, resolveImage('load-4'), SIZES.portrait);
-const ldImgHero = siteImage(photos?.hero?.portrait, resolveImage('hero'), SIZES.portrait);
+const ldImg1 = picture(loader.load1, SIZES.portrait);
+const ldImg2 = picture(loader.load2, SIZES.portrait);
+const ldImg3 = picture(loader.load3, SIZES.portrait);
+const ldImg4 = picture(loader.load4, SIZES.portrait);
+const ldImgHero = picture(hero.portrait, SIZES.portrait);
 ---
 
 <!-- Loader déjà vu pendant cette visite : masqué avant même le premier affichage -->
@@ -53,7 +55,7 @@ const ldImgHero = siteImage(photos?.hero?.portrait, resolveImage('hero'), SIZES.
     <!-- MAISON orange -->
     <div class="ld-word ld-maison" id="ld-maison-orange">MAISON</div>
     <!-- Hero-sub : visible dès que le crème commence à remonter depuis le bas -->
-    <p class="ld-hero-sub">Sublimer vos cheveux, <br />éveiller vos sens.</p>
+    <p class="ld-hero-sub">{rich(hero.subtitle).map((p) => (p.br ? <br /> : p.bold ? <b>{p.text}</b> : p.italic ? <i>{p.text}</i> : p.text))}</p>
   </div>
 
   <!-- MUSES orange : z-index 25, au-dessus de tout pour overlap par-dessus l'image une fois crème -->

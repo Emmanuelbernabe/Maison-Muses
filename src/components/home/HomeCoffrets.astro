@@ -1,28 +1,23 @@
 ---
 // Accueil — Coffrets avec Pin et Scroll Horizontal GSAP
-import { resolveImage, resolveVideo } from '../../lib/images';
-import { siteImage, SIZES } from '../../lib/siteImage';
-const { photos } = Astro.props;
-const cf = photos?.coffrets;
-
-const c1Little = siteImage(cf?.initiationSmall, resolveImage('initiation-little', 'slide-2'), SIZES.coffretSmall);
-const c1Big = siteImage(cf?.initiationBig, resolveImage('initiation-big', 'soin-img'), SIZES.coffretBig);
-
-const c2Little = siteImage(cf?.harmonieSmall, resolveImage('harmonie-little'), SIZES.coffretSmall);
-const c2Big = siteImage(cf?.harmonieBig, resolveImage('harmonie-big'), SIZES.coffretBig);
-
-const c3Big = siteImage(cf?.symbioseBig, resolveImage('symbiose-big'), SIZES.coffretBig);
-const c3Little = siteImage(cf?.symbioseSmall, resolveImage('symbiose-little'), SIZES.coffretSmall);
-
-const c4Little = siteImage(cf?.prestigeSmall, resolveImage('prestige-little'), SIZES.coffretSmall);
-const c4BigVideo = resolveVideo('prestige-big');
+import { SIZES } from '../../lib/siteImage';
+import { HOME, merge, picture, href } from '../../lib/content';
+import { rich, lines } from '../../lib/rich';
+// Section coffrets de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
+// 4 emplacements, chacun avec sa mise en page : les 4 premiers coffrets choisis dans Sanity, dans l'ordre
+const { coffrets } = Astro.props;
+const c = [0, 1, 2, 3].map((i) => coffrets.items[i] ?? merge(HOME.coffrets.items[i], undefined));
+const small = c.map((x) => picture(x.smallImage, SIZES.coffretSmall));
+const big = c.map((x) => picture(x.bigImage, SIZES.coffretBig));
+// Paragraphe entièrement en **gras** → style « appuyé » (coffret Prestige)
+const para = (t: string) => { const parts = rich(t); return { bold: parts.length > 0 && parts.every((p) => p.bold || !p.text.trim()), parts }; };
 ---
 
 <section class="coffrets" id="coffrets" data-anim="coffrets-section">
   <!-- ── 1. En-tête de section (Intro) ── -->
   <div class="coffrets-intro">
     <div class="coffrets-intro-header">
-      <h2 class="coffrets-intro-main">COIFFURE, MASSAGE, SOIN PROFOND. BIENVENUE DANS <br>LE RITUEL DES <em>MUSES</em>.</h2>
+      <h2 class="coffrets-intro-main">{rich(coffrets.title).map((p) => (p.br ? <br /> : p.italic ? <em>{p.text}</em> : p.bold ? <strong>{p.text}</strong> : p.text))}</h2>
       <!-- Illustration Muse : en bas du header, contre le padding de droite -->
       <svg class="coffrets-intro-deco" width="690" height="508" viewBox="0 -82 690 508" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       <g clip-path="url(#coffrets-deco-clip)">
@@ -50,7 +45,7 @@ const c4BigVideo = resolveVideo('prestige-big');
     <!-- Paragraphe placé en dessous du header, aligné à droite -->
     <div class="coffrets-intro-para-wrap">
       <p class="coffrets-intro-para">
-        UNE JOURNÉE COIFFURE ET BIEN-ÊTRE DANS NOS 2 ÉTABLISSEMENTS AU CENTRE VILLE DE TOULOUSE. CES EXPÉRIENCES DÉDIÉES À NOS MUSES, VOUS APPORTE UN MOMENT DE DÉTENTE RIEN QUE POUR VOUS. UNE PAUSE OÙ NOTRE ÉQUIPE D'EXPERTS VOUS APPORTE DES SOINS HAUT DE GAMME.
+        {coffrets.text}
       </p>
     </div>
   </div>
@@ -66,12 +61,12 @@ const c4BigVideo = resolveVideo('prestige-big');
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">COFFRET</span>
-              <span class="coffrets-extra-bold">INITIATION</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-bold">{c[0].name}</span>
             </h3>
-            <span class="coffrets-card-subtitle">LA PARENTHESE DOUCEUR</span>
+            <span class="coffrets-card-subtitle">{c[0].tagline}</span>
           </div>
-          <div class="coffrets-card-price">80€</div>
+          <div class="coffrets-card-price">{c[0].price}</div>
         </header>
 
         <!-- Flexbox principale en dessous du header -->
@@ -82,33 +77,29 @@ const c4BigVideo = resolveVideo('prestige-big');
             <div class="coffrets-action-block">
               <div class="coffrets-action-left">
                 <div class="coffrets-services-row">
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">BIEN ÊTRE</h4>
-                    <p class="coffrets-service-detail">Massage relaxant<br />30 min</p>
-                  </div>
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">COIFFURE</h4>
-                    <p class="coffrets-service-detail">Soin profond cheveux<br />& coiffure au choix</p>
-                  </div>
+                  {c[0].services.map((sv: any) => (
+                    <div class="coffrets-service-item">
+                      <h4 class="coffrets-service-title">{sv.title}</h4>
+                      <p class="coffrets-service-detail">{lines(sv.detail).map((l, k) => <>{k > 0 && <br />}{l}</>)}</p>
+                    </div>
+                  ))}
                 </div>
-                <a class="coffrets-btn-reserver" href="#reserver">RESERVER</a>
+                <a class="coffrets-btn-reserver" href={href(c[0].cta.url)}>{c[0].cta.label}</a>
               </div>
               <div class="coffrets-img-clip coffrets-img-small" data-anim="coffrets-img">
-                <img src={c1Little.src} srcset={c1Little.srcset} sizes={c1Little.sizes} alt={c1Little.alt ?? 'Coiffure Maison Muses'} loading="lazy" decoding="async" />
+                <img src={small[0].src} srcset={small[0].srcset} sizes={small[0].sizes} alt={small[0].alt} loading="lazy" decoding="async" />
               </div>
             </div>
 
             <!-- Div 2 : Le paragraphe en bas -->
             <div class="coffrets-para-block">
-              <p class="coffrets-desc-text">
-                Profitez d'une parenthèse de douceur avec un massage relaxant de 30 minutes chez Maison Muses Bien-être, suivi d'un soin profond pour vos cheveux et d'une coiffure au choix. Idéal pour découvrir l'alliance du bien-être et de la coiffure.
-              </p>
+              {c[0].description.map((t: string) => { const d = para(t); return <p class:list={['coffrets-desc-text', { 'coffrets-desc-bold': d.bold }]}>{d.parts.map((p) => (p.br ? <br /> : p.bold && !d.bold ? <strong>{p.text}</strong> : p.italic ? <em>{p.text}</em> : p.text))}</p>; })}
             </div>
           </div>
 
           <!-- Deuxième flexbox : grosse image prenant toute la hauteur disponible -->
           <div class="coffrets-img-clip coffrets-img-big" data-anim="coffrets-img">
-            <img src={c1Big.src} srcset={c1Big.srcset} sizes={c1Big.sizes} alt={c1Big.alt ?? 'Massage Maison Muses'} data-anim="coffrets-parallax" loading="lazy" decoding="async" />
+            <img src={big[0].src} srcset={big[0].srcset} sizes={big[0].sizes} alt={big[0].alt} data-anim="coffrets-parallax" loading="lazy" decoding="async" />
           </div>
         </div>
       </article>
@@ -120,12 +111,12 @@ const c4BigVideo = resolveVideo('prestige-big');
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">COFFRET</span>
-              <span class="coffrets-extra-bold">HARMONIE</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-bold">{c[1].name}</span>
             </h3>
-            <span class="coffrets-card-subtitle">L'EXPERIENCE SUR MESURE</span>
+            <span class="coffrets-card-subtitle">{c[1].tagline}</span>
           </div>
-          <div class="coffrets-card-price">SUR DEVIS</div>
+          <div class="coffrets-card-price">{c[1].price}</div>
         </header>
 
         <!-- Flexbox principale en dessous du header -->
@@ -134,35 +125,31 @@ const c4BigVideo = resolveVideo('prestige-big');
           <div class="coffrets-card-main">
             <!-- Div 1 : Le paragraphe en haut -->
             <div class="coffrets-para-block">
-              <p class="coffrets-desc-text">
-                L'harmonie parfaite entre beauté des cheveux et bien-être. Choisis librement parmi toutes nos prestations coiffure et soins pour un moment unique personnalisé (or rituels Olaplex/Tokio Inkarami et Essence des Muses). La durée sera en fonction des prestations choisies.
-              </p>
+              {c[1].description.map((t: string) => { const d = para(t); return <p class:list={['coffrets-desc-text', { 'coffrets-desc-bold': d.bold }]}>{d.parts.map((p) => (p.br ? <br /> : p.bold && !d.bold ? <strong>{p.text}</strong> : p.italic ? <em>{p.text}</em> : p.text))}</p>; })}
             </div>
 
             <!-- Div 2 : services + bouton (justify-between) et petite image alignée -->
             <div class="coffrets-action-block">
               <div class="coffrets-action-left">
                 <div class="coffrets-services-row">
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">BIEN ÊTRE</h4>
-                    <p class="coffrets-service-detail">Prestation au choix</p>
-                  </div>
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">COIFFURE</h4>
-                    <p class="coffrets-service-detail">Prestation au choix</p>
-                  </div>
+                  {c[1].services.map((sv: any) => (
+                    <div class="coffrets-service-item">
+                      <h4 class="coffrets-service-title">{sv.title}</h4>
+                      <p class="coffrets-service-detail">{lines(sv.detail).map((l, k) => <>{k > 0 && <br />}{l}</>)}</p>
+                    </div>
+                  ))}
                 </div>
-                <a class="coffrets-btn-reserver" href="#reserver">RESERVER</a>
+                <a class="coffrets-btn-reserver" href={href(c[1].cta.url)}>{c[1].cta.label}</a>
               </div>
               <div class="coffrets-img-clip coffrets-img-small" data-anim="coffrets-img">
-                <img src={c2Little.src} srcset={c2Little.srcset} sizes={c2Little.sizes} alt={c2Little.alt ?? 'Ambiance Maison Muses'} loading="lazy" decoding="async" />
+                <img src={small[1].src} srcset={small[1].srcset} sizes={small[1].sizes} alt={small[1].alt} loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
 
           <!-- Deuxième flexbox : grosse image prenant toute la hauteur disponible -->
           <div class="coffrets-img-clip coffrets-img-big" data-anim="coffrets-img">
-            <img src={c2Big.src} srcset={c2Big.srcset} sizes={c2Big.sizes} alt={c2Big.alt ?? 'Soin Maison Muses'} data-anim="coffrets-parallax" loading="lazy" decoding="async" />
+            <img src={big[1].src} srcset={big[1].srcset} sizes={big[1].sizes} alt={big[1].alt} data-anim="coffrets-parallax" loading="lazy" decoding="async" />
           </div>
         </div>
       </article>
@@ -174,47 +161,43 @@ const c4BigVideo = resolveVideo('prestige-big');
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">COFFRET</span>
-              <span class="coffrets-extra-bold">SYMBIOSE</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-bold">{c[2].name}</span>
             </h3>
-            <span class="coffrets-card-subtitle">L'EXPERIENCE REVITALISANTE</span>
+            <span class="coffrets-card-subtitle">{c[2].tagline}</span>
           </div>
-          <div class="coffrets-card-price">185 à 305€</div>
+          <div class="coffrets-card-price">{c[2].price}</div>
         </header>
 
         <!-- Flexbox principale en dessous du header : grosse image à gauche -->
         <div class="coffrets-card-body">
           <!-- Grosse image à gauche prenant toute la hauteur disponible -->
           <div class="coffrets-img-clip coffrets-img-big" data-anim="coffrets-img">
-            <img src={c3Big.src} srcset={c3Big.srcset} sizes={c3Big.sizes} alt={c3Big.alt ?? 'Soin Symbiose'} data-anim="coffrets-parallax" loading="lazy" decoding="async" />
+            <img src={big[2].src} srcset={big[2].srcset} sizes={big[2].sizes} alt={big[2].alt} data-anim="coffrets-parallax" loading="lazy" decoding="async" />
           </div>
 
           <!-- Flexbox "Tout le reste" à droite (2 div) -->
           <div class="coffrets-card-main">
             <!-- Div 1 : Le paragraphe en haut -->
             <div class="coffrets-para-block">
-              <p class="coffrets-desc-text">
-                L'harmonie parfaite entre beauté des cheveux et bien-être. Choisis librement parmi toutes nos prestations coiffure et soins pour un moment unique personnalisé (or rituels Olaplex/Tokio Inkarami et Essence des Muses). La durée sera en fonction des prestations choisies.
-              </p>
+              {c[2].description.map((t: string) => { const d = para(t); return <p class:list={['coffrets-desc-text', { 'coffrets-desc-bold': d.bold }]}>{d.parts.map((p) => (p.br ? <br /> : p.bold && !d.bold ? <strong>{p.text}</strong> : p.italic ? <em>{p.text}</em> : p.text))}</p>; })}
             </div>
 
             <!-- Div 2 : services + bouton (justify-between) et petite image alignée -->
             <div class="coffrets-action-block">
               <div class="coffrets-action-left">
                 <div class="coffrets-services-row">
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">BIEN ÊTRE</h4>
-                    <p class="coffrets-service-detail">Prestation au choix</p>
-                  </div>
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">COIFFURE</h4>
-                    <p class="coffrets-service-detail">Prestation au choix</p>
-                  </div>
+                  {c[2].services.map((sv: any) => (
+                    <div class="coffrets-service-item">
+                      <h4 class="coffrets-service-title">{sv.title}</h4>
+                      <p class="coffrets-service-detail">{lines(sv.detail).map((l, k) => <>{k > 0 && <br />}{l}</>)}</p>
+                    </div>
+                  ))}
                 </div>
-                <a class="coffrets-btn-reserver" href="#reserver">RESERVER</a>
+                <a class="coffrets-btn-reserver" href={href(c[2].cta.url)}>{c[2].cta.label}</a>
               </div>
               <div class="coffrets-img-clip coffrets-img-small" data-anim="coffrets-img">
-                <img src={c3Little.src} srcset={c3Little.srcset} sizes={c3Little.sizes} alt={c3Little.alt ?? 'Détail Symbiose'} loading="lazy" decoding="async" />
+                <img src={small[2].src} srcset={small[2].srcset} sizes={small[2].sizes} alt={small[2].alt} loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
@@ -228,12 +211,12 @@ const c4BigVideo = resolveVideo('prestige-big');
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">COFFRET</span>
-              <span class="coffrets-extra-bold">PRESTIGE</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-bold">{c[3].name}</span>
             </h3>
-            <span class="coffrets-card-subtitle">LA SIGNATURE MAISON MUSES</span>
+            <span class="coffrets-card-subtitle">{c[3].tagline}</span>
           </div>
-          <div class="coffrets-card-price">315 à 420€</div>
+          <div class="coffrets-card-price">{c[3].price}</div>
         </header>
 
         <!-- Flexbox principale en dessous du header -->
@@ -243,38 +226,31 @@ const c4BigVideo = resolveVideo('prestige-big');
             <!-- Div 1 : Petite image à gauche, services + bouton au milieu -->
             <div class="coffrets-action-block">
               <div class="coffrets-img-clip coffrets-img-small" data-anim="coffrets-img">
-                <img src={c4Little.src} srcset={c4Little.srcset} sizes={c4Little.sizes} alt={c4Little.alt ?? 'Coiffure Prestige'} loading="lazy" decoding="async" />
+                <img src={small[3].src} srcset={small[3].srcset} sizes={small[3].sizes} alt={small[3].alt} loading="lazy" decoding="async" />
               </div>
               <div class="coffrets-action-left">
                 <div class="coffrets-services-row">
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">BIEN ÊTRE</h4>
-                    <p class="coffrets-service-detail">Soin Signature<br />Essence des Muses</p>
-                  </div>
-                  <div class="coffrets-service-item">
-                    <h4 class="coffrets-service-title">COIFFURE</h4>
-                    <p class="coffrets-service-detail">Prestation au choix<br />avec le RITUEL TOKIO INKARAMI</p>
-                  </div>
+                  {c[3].services.map((sv: any) => (
+                    <div class="coffrets-service-item">
+                      <h4 class="coffrets-service-title">{sv.title}</h4>
+                      <p class="coffrets-service-detail">{lines(sv.detail).map((l, k) => <>{k > 0 && <br />}{l}</>)}</p>
+                    </div>
+                  ))}
                 </div>
-                <a class="coffrets-btn-reserver" href="#reserver">RESERVER</a>
+                <a class="coffrets-btn-reserver" href={href(c[3].cta.url)}>{c[3].cta.label}</a>
               </div>
             </div>
 
             <!-- Div 2 : Le paragraphe en bas -->
             <div class="coffrets-para-block coffrets-para-prestige">
-              <p class="coffrets-desc-text coffrets-desc-bold">
-                L'ultime expérience signée Maison Muses Bien-être et Maison Muses coiffure !
-              </p>
-              <p class="coffrets-desc-text">
-                Ce coffret regroupe la prestation coiffure de ton choix avec le rituel Tokio Inkarami, ainsi que le soin signature l'Essence des Muses qui est un voyage de deux heures alliant massage et soin visage.
-              </p>
+              {c[3].description.map((t: string) => { const d = para(t); return <p class:list={['coffrets-desc-text', { 'coffrets-desc-bold': d.bold }]}>{d.parts.map((p) => (p.br ? <br /> : p.bold && !d.bold ? <strong>{p.text}</strong> : p.italic ? <em>{p.text}</em> : p.text))}</p>; })}
             </div>
           </div>
 
           <!-- Deuxième flexbox : bg video prenant toute la hauteur disponible -->
           <div class="coffrets-img-clip coffrets-img-big coffrets-video-box" data-anim="coffrets-img">
             <div class="coffrets-video-parallax" data-anim="coffrets-parallax">
-              <video class="coffrets-video" src={c4BigVideo} preload="none" loop muted playsinline data-anim="coffrets-video"></video>
+              <video class="coffrets-video" src={c[3].bigVideo} preload="none" loop muted playsinline data-anim="coffrets-video"></video>
             </div>
           </div>
         </div>

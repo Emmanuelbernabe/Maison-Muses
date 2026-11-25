@@ -5,20 +5,21 @@ import EquipeHero from '../components/equipe/EquipeHero.astro';
 import EquipeMembers from '../components/equipe/EquipeMembers.astro';
 import SiteFooter from '../components/layout/SiteFooter.astro';
 import { getSettings } from '../lib/sanity';
+import { loadEquipe } from '../lib/content';
 
-const settings = await getSettings();
+const [settings, equipe] = await Promise.all([getSettings(), loadEquipe()]);
 if (!settings) {
   throw new Error("Contenu introuvable : publiez « Réglages du site » dans Sanity (voir README).");
 }
 ---
 <Layout
-  title="L’équipe – Maison Muses, coiffure et bien-être à Toulouse"
-  description="Moussine, coiffeur, et Violaine, praticienne bien-être : l’équipe de Maison Muses au centre de Toulouse."
+  title={equipe.seoTitle}
+  description={equipe.seoDescription}
 >
-  <Header logo={settings.logo} cta={settings.headerCta} />
+  <Header />
   <main id="top">
-    <EquipeHero />
-    <EquipeMembers />
+    <EquipeHero equipe={equipe} />
+    <EquipeMembers equipe={equipe} />
   </main>
   <!-- CTA « Prenez le temps » + footer -->
   <SiteFooter />

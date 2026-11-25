@@ -1,45 +1,18 @@
 ---
 // Pied de page du site (CTA, adresses + cartes Google Maps, liens, MAISON MUSES)
-// TODO : URL Planity et liens Instagram / podcast
+// Textes, adresses et liens : Réglages du site → Pied de page (Sanity + valeurs par défaut, lib/content.ts)
 // variant : « orange » par défaut, « green » pour la page bien-être (textes, filets, cartes en vert)
+import { loadSettings, href } from '../../lib/content';
+import { clean } from '../../lib/sanity';
+import { rich, lines } from '../../lib/rich';
 interface Props { variant?: 'orange' | 'green'; }
 const { variant = 'orange' } = Astro.props;
 
-const planityUrl = 'https://www.planity.com/';
+const { footer } = await loadSettings();
 const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 const year = new Date().getFullYear();
-
-const places = [
-  {
-    name: 'MAISON MUSES COIFFURE',
-    lines: ['48, All. Jean Jaurès,', 'Toulouse, 31000'],
-    phone: '07 67 66 02 67',
-    address: '48 Allées Jean Jaurès, 31000 Toulouse, France',
-  },
-  {
-    name: 'MAISON MUSES BIEN-ÊTRE',
-    lines: ['11 Rue Bellegarde,', '31000 Toulouse'],
-    phone: '07 67 79 03 12',
-    address: '11 Rue Bellegarde, 31000 Toulouse, France',
-  },
-];
-
-// Sur la home, ancres (#coffrets…) ; sur les autres pages, retour vers la home (/#coffrets…)
-const home = Astro.url.pathname === '/' ? '' : '/';
-
-const maisonLinks = [
-  { label: 'BIEN-ÊTRE', url: '/bien-etre' },
-  { label: 'COIFFURE', url: '/coiffure' },
-  { label: 'COFFRETS', url: `${home}#coffrets` },
-  { label: 'L’ÉQUIPE', url: '/equipe' },
-  { label: 'JOURNAL', url: '/journal' },
-];
-
-const socialLinks = [
-  { label: 'MAISON MUSE COIFFURE', url: '#' },
-  { label: 'MAISON MUSE BIEN-ÊTRE', url: '#' },
-  { label: 'PODCAST', url: '#' },
-];
+const isHome = Astro.url.pathname === '/';
+const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), address: clean(p.mapAddress), phone: clean(p.phone) }));
 ---
 
 <footer class:list={["footer", { "footer--green": variant === "green" }]} id="footer" data-anim="footer-section">
@@ -47,7 +20,7 @@ const socialLinks = [
     <div class="footer-cta">
       <div class="footer-cta-left">
         <h2 class="footer-title" data-anim="footer-title">
-          <span class="footer-thin">PRENEZ LE TEMPS.</span><br />ON S’OCCUPE DU RESTE
+          {rich(footer.title).map((p) => (p.br ? <br /> : p.bold ? p.text : <span class="footer-thin">{p.text}</span>))}
         </h2>
         <!-- Illustration Muse entre le titre et le bouton -->
         <svg class="footer-cta-deco" width="216" height="376" viewBox="0 0 216 376" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -63,7 +36,7 @@ const socialLinks = [
         <path d="M3.00073 304.424C36.8257 304.424 68.1907 322.879 68.1907 372.091" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
         </svg>
       </div>
-      <a class="footer-btn" href={planityUrl} target="_blank" rel="noopener">PRENDRE RENDEZ-VOUS</a>
+      <a class="footer-btn" href={href(footer.cta.url)} target="_blank" rel="noopener">{footer.cta.label}</a>
     </div>
 
     <div class="footer-places">
@@ -72,7 +45,7 @@ const socialLinks = [
           <div class="footer-place-content">
             <h3 class="footer-place-name">{p.name}</h3>
             <p class="footer-place-address">
-              {p.lines[0]}<br />{p.lines[1]}<br />
+              {p.lines.map((l: string) => <>{l}<br /></>)}
               <a href={`tel:${p.phone.replace(/\s/g, '')}`}>{p.phone}</a>
             </p>
           </div>
@@ -95,15 +68,15 @@ const socialLinks = [
 
     <div class="footer-links">
       <nav class="footer-links-group" aria-label="La maison">
-        <h3 class="footer-links-title">LA MAISON</h3>
+        <h3 class="footer-links-title">{footer.maisonTitle}</h3>
         <div class="footer-links-grid">
-          {maisonLinks.map((l) => <a href={l.url}>{l.label}</a>)}
+          {footer.maisonLinks.map((l: any) => <a href={href(l.url, isHome)}>{l.label}</a>)}
         </div>
       </nav>
       <nav class="footer-links-group footer-links-social" aria-label="Nous suivre">
-        <h3 class="footer-links-title">NOUS SUIVRE</h3>
+        <h3 class="footer-links-title">{footer.socialTitle}</h3>
         <div class="footer-links-list">
-          {socialLinks.map((l) => <a href={l.url} target="_blank" rel="noopener">{l.label}</a>)}
+          {footer.socialLinks.map((l: any) => <a href={href(l.url)} target="_blank" rel="noopener">{l.label}</a>)}
         </div>
       </nav>
     </div>
@@ -115,10 +88,9 @@ const socialLinks = [
   </div>
 
   <div class="footer-legal">
-    <span>© MAISON MUSES {year}</span>
+    <span>{footer.copyright} {year}</span>
     <span class="footer-legal-links">
-      <a href="#">MENTIONS LEGALES</a>
-      <a href="#">COOKIES</a>
+      {footer.legalLinks.map((l: any) => <a href={href(l.url)}>{l.label}</a>)}
     </span>
   </div>
 </footer>

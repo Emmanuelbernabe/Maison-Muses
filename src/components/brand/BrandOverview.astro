@@ -2,14 +2,17 @@
 // Page marque — la marque : grande phrase, origine, qualités, photo
 interface Props { brand: any; }
 const { brand } = Astro.props;
+// Libellés communs des pages marques : Réglages du site (Sanity + valeurs par défaut, lib/content.ts)
+import { loadSettings } from '../../lib/content';
+const { brandLabels: labels } = await loadSettings();
 ---
 
 <section class="br-ov" aria-label="La marque">
   {brand.statement && <p class="br-big" data-br-fade>{brand.statement}</p>}
   <div class="br-ov-grid">
     <div class="br-rows" data-br-fade>
-      {brand.origin.length > 0 && <><p class="br-mut">Origine</p><p>{brand.origin.map((line: string, i: number) => <>{i > 0 && <br />}{line}</>)}</p></>}
-      {brand.qualities.length > 0 && <><p class="br-mut">Qualités</p><ul>{brand.qualities.map((q: string) => <li>{q}</li>)}</ul></>}
+      {brand.origin.length > 0 && <><p class="br-mut">{labels.origin}</p><p>{brand.origin.map((line: string, i: number) => <>{i > 0 && <br />}{line}</>)}</p></>}
+      {brand.qualities.length > 0 && <><p class="br-mut">{labels.qualities}</p><ul>{brand.qualities.map((q: string) => <li>{q}</li>)}</ul></>}
     </div>
     <figure class="br-ov-photo" data-br-clip data-sanity={brand.overviewImage.attr}>
       <img src={brand.overviewImage.src} alt={brand.overviewImage.alt} loading="lazy" decoding="async" />

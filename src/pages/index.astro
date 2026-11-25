@@ -11,29 +11,24 @@ import HomeRoutines from '../components/home/HomeRoutines.astro';
 import HomeJournal from '../components/home/HomeJournal.astro';
 import SiteFooter from '../components/layout/SiteFooter.astro';
 import LoadingScreen from '../components/home/LoadingScreen.astro';
-import { getHome, getSettings } from '../lib/sanity';
+import { loadHome } from '../lib/content';
 
-const [home, settings] = await Promise.all([getHome(), getSettings()]);
-if (!home || !settings) {
-  throw new Error("Contenu introuvable : publiez « Page d'accueil » et « Réglages du site » dans Sanity (voir README).");
-}
+// Contenu de la page d'accueil (Sanity, complété par les valeurs par défaut de lib/content.ts)
+const home = await loadHome();
 ---
-<Layout
-  title={home.seoTitle ?? 'Maison Muses – Coiffure et bien-être à Toulouse'}
-  description={home.seoDescription}
->
-  <LoadingScreen photos={home.photos} />
-  <Header logo={settings.logo} cta={settings.headerCta} />
+<Layout title={home.seoTitle} description={home.seoDescription}>
+  <LoadingScreen loader={home.loader} hero={home.hero} />
+  <Header />
   <main id="top">
     <!-- Hero et intro dans le flux normal sans pin superposé -->
-    <HomeHero data={home.hero} photos={home.photos} />
-    <HomeIntro data={home.intro} photos={home.photos} />
-    <HomeGallery photos={home.photos} />
-    <HomeTeam photos={home.photos} />
-    <HomeCoffrets photos={home.photos} />
-    <HomeReviews />
-    <HomeRoutines photos={home.photos} />
-    <HomeJournal />
+    <HomeHero hero={home.hero} />
+    <HomeIntro intro={home.intro} />
+    <HomeGallery gallery={home.gallery} center={home.hero.center} />
+    <HomeTeam team={home.team} />
+    <HomeCoffrets coffrets={home.coffrets} />
+    <HomeReviews reviews={home.reviews} />
+    <HomeRoutines routines={home.routines} />
+    <HomeJournal journal={home.journal} />
   </main>
   <SiteFooter />
   <script>

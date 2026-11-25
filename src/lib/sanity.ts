@@ -40,41 +40,55 @@ const builder = createImageUrlBuilder(client);
 export const urlFor = (source: any) => builder.image(source);
 
 const link = `{ label, url }`;
+const video = (field: string) => `"${field}": ${field}.asset->url`;
 
+/* ───────── Accueil (structure et valeurs par défaut : lib/content.ts) ───────── */
 export const getHome = () =>
   client.fetch(`*[_id == "homepage"][0]{
     seoTitle, seoDescription,
-    photos,
-    hero { subtitle, title, image },
-    intro { title, text, gallery, soins[]{ label, url } },
+    loader,
+    hero { subtitle, ${video('video')}, portrait, reveal, center },
+    intro { title, text, ctaBienEtre ${link}, ctaCoiffure ${link}, image, ${video('video')} },
+    gallery,
+    team { title, text, cta ${link}, thumb, left, mid, right },
     coffrets {
-      title, tag, text,
-      items[]->{ _id, name, tagline, price, includes, description, image, ctaLabel, ctaUrl }
+      title, text, prefix,
+      items[]->{ _id, name, tagline, price, services[]{ title, detail }, cta ${link}, description, bigImage, smallImage, ${video('bigVideo')} }
     },
-    mission {
-      eyebrow, title, text,
-      primaryCta ${link}, secondaryCta ${link},
-      team[]->{ _id, name, tag, photo }
-    },
-    reviews { score, source, quotes },
-    routine {
-      title, text,
-      diagnostics[]{ title, ctaLabel, url },
-      advice { title, items[]->{ _id, title, url, linkLabel } },
-      podcast { title, items[]->{ _id, title, url, date } }
-    }
+    reviews { title, rating, ratingLabel, cta ${link}, items[]{ quote, author, service } },
+    routines { title, text, prefix, ctaLabel, doors[]{ label, text, url, embedUrl, image } },
+    journal { title, cta ${link}, filterAll, filterArticles, filterPodcast }
   }`);
 
+/* ───────── Réglages : logo, header, menu, footer, textes communs ───────── */
 export const getSettings = () =>
   client.fetch(`*[_id == "siteSettings"][0]{
-    logo, headerCta ${link},
+    logo { ..., "url": asset->url },
+    header { menuLabel, reserve ${link} },
+    menu[]{ label, url, brands },
     footer {
       title, cta ${link},
-      spaces[]{ title, details },
-      newsletter { title, text, cta ${link} },
-      socialsTitle, socials[]{ label, handle, url },
-      copyright, legal ${link}
-    }
+      places[]{ name, address, phone, mapAddress },
+      maisonTitle, maisonLinks[]${link},
+      socialTitle, socialLinks[]${link},
+      copyright, legalLinks[]${link}
+    },
+    brandLabels
+  }`);
+
+/* ───────── Page L'équipe ───────── */
+export const getEquipePage = () =>
+  client.fetch(`*[_id == "page-equipe"][0]{
+    seoTitle, seoDescription,
+    hero { title, word, text, tagline, ${video('video')}, poster, playLabel },
+    members[]{ name, role, tag, lead, bio, cta ${link}, imageMain, imageSecond }
+  }`);
+
+/* ───────── Textes des pages journal ───────── */
+export const getJournalPage = () =>
+  client.fetch(`*[_id == "page-journal"][0]{
+    seoTitle, seoDescription, titleItalic, titleMain, allLabel, featuredLabel, emptyText,
+    backLabel, cta ${link}, relatedTitleStart, relatedTitleEnd
   }`);
 
 /* ───────── Journal ───────── */

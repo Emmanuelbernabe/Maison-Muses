@@ -2,6 +2,10 @@
 // Accueil — Journal des Muses : les 5 derniers articles du journal (Sanity), couverture en aperçu au survol
 import { getJournalPosts, clean } from '../../lib/sanity';
 import { journalCover, journalReadingTime } from '../../lib/journal';
+import { href } from '../../lib/content';
+import { rich } from '../../lib/rich';
+// Titre, bouton et filtres : section journal de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
+const { journal } = Astro.props;
 
 // Les articles arrivent déjà triés du plus récent au plus ancien
 const posts: any[] = ((await getJournalPosts()) || []).slice(0, 5);
@@ -23,13 +27,13 @@ const showFilters = entries.some((e) => e.type === 'podcast') && entries.some((e
 <section class="journal" id="journal" data-anim="journal-section">
   <div class="journal-head">
     <h2 class="journal-title" data-anim="journal-title">
-      <span class="journal-thin">LE JOURNAL</span> DES MUSES
+      {rich(journal.title).map((p) => (p.br ? <br /> : p.bold ? p.text : <span class="journal-thin">{p.text}</span>))}
     </h2>
     {showFilters && (
       <div class="journal-filters" role="group" aria-label="Filtrer le journal">
-        <button class="journal-filter" type="button" data-filter="all" aria-pressed="true">TOUT</button>
-        <button class="journal-filter" type="button" data-filter="article" aria-pressed="false">ARTICLES</button>
-        <button class="journal-filter" type="button" data-filter="podcast" aria-pressed="false">PODCAST</button>
+        <button class="journal-filter" type="button" data-filter="all" aria-pressed="true">{journal.filterAll}</button>
+        <button class="journal-filter" type="button" data-filter="article" aria-pressed="false">{journal.filterArticles}</button>
+        <button class="journal-filter" type="button" data-filter="podcast" aria-pressed="false">{journal.filterPodcast}</button>
       </div>
     )}
   </div>
@@ -47,7 +51,7 @@ const showFilters = entries.some((e) => e.type === 'podcast') && entries.some((e
   </ul>
 
   <div class="journal-more">
-    <a class="journal-btn" href="/journal">TOUT LE JOURNAL</a>
+    <a class="journal-btn" href={href(journal.cta.url)}>{journal.cta.label}</a>
   </div>
 
   <div class="journal-preview" data-anim="journal-preview" aria-hidden="true">
