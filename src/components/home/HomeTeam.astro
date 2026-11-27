@@ -24,7 +24,7 @@ const teamRightImg = picture(team.right, SIZES.team);
             <img src={thumbImg.src} srcset={thumbImg.srcset} sizes={thumbImg.sizes} alt={thumbImg.alt} width="180" height="85" loading="lazy" decoding="async" />
           </span>
         )}
-        {words.map(({ w, thin }) => <span class:list={['team-word', { 'team-word--thin': thin }]}>{w}</span>)}
+        {words.map(({ w, thin }) => <span class:list={['team-word', { 'team-word--thin': thin }]}>{w}{' '}</span>)}
       </div>
     ))}
   </h2>
@@ -307,11 +307,15 @@ const teamRightImg = picture(team.right, SIZES.team);
     .team-word {
       margin-right: 0.2em;
     }
+    /* Image à la taille du texte : pas plus haute qu'une ligne (0.88em), sinon la 1re ligne s'écartait
+       des autres et l'image descendait sur la 2e ; légèrement remontée par rapport aux lettres */
     .team-thumb {
-      width: clamp(80px, 20vw, 120px);
-      height: clamp(40px, 10vw, 60px);
+      width: 2em;
+      height: 0.8em;
       margin-right: 0.2em;
       vertical-align: top;
+      position: relative;
+      top: -0.06em;
     }
 
     .team-mid {

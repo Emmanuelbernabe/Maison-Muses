@@ -2,10 +2,10 @@
    Chaque champ éditable du site existe dans Sanity (même nom, même structure).
    Valeurs par défaut (= contenu de référence) : lib/content-defaults.ts.
    Un champ vidé dans le Studio reprend sa valeur par défaut : le site ne casse jamais. */
-import { clean, getSettings, getHome, getEquipePage, getJournalPage } from './sanity';
+import { clean, getSettings, getHome, getEquipePage, getJournalPage, visualEditing } from './sanity';
 import { resolveImage, resolveVideo } from './images';
 import { siteImage, type SiteImage } from './siteImage';
-import { HOME, SETTINGS, EQUIPE, JOURNAL } from './content-defaults';
+import { HOME, SETTINGS, EQUIPE, JOURNAL, img, link } from './content-defaults';
 export { HOME, SETTINGS, EQUIPE, JOURNAL, img, vid, link } from './content-defaults';
 
 const isObj = (v: any) => v && typeof v === 'object' && !Array.isArray(v);
@@ -44,8 +44,22 @@ export const href = (url: string | undefined, isHome = true) => {
 };
 
 /* ══════════════════════ Chargement fusionné (une requête par document et par build) ══════════════════════ */
-const once = <T,>(load: () => Promise<T>) => { let p: Promise<T> | null = null; return () => (p ??= load()); };
+// Mis en cache seulement pendant un build statique (une requête par document) : en dev et sur le site
+// d'aperçu (rendu serveur), le contenu est relu à chaque page, sinon il resterait figé jusqu'au redémarrage
+const cacheable = import.meta.env.PROD && !visualEditing;
+const once = <T,>(load: () => Promise<T>) => { let p: Promise<T> | null = null; return () => (cacheable ? (p ??= load()) : load()); };
 export const loadSettings = once(async () => merge(SETTINGS, await getSettings()) as typeof SETTINGS & { logo: any });
 export const loadHome = once(async () => merge(HOME, await getHome()) as any);
-export const loadEquipe = once(async () => merge(EQUIPE, await getEquipePage()) as any);
+// Membres ajoutés au-delà des deux du contenu de référence : complétés par un membre vide
+// (et non par Moussine, comme le ferait la fusion par défaut) ; sans photo, la photo d'équipe
+const BLANK_MEMBER = { name: '', role: '', tag: '', lead: '', bio: '', cta: link('', ''), imageMain: img('team-mid', ''), imageSecond: img('team-mid', '') };
+export const loadEquipe = once(async () => {
+  const data = await getEquipePage();
+  const out = merge(EQUIPE, data) as any;
+  const raw = Array.isArray(data?.members) ? data.members : [];
+  raw.forEach((d: any, i: number) => {
+    if (i >= EQUIPE.members.length) out.members[i] = merge(BLANK_MEMBER, d);
+  });
+  return out;
+});
 export const loadJournalPage = once(async () => merge(JOURNAL, await getJournalPage()) as typeof JOURNAL);

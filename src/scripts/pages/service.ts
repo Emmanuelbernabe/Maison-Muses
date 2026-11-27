@@ -34,13 +34,15 @@ function initServiceHero() {
     });
   }
 
-  // Header crème tant que la vidéo est sous lui
-  ScrollTrigger.create({
+  // Header crème tant que la vidéo est sous lui, dès l'arrivée sur la page
+  // (« top bottom » : déjà actif en haut de page ; « top top » ne s'activait qu'au premier scroll)
+  const heroSt = ScrollTrigger.create({
     trigger: hero,
-    start: 'top top',
+    start: 'top bottom',
     end: 'bottom top+=40',
     onToggle: (self) => hd?.classList.toggle('is-on-orange', self.isActive),
   });
+  hd?.classList.toggle('is-on-orange', heroSt.isActive);
 }
 
 // ============ NOTRE APPROCHE ============
@@ -78,8 +80,8 @@ function initServiceApproach() {
   section.querySelectorAll<HTMLElement>('[data-service-clip]').forEach((el) => {
     gsap.fromTo(el, { clipPath: CLIP_HIDDEN }, {
       clipPath: CLIP_FULL,
-      duration: 1.1,
-      ease: 'musesEase',
+      duration: 1.6,
+      ease: 'musesReveal',
       scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none reverse' },
     });
   });
@@ -148,8 +150,9 @@ function initServiceSliderOne(slider: HTMLElement) {
     if (e.key === 'ArrowRight') { e.preventDefault(); sliderGoTo(Math.round(sliderState.pos) + 1); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); sliderGoTo(Math.round(sliderState.pos) - 1); }
     if (e.key === 'Enter') {
-      const index = gsap.utils.wrap(0, count, Math.round(sliderState.pos));
-      slider.dispatchEvent(new CustomEvent('service-slide-click', { detail: { index, slide: slides[index] } }));
+      const slide = slides[gsap.utils.wrap(0, count, Math.round(sliderState.pos))];
+      // data-index : numéro du produit d'origine (les copies ajoutées quand il y a peu de produits gardent le leur)
+      slider.dispatchEvent(new CustomEvent('service-slide-click', { detail: { index: Number(slide.dataset.index), slide } }));
     }
   });
 
@@ -229,7 +232,7 @@ function initServiceAccordion() {
     });
     if (!open || reduce) return;
     const photo = detail.querySelector<HTMLElement>('[data-service-acc-clip]');
-    if (photo) gsap.fromTo(photo, { clipPath: CLIP_HIDDEN }, { clipPath: CLIP_FULL, duration: 1, ease: 'musesEase', delay: 0.15 });
+    if (photo) gsap.fromTo(photo, { clipPath: CLIP_HIDDEN }, { clipPath: CLIP_FULL, duration: 1.6, ease: 'musesReveal', delay: 0.15 });
     gsap.fromTo(detail.querySelectorAll('.service-detail-text > *, .service-brands'), { y: 20, autoAlpha: 0 }, {
       y: 0, autoAlpha: 1, duration: 0.8, ease: 'musesEase', stagger: 0.07, delay: 0.1,
     });
@@ -309,7 +312,7 @@ function initServiceAccordion() {
   const firstPhoto = acc.querySelector<HTMLElement>('.service-row.is-open [data-service-acc-clip]');
   if (firstPhoto && !reduce) {
     gsap.fromTo(firstPhoto, { clipPath: CLIP_HIDDEN }, {
-      clipPath: CLIP_FULL, duration: 1.1, ease: 'musesEase',
+      clipPath: CLIP_FULL, duration: 1.6, ease: 'musesReveal',
       scrollTrigger: { trigger: firstPhoto, start: 'top 85%', toggleActions: 'play none none reverse' },
     });
   }

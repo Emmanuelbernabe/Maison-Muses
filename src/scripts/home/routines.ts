@@ -17,8 +17,8 @@ export function initHomeRoutines() {
       { clipPath: 'inset(100% 0% 0% 0%)' },
       {
         clipPath: 'inset(0% 0% 0% 0%)',
-        duration: 1.3,
-        ease: 'musesEase',
+        duration: 1.6,
+        ease: 'musesReveal',
         stagger: 0.12,
         scrollTrigger: { trigger: routines.querySelector('[data-anim="routines-doors"]'), start: 'top 85%', once: true },
       }

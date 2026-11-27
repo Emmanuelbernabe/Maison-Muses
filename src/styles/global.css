@@ -44,7 +44,19 @@ html.lenis,html.lenis body{height:auto}
 .fill{width:100%;height:100%;object-fit:cover}
 :focus-visible{outline:2px solid var(--orange);outline-offset:4px;border-radius:4px}
 h1,h2,h3,p{margin:0}
+/* Texte lu par Google, les IA et les lecteurs d'écran, invisible à l'écran (ex. titre principal de l'accueil) */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* Lien « Aller au contenu » : hors écran, apparaît au focus clavier */
+.skip-link{position:fixed;top:-100px;left:1rem;z-index:2000;padding:.75rem 1.25rem;background:var(--green);color:var(--bg);font:500 1rem/1 var(--font);border-radius:4px}
+.skip-link:focus{top:1rem}
+/* Cible d'ancre focalisée par script (main, section) : pas de contour autour de tout le bloc */
+main:focus,[tabindex="-1"]:focus{outline:none}
 
+
+/* Même transition pour les changements de page complets (liens data-astro-reload : pages de réservation,
+   dont le module Planity ne démarre qu'au chargement) : View Transitions entre documents.
+   Ne concerne ni les rechargements (F5, géré par mm-reload) ni les navigations internes d'Astro. */
+@view-transition { navigation: auto; }
 
 ::view-transition-group(navbar) {
   animation: none;
@@ -82,3 +94,24 @@ html.mm-reload body { transition: none !important; }
     animation: none;
   }
 }
+/* ───────── Couleur des textes : orange ou terracotta ─────────
+   - Orange de la charte (#e57851) : textes en majuscules et grands titres (règle par défaut, rien à faire).
+   - Terracotta (#ae4c2c, contraste 4,88:1 sur le crème) : textes en casse normale et boutons.
+   Les variantes vertes (bien-être) et crème (sur fond orange) ne sont pas touchées.
+   #top = <main> de chaque page : ces règles l'emportent sur celles des composants. */
+:root { --orange-brand: #e57851; --orange-ink: #ae4c2c; }
+
+/* Éléments qui lisent eux-mêmes var(--orange) (y compris pour un fond) : on redéfinit la variable */
+#top :is(.intro-para, .intro-btn, .team-btn, .eq-play, .br-dlg-body a, .jr-filters button) { --orange: var(--orange-ink); }
+
+/* Éléments qui héritent la couleur de leur section : couleur explicite */
+#top :is(.reviews-btn, .reviews-card-quote, .reviews-card-service, .journal-item-type, .journal-btn, .nf-btn,
+  .jr-date, .jr-feat-excerpt, .jr-art-cta, .rt p, .rt li, .rt blockquote, .rt strong, .lead, .br-intro),
+#top .routines-door-coiffure .routines-btn,
+#top .br-slider .service-slide-sub,
+#top.service-orange :is(.service-cta, .service-body, .service-detail-text p, .service-detail-text strong),
+.footer:not(.footer--green) .footer-btn { color: var(--orange-ink); }
+/* Boutons et textes en casse normale : équipe (panneau orange de Moussine), filtres du journal (inactifs) */
+#top .jr-filters button:not([aria-pressed='true']) { color: var(--orange-ink); }
+/* Signature d'une citation (majuscules) : orange, même dans une citation en terracotta */
+#top .rt cite { color: var(--orange-brand); }

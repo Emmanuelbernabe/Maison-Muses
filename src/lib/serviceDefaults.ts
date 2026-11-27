@@ -104,6 +104,14 @@ export const SERVICE_DEFAULTS: Record<string, any> = {
         "Origine",
         "Lab–Zéro",
         "Pure & Co"
+      ],
+      "logos": [
+        { "src": "/logo/eleven_australia.svg", "alt": "Eleven Australia" },
+        { "src": "/logo/k18.svg", "alt": "K18" },
+        { "src": "/logo/minimaliste.svg", "alt": "Minimaliste" },
+        { "src": "/logo/patrice_mulato.svg", "alt": "Patrice Mulato" },
+        { "src": "/logo/tokio_inkarami.svg", "alt": "Tokio Inkarami" },
+        { "src": "/logo/trend_curls.svg", "alt": "Trend Curls" }
       ]
     },
     "social": {
@@ -213,6 +221,10 @@ export const SERVICE_DEFAULTS: Record<string, any> = {
         "Origine",
         "Lab–Zéro",
         "Pure & Co"
+      ],
+      "logos": [
+        { "src": "/logo/minimaliste_vert.svg", "alt": "Minimaliste" },
+        { "src": "/logo/oceopin_vert.svg", "alt": "Océopin" }
       ]
     },
     "social": {

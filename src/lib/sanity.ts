@@ -47,7 +47,7 @@ export const getHome = () =>
   client.fetch(`*[_id == "homepage"][0]{
     seoTitle, seoDescription,
     loader,
-    hero { subtitle, ${video('video')}, portrait, reveal, center },
+    hero { heading, subtitle,${video('video')}, portrait, reveal, center },
     intro { title, text, ctaBienEtre ${link}, ctaCoiffure ${link}, image, ${video('video')} },
     gallery,
     team { title, text, cta ${link}, thumb, left, mid, right },
@@ -65,7 +65,8 @@ export const getSettings = () =>
   client.fetch(`*[_id == "siteSettings"][0]{
     logo { ..., "url": asset->url },
     header { menuLabel, reserve ${link} },
-    menu[]{ label, url, brands },
+    menu[]{ label, url, brands, image },
+    menuPanel { maisonTitle, brandsTitle, visit { label, text, url }, socials[]${link} },
     footer {
       title, cta ${link},
       places[]{ name, address, phone, mapAddress },
@@ -73,14 +74,21 @@ export const getSettings = () =>
       socialTitle, socialLinks[]${link},
       copyright, legalLinks[]${link}
     },
+    notFound { title, text, cta ${link} },
+    cookies,
+    booking { title, text, choices[]{ label, place, address, url, image }, coiffure, bienEtre, otherLabel },
     brandLabels
   }`);
+
+/* ───────── Pages légales ───────── */
+export const getLegalPage = (id: 'page-mentions-legales' | 'page-confidentialite') =>
+  client.fetch(`*[_id == $id][0]{ _id, title, updatedAt, body, seoDescription }`, { id });
 
 /* ───────── Page L'équipe ───────── */
 export const getEquipePage = () =>
   client.fetch(`*[_id == "page-equipe"][0]{
     seoTitle, seoDescription,
-    hero { title, word, text, tagline, ${video('video')}, poster, playLabel },
+    hero { title, word, text, tagline, ${video('video')}, poster, playLabel, rotateHint },
     members[]{ name, role, tag, lead, bio, cta ${link}, imageMain, imageSecond }
   }`);
 
@@ -109,7 +117,7 @@ export const getServicePage = (id: 'page-coiffure' | 'page-bien-etre') =>
     approach,
     gallery,
     steps[]{ _key, tag, title, paragraphs, ctaLabel, ctaUrl, image, "video": video.asset->url },
-    brands,
+    brands { tag, title, text, list, logos[]{ _key, alt, "url": asset->url } },
     social
   }`, { id });
 
@@ -122,9 +130,14 @@ export const getBrands = () =>
   client.fetch(`*[_type == "brand" && defined(slug.current)] | order(name asc){ ${brandFields} }`);
 
 // Menu « Nos marques » : chaque marque publiée apparaît automatiquement
-export const getBrandLinks = async (): Promise<{ name: string; url: string }[]> => {
-  const brands: any[] = (await client.fetch(`*[_type == "brand" && defined(slug.current)] | order(name asc){ name, "slug": slug.current }`)) || [];
-  return brands.map((b) => ({ name: clean(b.name), url: `/marques/${clean(b.slug)}` }));
+// L'image de hero de chaque marque s'affiche dans le menu au survol de son lien
+export const getBrandLinks = async (): Promise<{ name: string; url: string; image: string | null }[]> => {
+  const brands: any[] = (await client.fetch(`*[_type == "brand" && defined(slug.current)] | order(name asc){ name, "slug": slug.current, heroImage }`)) || [];
+  return brands.map((b) => ({
+    name: clean(b.name),
+    url: `/marques/${clean(b.slug)}`,
+    image: b.heroImage?.asset ? urlFor(b.heroImage).width(800).fit('max').auto('format').quality(80).url() : null,
+  }));
 };
 
 export const getBrand = (slug: string) =>

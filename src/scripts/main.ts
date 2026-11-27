@@ -18,6 +18,11 @@ import { initServicePage } from './pages/service';
 import { initJournal } from './pages/journal';
 import { initMenu } from './layout/menu';
 import { initBrandPage } from './pages/brand';
+import { initConsentBanner, applyConsent, readConsent } from './layout/consent';
+import { initBooking } from './layout/booking';
+
+// Choix de cookies déjà enregistré : appliqué dès le chargement (Google Tag Manager, cartes)
+applyConsent(readConsent());
 
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, SplitText);
@@ -57,8 +62,6 @@ function restoreScroll() {
 let lenis: Lenis | null = null;
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-/** Durée nulle si l'utilisateur préfère réduire les animations */
-const t = (d: number) => (reduce ? 0 : d);
 const $$ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode = document) =>
   Array.from(root.querySelectorAll<T>(sel));
 
@@ -107,29 +110,27 @@ function initResize() {
 }
 
 /* ───────── Header : fond / couleur / flou pilotés par variables CSS ───────── */
+// Fond crème flouté du header (Header.astro) partout, sauf quand le header passe au-dessus d'une zone à garder
+// dégagée : hero de l'accueil (vidéo), coffrets, vidéo des pages espace. Les autres vidéos (page équipe)
+// passent le header en crème (.is-on-orange), ce qui retire aussi le fond.
 function initHeader() {
   const hd = document.getElementById('hd');
-  const hero = document.querySelector('.hero');
-  if (!hd || !hero) return;
-  const solid = (on: boolean) =>
-    gsap.to(hd, { '--hb': on ? 86 : 0, '--hc': on ? 100 : 0, '--hblur': on ? 14 : 0, duration: t(0.4), ease: 'power2.out', overwrite: true });
-  const st = ScrollTrigger.create({ trigger: hero, start: 'bottom top+=70', end: 'max', onToggle: (s) => solid(s.isActive) });
-  if (st.isActive) solid(true);
-
-  // Items du header en crème tant que le milieu du header est au-dessus d'une section orange (coffrets)
-  // refreshPriority -1 : calculé après le pin horizontal des coffrets
-  const hdMid = () => `top top+=${hd.offsetHeight / 2}`;
-  const hdMidEnd = () => `bottom top+=${hd.offsetHeight / 2}`;
-  document.querySelectorAll<HTMLElement>('#coffrets').forEach((orangeSection) => {
-    ScrollTrigger.create({
-      trigger: orangeSection,
-      start: hdMid,
-      end: hdMidEnd,
-      refreshPriority: -1,
+  if (!hd) return;
+  const zones = Array.from(document.querySelectorAll<HTMLElement>('.hero, #coffrets, [data-anim="service-hero"]'));
+  const triggers: ScrollTrigger[] = [];
+  const sync = () => hd.classList.toggle('hd-clear', triggers.some((st) => st.isActive));
+  zones.forEach((zone) => {
+    triggers.push(ScrollTrigger.create({
+      trigger: zone,
+      // Actif tant que la zone est sous le header (du haut de la zone au bas du header, jusqu'à sa sortie par le haut)
+      start: () => `top top+=${hd.offsetHeight}`,
+      end: 'bottom top',
+      refreshPriority: -1,              // calculé après les pins (coffrets, hero équipe)
       invalidateOnRefresh: true,
-      toggleClass: { targets: hd, className: 'is-on-orange' },
-    });
+      onToggle: sync,
+    }));
   });
+  sync();
 }
 
 // Une seule fois pour tout le site (ils survivent aux changements de page)
@@ -148,20 +149,14 @@ function initAnchors() {
       if (lenis) lenis.scrollTo(target as HTMLElement, { offset, duration: 1.4, easing: (x: number) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x)) });
       else window.scrollTo({ top: (target as HTMLElement).getBoundingClientRect().top + scrollY + offset });
       history.pushState(null, '', id);
+      // Le focus clavier suit le lien (lien « Aller au contenu », ancres du menu) : la tabulation repart de la cible
+      const el = target as HTMLElement;
+      if (!el.matches('a, button, input, select, textarea, [tabindex]')) el.setAttribute('tabindex', '-1');
+      el.focus({ preventScroll: true });
     }),
   );
-
-  // Liens vers l'accueil (logo, « Accueil ») quand on y est déjà : retour en haut en douceur,
-  // sans recharger la page ni ajouter d'ancre dans l'adresse
-  if (location.pathname !== '/') return;
-  $$<HTMLAnchorElement>('a[href="/"]').forEach((a) =>
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (lenis) lenis.scrollTo(0, { duration: 1.4, easing: (x: number) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x)) });
-      else window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (location.hash) history.replaceState(history.state, '', '/');
-    }),
-  );
+  // Les liens vers l'accueil depuis l'accueil ne sont pas interceptés : Astro rejoue la transition
+  // de page et l'on arrive sur le hero (un défilement vers le haut était bloqué par le pin des coffrets)
 }
 
 /* ───────── Initialisation d'une page ─────────
@@ -205,6 +200,10 @@ function startPage(isFirstLoad: boolean) {
   // Une seule initialisation par page (le body est remplacé à chaque navigation)
   if (document.body.dataset.mmInit) return;
   document.body.dataset.mmInit = '1';
+  // Bandeau de cookies (réaffiché tant qu'aucun choix n'est enregistré) et liens « Cookies »
+  initConsentBanner();
+  // Bouton RESERVER du header : fenêtre de choix du salon
+  initBooking();
 
   const loaderEl = document.getElementById('loader');
   // Le loader ne se joue qu'au premier chargement réel de la home, une fois par visite

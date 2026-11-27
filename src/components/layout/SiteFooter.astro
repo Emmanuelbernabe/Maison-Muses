@@ -9,10 +9,21 @@ interface Props { variant?: 'orange' | 'green'; }
 const { variant = 'orange' } = Astro.props;
 
 const { footer } = await loadSettings();
-const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 const year = new Date().getFullYear();
 const isHome = Astro.url.pathname === '/';
-const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), address: clean(p.mapAddress), phone: clean(p.phone) }));
+// Carte de chaque établissement : images fixes (public/images/maps), en orange ou en vert selon le footer
+const mapTone = variant === 'green' ? 'vert' : 'orange';
+const places = footer.places.map((p: any) => {
+  const wellness = /bien/i.test(clean(p.name));
+  return {
+    ...p,
+    lines: lines(p.address),
+    address: clean(p.mapAddress),
+    phone: clean(p.phone),
+    mapUrl: `https://maps.google.com/maps?q=${encodeURIComponent(clean(p.mapAddress))}`,
+    mapImg: `/images/maps/${wellness ? 'bien-etre' : 'coiffure'}-${mapTone}.png`,
+  };
+});
 ---
 
 <footer class:list={["footer", { "footer--green": variant === "green" }]} id="footer" data-anim="footer-section">
@@ -49,19 +60,10 @@ const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), a
               <a href={`tel:${p.phone.replace(/\s/g, '')}`}>{p.phone}</a>
             </p>
           </div>
-          <div class="footer-map">
-            {mapsKey ? (
-              <div class="footer-map-canvas" data-anim="footer-map" data-address={p.address} data-key={mapsKey} role="img" aria-label={`Carte : ${p.address}`}></div>
-            ) : (
-              <iframe
-                class="footer-map-frame"
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(p.address)}&z=15&output=embed`}
-                title={`Carte : ${p.address}`}
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-              ></iframe>
-            )}
-          </div>
+          <!-- Carte fixe (image aux couleurs du footer, sans appel à Google ni cookie) ; au clic, l'adresse dans Google Maps -->
+          <a class="footer-map" href={p.mapUrl} target="_blank" rel="noopener" aria-label={`${clean(p.name)} : voir l’adresse sur Google Maps (nouvel onglet)`}>
+            <img src={p.mapImg} alt="" width="414" height="274" loading="lazy" decoding="async" />
+          </a>
         </div>
       ))}
     </div>
@@ -82,7 +84,8 @@ const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), a
     </div>
   </div>
 
-  <div class="footer-brand" data-anim="footer-brand">
+  <!-- MAISON MUSES en très grand : décoratif (la marque est déjà nommée partout), ignoré par les lecteurs d'écran -->
+  <div class="footer-brand" data-anim="footer-brand" aria-hidden="true">
     <p class="footer-brand-main" data-anim="footer-brand-main">MAISON</p>
     <p class="footer-brand-sub">MUSES</p>
   </div>
@@ -90,7 +93,15 @@ const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), a
   <div class="footer-legal">
     <span>{footer.copyright} {year}</span>
     <span class="footer-legal-links">
-      {footer.legalLinks.map((l: any) => <a href={href(l.url)}>{l.label}</a>)}
+      {/* Lien « Cookies » : rouvre toujours le bandeau de choix, quelle que soit l'adresse saisie dans le Studio.
+          Lien laissé sans adresse (« # ») : il mène à la page légale correspondant à son texte */}
+      {footer.legalLinks.map((l: any) => {
+        const label = clean(l.label);
+        if (/cookie/i.test(label)) return <a href="#cookies" data-cc-open>{l.label}</a>;
+        const url = clean(l.url);
+        const fallback = /mention/i.test(label) ? '/mentions-legales' : /confidential/i.test(label) ? '/politique-de-confidentialite' : url;
+        return <a href={href(!url || url === '#' ? fallback : url)}>{l.label}</a>;
+      })}
     </span>
   </div>
 </footer>
@@ -202,37 +213,23 @@ const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), a
   .footer-place-address a:hover { text-decoration: underline; }
 
   .footer-map {
+    display: block;
     position: relative;
     flex-shrink: 0;
-    width: 27.5rem;
-    height: 18.25rem;
+    /* Au plus la taille réelle des images (414 × 274) : jamais agrandies, donc jamais floues */
+    width: min(27.5rem, 414px);
+    height: auto;
+    aspect-ratio: 414 / 274;
     overflow: hidden;
     background: var(--bg);
   }
 
-  .footer-map-canvas,
-  .footer-map-frame {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
+  .footer-map img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  .footer-map:hover img { transform: scale(1.03); }
+  .footer-map:focus-visible { outline: 2px solid var(--footer-c); outline-offset: 3px; }
 
   /* Variante verte (page bien-être) */
   .footer.footer--green { --footer-c: var(--green, #0F2F18); }
-
-  /* Repli sans clé API : iframe teintée à la couleur du footer */
-  .footer-map-frame { filter: grayscale(1) contrast(1.1); }
-
-  .footer-map:has(.footer-map-frame)::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--footer-c);
-    mix-blend-mode: color;
-    pointer-events: none;
-  }
 
   /* ── Liens ── */
   .footer-links {
@@ -258,6 +255,8 @@ const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), a
   }
 
   .footer-links-list { display: flex; flex-direction: column; }
+  /* Zone de clic d'au moins 24 px de haut (accessibilité tactile, WCAG 2.5.8), texte centré dedans */
+  .footer-links-grid a, .footer-links-list a, .footer-legal-links a { display: inline-flex; align-items: center; min-height: 24px; }
 
   .footer-links a {
     font-size: 1.5rem;
@@ -281,7 +280,7 @@ const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), a
   }
 
   .footer-brand-main {
-    font-size: var(--hero-maison-fs, 23.75rem);
+    font-size: var(--hero-maison-fs, min(23.75rem, 26.6vw));
     text-align: center;
   }
 
@@ -325,7 +324,7 @@ const places = footer.places.map((p: any) => ({ ...p, lines: lines(p.address), a
     .footer-place { flex-direction: column; }
     .footer-place-name { font-size: 1.8rem; }
     .footer-place-address { font-size: 1.15rem; }
-    .footer-map { width: 100%; height: auto; aspect-ratio: 3 / 2; }
+    .footer-map { width: 100%; max-width: 414px; }
     .footer-links { grid-template-columns: 1fr; gap: 2.5rem; padding-right: 0; margin-top: 4rem; }
     .footer-links-title { font-size: 1.5rem; margin-bottom: 1rem; }
     .footer-links a { font-size: 1.15rem; }

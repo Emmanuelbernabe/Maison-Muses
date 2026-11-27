@@ -1,0 +1,97 @@
+---
+// Fenêtre « Réserver » (bouton RESERVER du header) : choix du salon, puis la page de réservation Planity
+// Contenu : Réglages du site → Réservation ; ouverture / fermeture : scripts/layout/booking.ts
+import { loadSettings, picture, href } from '../../lib/content';
+const { booking } = await loadSettings();
+const choices = booking.choices.map((c: any) => ({ ...c, img: picture(c.image, '(max-width: 899px) 90vw, 360px') }));
+---
+<div class="bk" data-bk role="dialog" aria-modal="true" aria-labelledby="bk-title" hidden>
+  <div class="bk-veil" data-bk-close></div>
+  <div class="bk-dlg" data-bk-dlg>
+    <div class="bk-head" data-bk-in>
+      <p class="bk-title" id="bk-title">{booking.title}</p>
+      <button class="bk-close" type="button" aria-label="Fermer" data-bk-close>
+        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.2" /></svg>
+      </button>
+    </div>
+    <p class="bk-text" data-bk-in>{booking.text}</p>
+    <ul class="bk-choices">
+      {choices.map((c: any) => (
+        <li data-bk-in>
+          <!-- Rechargement complet : le module Planity ne s'initialise qu'au chargement de la page -->
+          <a class="bk-choice" href={href(c.url)} data-astro-reload>
+            <span class="bk-media" data-bk-clip><img src={c.img.src} srcset={c.img.srcset} sizes={c.img.sizes} alt="" loading="lazy" decoding="async" /></span>
+            <span class="bk-label">{c.label}</span>
+            <span class="bk-place">{c.place}</span>
+            <span class="bk-address">{c.address}</span>
+            <svg class="bk-arrow" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 11.5l9-9M4.5 2.5h7v7" stroke="currentColor" stroke-width="1.2" /></svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .bk { position: fixed; inset: 0; z-index: 1004; display: grid; place-items: center; padding: 16px; }
+  .bk[hidden] { display: none; }
+  .bk-veil { position: absolute; inset: 0; background: rgba(247, 242, 236, 0.35); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+
+  .bk-dlg {
+    position: relative;
+    box-sizing: border-box;
+    width: min(820px, 100%);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    padding: clamp(22px, 3vw, 40px);
+    border: 1px solid rgba(229, 120, 81, 0.35);
+    border-radius: 14px;
+    background: var(--bg, #F7F2EC);
+    color: var(--orange, #e57851);           /* textes en capitales : orange */
+    box-shadow: 0 18px 50px rgba(174, 76, 44, 0.1);
+  }
+
+  .bk-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .bk-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 4.6vw, 4.2rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+  .bk-close { display: flex; padding: 6px; margin: -6px; border: 0; background: none; color: inherit; cursor: pointer; transition: opacity 0.25s ease; }
+  .bk-close svg { width: 22px; height: 22px; }
+  .bk-close:hover { opacity: 0.75; }
+  .bk-text { margin: 10px 0 0; font-size: 1rem; line-height: 1.5; color: var(--orange-ink, #ae4c2c); }
+
+  .bk-choices { list-style: none; margin: clamp(20px, 2.6vw, 32px) 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 2vw, 24px); }
+  .bk-choice {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 2px;
+    color: var(--orange, #e57851);
+    text-decoration: none;
+  }
+  .bk-media { grid-column: 1 / -1; display: block; aspect-ratio: 4 / 3; overflow: hidden; margin-bottom: 14px; }
+  .bk-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+  .bk-choice:hover .bk-media img, .bk-choice:focus-visible .bk-media img { transform: scale(1.05); }
+  .bk-label {
+    grid-column: 1;
+    font-family: 'Cormorant Infant', serif;
+    font-size: clamp(1.9rem, 3vw, 2.6rem);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .bk-place { grid-column: 1; margin-top: 6px; font-family: 'Thunder', sans-serif; font-weight: 600; font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .bk-address { grid-column: 1; font-size: 0.92rem; color: var(--orange-ink, #ae4c2c); }
+  .bk-arrow { grid-column: 2; grid-row: 2; align-self: center; width: 18px; height: 18px; transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+  .bk-choice:hover .bk-arrow, .bk-choice:focus-visible .bk-arrow { transform: translate(3px, -3px); }
+  .bk :focus-visible { outline: 1px solid var(--orange, #e57851); outline-offset: 4px; }
+
+  @media (max-width: 599px) {
+    .bk-choices { grid-template-columns: 1fr; }
+    .bk-media { aspect-ratio: 16 / 9; margin-bottom: 10px; }
+  }
+</style>

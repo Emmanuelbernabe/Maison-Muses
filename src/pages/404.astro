@@ -1,0 +1,55 @@
+---
+// Page introuvable : servie par Cloudflare pour toute adresse inexistante (wrangler.jsonc → not_found_handling)
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/layout/Header.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
+import { loadSettings, href } from '../lib/content';
+import { rich } from '../lib/rich';
+
+const { notFound } = await loadSettings();
+---
+<Layout title="Page introuvable – Maison Muses" noindex>
+  <Header />
+  <main id="top" class="nf">
+    <h1 class="nf-title">{rich(notFound.title).map((p) => (p.br ? <br /> : p.bold ? p.text : <span class="nf-thin">{p.text}</span>))}</h1>
+    <p class="nf-text">{notFound.text}</p>
+    <a class="nf-btn" href={href(notFound.cta.url)}>{notFound.cta.label}</a>
+  </main>
+  <SiteFooter />
+  <script>
+    import '../scripts/main';
+  </script>
+</Layout>
+
+<style>
+  .nf {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: calc(32 * var(--fpx));
+    padding: calc(160 * var(--fpx)) calc(40 * var(--fpx)) calc(80 * var(--fpx));
+    color: var(--orange);
+  }
+  .nf-title {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 800;
+    font-size: clamp(4rem, calc(160 * var(--fpx)), 14rem);
+    line-height: 0.85;
+    text-transform: uppercase;
+  }
+  .nf-thin { font-weight: 200; }
+  .nf-text { max-width: 32rem; font-size: 1.125rem; line-height: 1.5; color: var(--orange-ink); }
+  .nf-btn {
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(28 * var(--fpx));
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  @media (max-width: 1023px) {
+    .nf { padding: 8rem 1.5rem 4rem; }
+    .nf-btn { font-size: 1.4rem; }
+  }
+</style>

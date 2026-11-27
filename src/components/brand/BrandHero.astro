@@ -6,8 +6,9 @@ const { brand } = Astro.props;
 ---
 
 <section class="br-hero" data-anim="br-hero" aria-label={brand.name}>
-  <h1 class="br-title">
-    {brand.titleLines.map((line: string) => <span class="br-title-line"><span data-br-line>{line}</span></span>)}
+  <!-- Nom de la marque : bloc centré, mis en page par scripts/pages/brand.ts (décalage façon Lysor Liane si les mots sont courts) -->
+  <h1 class="br-title" data-br-title>
+    {brand.titleLines.map((line: string) => <span class="br-title-line"><span data-br-line>{line}</span>{' '}</span>)}
   </h1>
   {brand.intro && <p class="br-intro" data-br-fade>{brand.intro}</p>}
   <div class="br-mask" data-br-mask data-sanity={brand.hero.attr}>
@@ -22,18 +23,29 @@ const { brand } = Astro.props;
     color: var(--orange, #e57851);
   }
 
+  /* Nom de la marque : un bloc à la largeur de son contenu, centré dans la page.
+     2e ligne décalée vers la droite (--br-stagger, comme Lysor Liane) quand les mots sont courts ;
+     sinon lignes centrées l'une sous l'autre (.is-stacked). Le script réduit la taille si un mot dépasse. */
   .br-title {
-    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
     font-family: 'Cormorant Infant', serif;
     font-weight: 400;
     font-size: calc(183 * var(--fpx));
     line-height: 0.815;
     letter-spacing: 0.005em;
     text-transform: uppercase;
+    white-space: nowrap;
   }
+  .br-title.is-stacked { align-items: center; }
 
-  .br-title-line { display: block; overflow: hidden; padding-bottom: 0.04em; margin-left: calc(196 * var(--fpx)); }
-  .br-title-line + .br-title-line { margin-left: calc(639 * var(--fpx)); }
+  .br-title-line { display: block; overflow: hidden; padding-bottom: 0.04em; }
+  .br-title-line + .br-title-line { margin-left: var(--br-stagger, calc(443 * var(--fpx))); }
+  .br-title.is-stacked .br-title-line + .br-title-line { margin-left: 0; }
   .br-title-line > span { display: inline-block; }
 
   .br-intro {
@@ -53,8 +65,6 @@ const { brand } = Astro.props;
   @media (max-width: 899px) {
     .br-hero { padding: 110px 20px 0; }
     .br-title { font-size: 25vw; }
-    .br-title-line, .br-title-line + .br-title-line { margin-left: 0; }
-    .br-title-line + .br-title-line { text-align: right; }
     .br-intro { margin: 28px 0 0 22vw; max-width: none; font-size: 16px; line-height: 1.4; }
     .br-mask { gap: 16px; margin-top: 36px; }
     .br-win.is-left { width: 52vw; height: 72vw; }

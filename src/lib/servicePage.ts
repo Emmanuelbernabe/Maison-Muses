@@ -60,7 +60,11 @@ export function buildServicePage(slug: 'coiffure' | 'bien-etre', doc: any) {
   }));
 
   const b = doc?.brands || {};
-  const brands = { tag: pick(b.tag, d.brands.tag), title: pick(b.title, d.brands.title), text: pick(b.text, d.brands.text), list: pick(b.list, d.brands.list) };
+  // Logos : ceux de Sanity, sinon ceux du dossier public/logo ; les noms ne servent que s'il n'y a aucun logo
+  const logos = filled(b.logos)
+    ? b.logos.filter((l: any) => l?.url).map((l: any) => ({ src: l.url, alt: clean(l.alt) || '', attr: attr(`brands.logos[_key=="${l._key}"]`) }))
+    : d.brands.logos || [];
+  const brands = { tag: pick(b.tag, d.brands.tag), title: pick(b.title, d.brands.title), text: pick(b.text, d.brands.text), list: pick(b.list, d.brands.list), logos };
 
   const so = doc?.social || {};
   const social = { tag: pick(so.tag, d.social.tag), title: pick(so.title, d.social.title), text: pick(so.text, d.social.text), handle: pick(so.handle, d.social.handle), url: clean(pick(so.url, d.social.url)) };

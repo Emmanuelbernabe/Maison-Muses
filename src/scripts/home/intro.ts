@@ -65,6 +65,7 @@ export function initHomeIntro() {
     // ── 1. Voyage de l'image fixe : bas du viewport → centre vertical ──
   gsap.fromTo(heroImg, { y: 0 }, {
   y: midY,
+  snap: { y: 1 },   // déplacement au pixel entier : sinon 1px de vidéo dépassait sous l'image en bas
   ease: 'none',
   scrollTrigger: {
     trigger: hero,
@@ -115,7 +116,7 @@ const st = () => ({
 
 gsap.fromTo(heroImg,
   { y: midY },
-  { y: () => midY() - vh(), ease: 'none', immediateRender: false, scrollTrigger: st() },
+  { y: () => midY() - vh(), snap: { y: 1 }, ease: 'none', immediateRender: false, scrollTrigger: st() },
 );
 
   });
@@ -161,7 +162,7 @@ gsap.fromTo(heroImg,
     });
 
     // 1. Le portrait glisse plus lentement que la page et se pose sur l'emplacement de l'intro
-    gsap.fromTo(heroImg, { y: 0 }, { y: introTravel, ease: 'none', scrollTrigger: heroScroll() });
+    gsap.fromTo(heroImg, { y: 0 }, { y: introTravel, snap: { y: 1 }, ease: 'none', scrollTrigger: heroScroll() });
 
     // 2. Révélation de load-1 par clip-path pendant le trajet
     if (load1Wrap) {

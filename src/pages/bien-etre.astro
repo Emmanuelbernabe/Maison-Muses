@@ -19,6 +19,7 @@ const page = buildServicePage('bien-etre', doc);
 <Layout
   title={page.seoTitle || "L’espace bien-être – Maison Muses, Toulouse"}
   description={page.seoDescription || "L’espace bien-être de Maison Muses par Violaine : soins du visage, du corps et esthétique, pour elle et pour lui, au centre de Toulouse."}
+  image={page.hero.poster ? new URL(page.hero.poster, Astro.site).href : undefined}
 >
   <Header />
   <main id="top" style="--sp-c: var(--green, #0F2F18);">

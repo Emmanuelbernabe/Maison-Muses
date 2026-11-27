@@ -2,7 +2,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { revealTitle } from '../shared/revealTitle';
 
-const CLIP_EASE = 'power2.out';   // même courbe que les images du loader
+const CLIP_EASE = 'musesReveal';   // révélations d'images : courbe commune (shared/revealTitle.ts)
 const CENTER = 'inset(50% 50% 50% 50%)';
 const FULL = 'inset(0% 0% 0% 0%)';
 
@@ -53,6 +53,21 @@ function initEquipeHero() {
     return `inset(${cy}px ${l.width - cx}px ${l.height - cy}px ${cx}px)`;
   };
 
+  // ── Ouverture complète de la vidéo ──
+  // Desktop : tout l'écran. Mobile : une bande 16:9 sur toute la largeur, centrée (au plus la hauteur de l'écran),
+  // pour voir la vidéo en entier plutôt qu'un recadrage plein écran
+  const rotateHint = eq.querySelector<HTMLElement>('[data-anim="eq-rotate"]');
+  const eqIsMobile = () => matchMedia('(max-width: 899px)').matches;
+  const eqBand = () => (eqIsMobile() ? Math.min(layer.offsetWidth * 9 / 16, layer.offsetHeight) : layer.offsetHeight);
+  const eqOpenInset = () => {
+    const gap = Math.max(0, (layer.offsetHeight - eqBand()) / 2);
+    return `inset(${gap}px 0px ${gap}px 0px)`;
+  };
+
+  // Header en crème seulement si la vidéo ouverte passe sous lui (desktop, mobile tourné) ; en bande au milieu
+  // de l'écran (mobile en portrait), il reste orange sur le fond crème
+  const eqUnderHeader = () => (layer.offsetHeight - eqBand()) / 2 < (hd?.offsetHeight ?? 80);
+
   const mm = gsap.matchMedia();
 
   // ============ APPARITION + AGRANDISSEMENT ============
@@ -62,11 +77,11 @@ function initEquipeHero() {
 
     // Apparition de droite à gauche : Violaine, Moussine, puis la vidéo
     gsap.timeline({ delay: 0.3 })
-      .fromTo(photoV, { clipPath: CENTER }, { clipPath: FULL, duration: d(0.85), ease: CLIP_EASE }, 0)
-      .fromTo(photoM, { clipPath: CENTER }, { clipPath: FULL, duration: d(0.85), ease: CLIP_EASE }, d(0.25))
+      .fromTo(photoV, { clipPath: CENTER }, { clipPath: FULL, duration: d(1.6), ease: CLIP_EASE }, 0)
+      .fromTo(photoM, { clipPath: CENTER }, { clipPath: FULL, duration: d(1.6), ease: CLIP_EASE }, d(0.25))
       .fromTo(inner, { clipPath: eqSlotCenter }, {
         clipPath: eqSlotInset,
-        duration: d(0.85),
+        duration: d(1.6),
         ease: CLIP_EASE,
              onComplete: () => { gsap.set(inner, { clipPath: 'none' }); },   // ensuite, seul le calque découpe
       }, d(0.5))
@@ -85,13 +100,18 @@ function initEquipeHero() {
         pin: true,
         scrub: 1,
         invalidateOnRefresh: true,
-        onUpdate: (self) => hd?.classList.toggle('is-on-orange', self.isActive && self.progress > 0.85),
+        onUpdate: (self) => hd?.classList.toggle('is-on-orange', eqUnderHeader() && self.isActive && self.progress > 0.85),
         onLeave: () => hd?.classList.remove('is-on-orange'),
-        onEnterBack: (self) => hd?.classList.toggle('is-on-orange', self.progress > 0.85),
+        onEnterBack: (self) => hd?.classList.toggle('is-on-orange', eqUnderHeader() && self.progress > 0.85),
         onLeaveBack: () => hd?.classList.remove('is-on-orange'),
       },
     })
-      .fromTo(layer, { clipPath: eqSlotInset }, { clipPath: 'inset(0px 0px 0px 0px)', ease: 'none', immediateRender: false }, 0)
+      .fromTo(layer, { clipPath: eqSlotInset }, { clipPath: eqOpenInset, ease: 'none', immediateRender: false }, 0)
+      // Mobile : la vidéo (16:9) se resserre en bande pour être vue en entier, sans recadrage
+      .fromTo(video, { top: 0, height: () => layer.offsetHeight }, { top: () => (layer.offsetHeight - eqBand()) / 2, height: eqBand, ease: 'none', immediateRender: false }, 0)
+      // Mobile en portrait : invitation à tourner le téléphone, sous la bande, en fin d'ouverture
+      // (finit en même temps que l'ouverture, 0,5 : la durée totale, donc le rythme du scroll, ne change pas)
+      .fromTo([rotateHint].filter(Boolean), { opacity: 0, y: 12 }, { opacity: () => (eqIsMobile() ? 1 : 0), y: 0, duration: 0.12, ease: 'none', immediateRender: false }, 0.38)
       // Pendant que la vidéo s'ouvre, le reste remonte et s'efface
       .fromTo(photos, { yPercent: 0, opacity: 1 }, { yPercent: -60, opacity: 0, ease: 'none', stagger: 0.03, immediateRender: false }, 0)
       .fromTo(eqTexts, { y: 0, opacity: 1 }, { y: -80, opacity: 0, ease: 'none', immediateRender: false }, 0);
@@ -107,7 +127,7 @@ function initEquipeHero() {
     const eqHoverState = { p: 50 };
     const eqApply = () => { hover.style.clipPath = `inset(${eqHoverState.p}% ${eqHoverState.p}% ${eqHoverState.p}% ${eqHoverState.p}%)`; };
     eqApply();
-    const eqShow = () => gsap.to(eqHoverState, { p: 0, duration: d(0.85), ease: CLIP_EASE, overwrite: true, onUpdate: eqApply });
+    const eqShow = () => gsap.to(eqHoverState, { p: 0, duration: d(1.2), ease: CLIP_EASE, overwrite: true, onUpdate: eqApply });
     const eqHide = () => gsap.to(eqHoverState, { p: 50, duration: d(0.6), ease: 'power2.inOut', overwrite: true, onUpdate: eqApply });
     let eqShown = false;
     fig.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') eqShow(); });
@@ -173,16 +193,20 @@ function initEquipeHero() {
   if (reduce) video.pause();
 }
 
-// ============ MOUSSINE / VIOLAINE : la section se fige, le scroll fait le relais ============
+// ============ MEMBRES : la fiche du membre choisi dans la liste (au clic, plus de pin) ============
+// Mêmes animations qu'avant : à l'entrée, la photo s'ouvre depuis le centre, le nom et le métier montent
+// dans leur masque, la présentation et le bouton apparaissent en fondu ; à la sortie, l'inverse, plus vite.
 function initEquipeMembers() {
-  const em = document.querySelector<HTMLElement>('[data-anim="em-relay"]');
-  const emM = em?.querySelector<HTMLElement>('[data-em-panel="m"]');
-  const emV = em?.querySelector<HTMLElement>('[data-em-panel="v"]');
-  if (!em || !emM || !emV) return;
+  const em = document.querySelector<HTMLElement>('[data-anim="em-team"]');
+  if (!em) return;
+  const panels = new Map<string, HTMLElement>();
+  em.querySelectorAll<HTMLElement>('[data-em-panel]').forEach((p) => panels.set(p.dataset.emPanel!, p));
+  const picks = Array.from(em.querySelectorAll<HTMLButtonElement>('[data-em-pick]'));
+  const first = panels.values().next().value as HTMLElement | undefined;
+  if (!first || !picks.length) return;
 
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const d = (s: number) => (reduce ? 0 : s);
-  const panels: Record<'m' | 'v', HTMLElement> = { m: emM, v: emV };
   const q = (root: HTMLElement, sel: string) => root.querySelectorAll<HTMLElement>(sel);
 
   // Textes qui montent dans leur masque, fondus, médias ouverts depuis le centre
@@ -193,7 +217,9 @@ function initEquipeMembers() {
     gsap.set(q(root, '[data-em-clip]'), { clipPath: CENTER });
   };
   const emIn = (root: HTMLElement) => gsap.timeline()
-    .to(q(root, '[data-em-clip]'), { clipPath: FULL, duration: d(0.85), ease: CLIP_EASE, stagger: 0.12 }, 0)
+    // fromTo avec le départ explicite : le navigateur abrège « inset(50% 50% 50% 50%) » en « inset(50%) »,
+    // que GSAP lisait comme « 50 % en haut seulement » (ouverture de bas en haut au lieu de depuis le centre)
+    .fromTo(q(root, '[data-em-clip]'), { clipPath: CENTER }, { clipPath: FULL, duration: d(1.6), ease: CLIP_EASE, stagger: 0.12 }, 0)
     .to(q(root, '[data-em-line] > span'), { yPercent: 0, duration: d(1), ease: 'musesEase', stagger: 0.07 }, 0)
     .to(q(root, '[data-em-fade]'), { autoAlpha: 1, y: 0, duration: d(0.8), ease: 'musesEase', stagger: 0.06 }, d(0.2));
   const emOut = (root: HTMLElement) => gsap.timeline()
@@ -201,67 +227,53 @@ function initEquipeMembers() {
     .to(q(root, '[data-em-fade]'), { autoAlpha: 0, duration: d(0.3) }, 0)
     .to(q(root, '[data-em-clip]'), { clipPath: CENTER, duration: d(0.45), ease: 'power2.in', stagger: 0.05 }, 0);
 
-  const emPlayPreview = (root: HTMLElement) => {
-    if (reduce) return;
-    root.querySelectorAll('video').forEach((v) => v.play().catch(() => {}));
-  };
+  let current = first.dataset.emPanel!;
+  let running: gsap.core.Timeline | null = null;
+  let entered = false;
+  emHide(first);
 
-  // Vidéos : aperçu muet, clic = relance depuis le début avec le son
-  em.querySelectorAll<HTMLButtonElement>('.em-video').forEach((card) => {
-    const v = card.querySelector('video');
-    const label = card.querySelector<HTMLElement>('.em-play span');
-    if (!v || !label) return;
-    card.addEventListener('click', () => {
-      if (v.muted || v.paused) {
-        v.muted = false;
-        v.currentTime = 0;
-        v.play().catch(() => {});
-        label.textContent = 'Pause';
-      } else {
-        v.pause();
-        label.textContent = 'Reprendre';
-      }
-    });
+  const setActive = (key: string) => picks.forEach((b) => {
+    const on = b.dataset.emPick === key;
+    b.classList.toggle('is-active', on);
+    b.setAttribute('aria-pressed', String(on));
   });
 
-  let emCurrent: 'm' | 'v' = 'm';
-  let emRunning: gsap.core.Timeline | null = null;
-  emHide(emM);
-
-  const emShow = (next: 'm' | 'v') => {
-    if (next === emCurrent) return;
-    const from = panels[emCurrent];
-    const to = panels[next];
-    emCurrent = next;
-    em.classList.toggle('show-v', next === 'v');
-    from.querySelectorAll('video').forEach((v) => { v.pause(); v.muted = true; });
-    from.querySelectorAll<HTMLElement>('.em-play span').forEach((s) => { s.textContent = 'Lire la vidéo'; });
-    if (emRunning) emRunning.progress(1);
-    emRunning = emOut(from).eventCallback('onComplete', () => {
+  const emShow = (next: string) => {
+    const to = panels.get(next);
+    if (!to || next === current) return;
+    const from = panels.get(current)!;
+    current = next;
+    setActive(next);
+    // Membre du bien-être : la section passe sur fond vert, textes en crème
+    em.classList.toggle('is-green', to.hasAttribute('data-em-green'));
+    if (running) running.progress(1);
+    // Fiche pas encore entrée (clic avant l'arrivée de la section) : on échange directement
+    if (!entered) {
+      entered = true;
       from.hidden = true;
       to.hidden = false;
       emHide(to);
-      emRunning = emIn(to);
-      emPlayPreview(to);
+      running = emIn(to);
+      return;
+    }
+    running = emOut(from).eventCallback('onComplete', () => {
+      from.hidden = true;
+      to.hidden = false;
+      emHide(to);
+      running = emIn(to);
     });
   };
+  picks.forEach((b) => b.addEventListener('click', () => emShow(b.dataset.emPick!)));
 
-  ScrollTrigger.create({
-    trigger: em,
-    start: 'top top',
-    end: '+=120%',
-    pin: true,
-    onUpdate: (self) => emShow(self.progress > 0.5 ? 'v' : 'm'),
-  });
-
-  // Entrée de Moussine à l'arrivée de la section
+  // Entrée de la première fiche à l'arrivée de la section
   ScrollTrigger.create({
     trigger: em,
     start: 'top 60%',
     once: true,
     onEnter: () => {
-      emRunning = emIn(emM);
-      emPlayPreview(emM);
+      if (entered) return;
+      entered = true;
+      running = emIn(panels.get(current)!);
     },
   });
 }

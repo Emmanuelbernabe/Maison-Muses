@@ -8,6 +8,7 @@ import JournalBody from '../../components/journal/JournalBody.astro';
 import JournalPlayer from '../../components/journal/JournalPlayer.astro';
 import { getSettings, getJournalPosts, getJournalPost } from '../../lib/sanity';
 import { loadJournalPage, href } from '../../lib/content';
+import { articleJsonLd } from '../../lib/seo';
 import { journalCover, journalCategoryLabel, journalDate, journalReadingTime, journalBodyHtml } from '../../lib/journal';
 
 export async function getStaticPaths() {
@@ -24,6 +25,9 @@ if (!settings || !post) {
 }
 
 const cover = journalCover(post, 1800);
+// Partage et données structurées : couverture de l'article
+const shareImage = new URL(journalCover(post, 1200).src, Astro.site).href;
+const jsonLd = articleJsonLd(post, new URL(Astro.url.pathname, Astro.site).href, shareImage, Astro.site!);
 const html = journalBodyHtml(post.body);
 // À lire aussi : d'abord la même catégorie, puis les plus récents
 const others = all.filter((p) => p.slug !== post.slug);
@@ -32,6 +36,9 @@ const related = [...others.filter((p) => p.category === post.category), ...other
 <Layout
   title={`${post.seoTitle || post.title} – Journal Maison Muses`}
   description={post.excerpt || `${journalCategoryLabel(post.category)} : un article du journal de Maison Muses.`}
+  image={shareImage}
+  type="article"
+  jsonLd={jsonLd}
 >
   <Header />
   <main id="top">

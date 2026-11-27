@@ -11,8 +11,8 @@ const { brandLabels: labels } = await loadSettings();
   {brand.statement && <p class="br-big" data-br-fade>{brand.statement}</p>}
   <div class="br-ov-grid">
     <div class="br-rows" data-br-fade>
-      {brand.origin.length > 0 && <><p class="br-mut">{labels.origin}</p><p>{brand.origin.map((line: string, i: number) => <>{i > 0 && <br />}{line}</>)}</p></>}
-      {brand.qualities.length > 0 && <><p class="br-mut">{labels.qualities}</p><ul>{brand.qualities.map((q: string) => <li>{q}</li>)}</ul></>}
+      {brand.origin.length > 0 && <><p class="br-key">{labels.origin}</p><p>{brand.origin.map((line: string, i: number) => <>{i > 0 && <br />}{line}</>)}</p></>}
+      {brand.qualities.length > 0 && <><p class="br-key">{labels.qualities}</p><ul>{brand.qualities.map((q: string) => <li>{q}</li>)}</ul></>}
     </div>
     <figure class="br-ov-photo" data-br-clip data-sanity={brand.overviewImage.attr}>
       <img src={brand.overviewImage.src} alt={brand.overviewImage.alt} loading="lazy" decoding="async" />
@@ -36,9 +36,11 @@ const { brandLabels: labels } = await loadSettings();
   }
 
   .br-ov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(20 * var(--fpx)); }
-  .br-rows { display: grid; grid-template-columns: minmax(90px, 0.4fr) 1fr; gap: calc(44 * var(--fpx)) calc(28 * var(--fpx)); align-content: start; font-size: 15px; line-height: 1.55; }
+  .br-rows { display: grid; grid-template-columns: minmax(90px, 0.4fr) 1fr; gap: calc(44 * var(--fpx)) calc(28 * var(--fpx)); align-content: start; font-size: 20px; line-height: 1.55; }
   .br-rows p { margin: 0; }
-  .br-mut { color: var(--br-mut, rgba(125, 67, 48, 0.55)); }
+  .br-mut { color: var(--br-mut, rgba(125, 67, 48, 0.85)); }
+  /* Intitulés « Origine » / « Qualités » : majuscules en orange, même taille que le texte à côté */
+  .br-key { color: var(--orange, #e57851); text-transform: uppercase; letter-spacing: 0.04em; }
   .br-rows ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 
   .br-ov-photo { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; }

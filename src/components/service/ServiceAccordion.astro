@@ -5,6 +5,11 @@ interface Props { steps: any[]; brands: any; social: any; }
 const { steps, brands, social } = Astro.props;
 // Les marques reprennent tour à tour les 5 styles typographiques du bandeau
 const brandStyles = ['nord', 'vert', 'origine', 'lab', 'pure'];
+// Logos : la boucle défile d'une demi-piste, chaque moitié doit donc être plus large que l'écran.
+// Avec peu de logos (2 au bien-être), on les répète jusqu'à au moins 8 marques par moitié.
+const logoRun = brands.logos.length
+  ? Array.from({ length: Math.ceil(8 / brands.logos.length) }, () => brands.logos).flat()
+  : [];
 const external = (url?: string) => (url?.startsWith('http') ? '_blank' : undefined);
 // Paragraphe → morceaux de texte, les passages entre **…** en gras (seule mise en forme possible depuis le Studio)
 const boldParts = (text: string) => text.split(/\*\*(.+?)\*\*/g).map((part, i) => ({ part, bold: i % 2 === 1 }));
@@ -39,9 +44,19 @@ const boldParts = (text: string) => text.split(/\*\*(.+?)\*\*/g).map((part, i) =
       </div>
       <div class="service-brands" aria-label="Nos marques partenaires">
         <div class="service-brands-track" data-service-brands>
-          {[0, 1].map((copy) => brands.list.map((name: string, i: number) => (
-            <span class={`service-brand service-brand-${brandStyles[i % brandStyles.length]}`} aria-hidden={copy === 1 ? 'true' : undefined}>{copy === 1 ? clean(name) : name}</span>
-          )))}
+          {brands.logos.length > 0
+            ? [0, 1].map((copy) => logoRun.map((logo: any, i: number) => {
+                // Seule la 1re occurrence de chaque logo est lue par les lecteurs d'écran
+                const first = copy === 0 && i < brands.logos.length;
+                return (
+                  <span class="service-brand service-brand-logo" aria-hidden={first ? undefined : 'true'} data-sanity={first ? logo.attr : undefined}>
+                    <img src={logo.src} alt={first ? logo.alt : ''} decoding="async" draggable="false" />
+                  </span>
+                );
+              }))
+            : [0, 1].map((copy) => brands.list.map((name: string, i: number) => (
+                <span class={`service-brand service-brand-${brandStyles[i % brandStyles.length]}`} aria-hidden={copy === 1 ? 'true' : undefined}>{copy === 1 ? clean(name) : name}</span>
+              )))}
         </div>
       </div>
     </div></div>
@@ -169,6 +184,8 @@ const boldParts = (text: string) => text.split(/\*\*(.+?)\*\*/g).map((part, i) =
   .service-brand-origine { font-size: calc(18 * var(--fpx)); letter-spacing: 0.5em; text-transform: uppercase; }
   .service-brand-lab { font-family: 'Thunder', sans-serif; font-weight: 600; font-size: calc(32 * var(--fpx)); text-transform: uppercase; }
   .service-brand-pure { font-family: 'Cormorant Infant', serif; font-size: calc(34 * var(--fpx)); }
+  /* Logos : même hauteur visuelle que les noms en texte ; l'étoile ✦ reste entre chaque marque */
+  .service-brand-logo img { display: block; height: calc(44 * var(--fpx)); width: auto; max-width: none; }
 
   @media (max-width: 899px) {
     .service-acc { padding: 3rem 1.25rem 5rem; }
@@ -184,6 +201,7 @@ const boldParts = (text: string) => text.split(/\*\*(.+?)\*\*/g).map((part, i) =
     .service-brand-nord, .service-brand-lab { font-size: 1.5rem; }
     .service-brand-vert, .service-brand-pure { font-size: 1.7rem; }
     .service-brand-origine { font-size: 0.9rem; }
+    .service-brand-logo img { height: 2rem; }
   }
 
   @media (prefers-reduced-motion: reduce) { .service-plus { transition: none; } }

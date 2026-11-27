@@ -9,10 +9,120 @@ export function initBrandPage() {
   initMarqueHero(hero, reduce);
   initMarqueReveals(reduce);
   initMarqueModal(reduce);
+  initMarqueCursor(reduce);
+}
+
+// ============ CURSEUR DU SLIDER PRODUITS ============
+// L'étoile des listes du journal suit la souris et s'étire dans le sens du mouvement ;
+// l'invite « Cliquez pour en savoir plus » reste à sa droite, centrée sur le curseur
+function initMarqueCursor(reduce: boolean) {
+  const holder = document.querySelector<HTMLElement>('[data-br-products]');
+  const cursor = holder?.querySelector<HTMLElement>('[data-br-cursor]');
+  const star = cursor?.querySelector<HTMLElement>('[data-br-cursor-star]');
+  const shape = star?.querySelector('svg');
+  if (!holder || !cursor || !star || !shape) return;
+
+  const mm = gsap.matchMedia();
+  mm.add('(hover: hover) and (pointer: fine) and (min-width: 900px)', () => {
+    holder.classList.add('has-cursor');
+    const moveX = gsap.quickTo(cursor, 'x', { duration: reduce ? 0 : 0.35, ease: 'power3' });
+    const moveY = gsap.quickTo(cursor, 'y', { duration: reduce ? 0 : 0.35, ease: 'power3' });
+    let shown = false;
+    let px = -1, py = -1;
+
+    const show = (next: boolean) => {
+      if (next === shown) return;
+      shown = next;
+      gsap.to(cursor.children, { autoAlpha: next ? 1 : 0, duration: next ? 0.4 : 0.25, ease: next ? 'musesEase' : 'power2.out', overwrite: 'auto' });
+    };
+
+    // Visible seulement sur une diapositive (pas sur les flèches), et jamais pop-up ouverte
+    const update = () => {
+      if (px < 0) return show(false);
+      const el = document.elementFromPoint(px, py);
+      show(!!el?.closest('[data-service-slide]') && !el.closest('.service-slider-nav') && !document.documentElement.classList.contains('is-modal-open'));
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      if (!shown) { moveX(e.clientX, e.clientX); moveY(e.clientY, e.clientY); }
+      px = e.clientX; py = e.clientY;
+      moveX(px); moveY(py);
+      update();
+    };
+    const onLeave = () => { px = -1; show(false); };
+
+    // Déformation : l'étoile s'allonge selon la vitesse, orientée dans la direction du mouvement
+    let lastX = 0, lastY = 0, stretch = 0, angle = 0;
+    const tick = () => {
+      const x = gsap.getProperty(cursor, 'x') as number;
+      const y = gsap.getProperty(cursor, 'y') as number;
+      const dx = x - lastX, dy = y - lastY;
+      lastX = x; lastY = y;
+      const speed = Math.hypot(dx, dy);
+      if (speed > 0.5) angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      stretch += (Math.min(speed / 40, 0.7) - stretch) * 0.25;
+      // Étirement dans l'axe du mouvement, l'étoile elle-même reste droite (contre-rotation)
+      gsap.set(star, { rotation: angle, scaleX: 1 + stretch, scaleY: 1 - stretch * 0.55 });
+      gsap.set(shape, { rotation: -angle });
+    };
+    if (!reduce) gsap.ticker.add(tick);
+
+    addEventListener('pointermove', onMove, { passive: true });
+    addEventListener('scroll', update, { passive: true });
+    document.documentElement.addEventListener('pointerleave', onLeave);
+    holder.addEventListener('click', () => requestAnimationFrame(update));
+    return () => {
+      holder.classList.remove('has-cursor');
+      gsap.ticker.remove(tick);
+      removeEventListener('pointermove', onMove);
+      removeEventListener('scroll', update);
+      document.documentElement.removeEventListener('pointerleave', onLeave);
+      gsap.set(cursor.children, { autoAlpha: 0 });
+    };
+  });
+  document.addEventListener('astro:before-swap', () => mm.revert(), { once: true });
 }
 
 // ============ HERO : UNE IMAGE, DEUX FENÊTRES ============
+// ============ NOM DE LA MARQUE : bloc centré, décalé façon Lysor Liane quand c'est possible ============
+// Mesures réelles des mots (police chargée) :
+//  - un mot trop large pour l'écran → la taille de police baisse jusqu'à ce qu'il tienne ;
+//  - deux lignes : la 2e se décale vers la droite (443 px à 1440, 30 % de la largeur sur mobile),
+//    réduit si besoin pour tenir ; si le décalage possible devient trop faible (mots longs),
+//    les deux lignes sont simplement centrées l'une sous l'autre.
+function fitMarqueTitle(title: HTMLElement) {
+  const lines = [...title.querySelectorAll<HTMLElement>('[data-br-line]')];
+  if (!lines.length) return;
+  title.style.fontSize = '';
+  title.style.removeProperty('--br-stagger');
+  title.classList.remove('is-stacked');
+
+  const avail = title.parentElement!.clientWidth - parseFloat(getComputedStyle(title.parentElement!).paddingLeft) - parseFloat(getComputedStyle(title.parentElement!).paddingRight);
+  const widest = Math.max(...lines.map((l) => l.offsetWidth));
+  if (widest > avail) {
+    title.style.fontSize = `${parseFloat(getComputedStyle(title).fontSize) * (avail / widest) * 0.98}px`;
+  }
+  if (lines.length < 2) return;
+
+  const w2 = lines[1].offsetWidth;
+  const fpx = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fpx')) || 1;
+  const wanted = innerWidth < 900 ? avail * 0.3 : 443 * fpx;
+  const possible = Math.min(wanted, avail - w2);
+  if (possible < wanted * 0.5) title.classList.add('is-stacked');
+  else title.style.setProperty('--br-stagger', `${possible}px`);
+}
+
 function initMarqueHero(hero: HTMLElement, reduce: boolean) {
+  const title = hero.querySelector<HTMLElement>('[data-br-title]');
+  if (title) {
+    const fit = () => fitMarqueTitle(title);
+    fit();
+    document.fonts.ready.then(fit);
+    ScrollTrigger.addEventListener('refreshInit', fit);
+    document.addEventListener('astro:before-swap', () => ScrollTrigger.removeEventListener('refreshInit', fit), { once: true });
+  }
+
   const mask = hero.querySelector<HTMLElement>('[data-br-mask]');
   const wins = [...hero.querySelectorAll<HTMLElement>('[data-br-win]')];
   const winLeft = wins[0];
@@ -57,7 +167,7 @@ function initMarqueHero(hero: HTMLElement, reduce: boolean) {
   if (!reduce) {
     gsap.from(hero.querySelectorAll('[data-br-line]'), { yPercent: 105, duration: 1.3, ease: 'musesEase', stagger: 0.12, delay: 0.15 });
     gsap.from(hero.querySelectorAll('[data-br-fade]'), { y: 24, autoAlpha: 0, duration: 1.1, ease: 'musesEase', delay: 0.55 });
-    gsap.from(wins, { clipPath: 'inset(100% 0% 0% 0%)', duration: 1.3, ease: 'musesEase', stagger: 0.12, delay: 0.4 });
+    gsap.from(wins, { clipPath: 'inset(100% 0% 0% 0%)', duration: 1.6, ease: 'musesReveal', stagger: 0.12, delay: 0.4 });
   }
 }
 
@@ -69,7 +179,7 @@ function initMarqueReveals(reduce: boolean) {
     gsap.from(el, { y: 30, autoAlpha: 0, duration: 1, ease: 'musesEase', scrollTrigger: { trigger: el, start: 'top 86%', toggleActions: 'play none none reverse' } });
   });
   document.querySelectorAll<HTMLElement>('[data-br-clip]').forEach((el) => {
-    gsap.fromTo(el, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'musesEase', scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' } });
+    gsap.fromTo(el, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'musesReveal', scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' } });
   });
 }
 

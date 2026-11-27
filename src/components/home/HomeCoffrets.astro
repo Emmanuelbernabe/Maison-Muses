@@ -3,6 +3,9 @@
 import { SIZES } from '../../lib/siteImage';
 import { HOME, merge, picture, href } from '../../lib/content';
 import { rich, lines } from '../../lib/rich';
+import { clean } from '../../lib/sanity';
+// Lien externe (réservation) : nouvel onglet
+const ext = (url: string) => (/^https?:/.test(clean(url) || '') ? { target: '_blank', rel: 'noopener' } : {});
 // Section coffrets de la page d'accueil (Sanity + valeurs par défaut, lib/content.ts)
 // 4 emplacements, chacun avec sa mise en page : les 4 premiers coffrets choisis dans Sanity, dans l'ordre
 const { coffrets } = Astro.props;
@@ -61,7 +64,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}{' '}</span>
               <span class="coffrets-extra-bold">{c[0].name}</span>
             </h3>
             <span class="coffrets-card-subtitle">{c[0].tagline}</span>
@@ -84,7 +87,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
                     </div>
                   ))}
                 </div>
-                <a class="coffrets-btn-reserver" href={href(c[0].cta.url)}>{c[0].cta.label}</a>
+                <a class="coffrets-btn-reserver" href={href(c[0].cta.url)} {...ext(c[0].cta.url)} aria-label={`${clean(c[0].cta.label)} ${clean(coffrets.prefix)} ${clean(c[0].name)}`}>{c[0].cta.label}</a>
               </div>
               <div class="coffrets-img-clip coffrets-img-small" data-anim="coffrets-img">
                 <img src={small[0].src} srcset={small[0].srcset} sizes={small[0].sizes} alt={small[0].alt} loading="lazy" decoding="async" />
@@ -111,7 +114,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}{' '}</span>
               <span class="coffrets-extra-bold">{c[1].name}</span>
             </h3>
             <span class="coffrets-card-subtitle">{c[1].tagline}</span>
@@ -139,7 +142,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
                     </div>
                   ))}
                 </div>
-                <a class="coffrets-btn-reserver" href={href(c[1].cta.url)}>{c[1].cta.label}</a>
+                <a class="coffrets-btn-reserver" href={href(c[1].cta.url)} {...ext(c[1].cta.url)} aria-label={`${clean(c[1].cta.label)} ${clean(coffrets.prefix)} ${clean(c[1].name)}`}>{c[1].cta.label}</a>
               </div>
               <div class="coffrets-img-clip coffrets-img-small" data-anim="coffrets-img">
                 <img src={small[1].src} srcset={small[1].srcset} sizes={small[1].sizes} alt={small[1].alt} loading="lazy" decoding="async" />
@@ -161,7 +164,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}{' '}</span>
               <span class="coffrets-extra-bold">{c[2].name}</span>
             </h3>
             <span class="coffrets-card-subtitle">{c[2].tagline}</span>
@@ -194,7 +197,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
                     </div>
                   ))}
                 </div>
-                <a class="coffrets-btn-reserver" href={href(c[2].cta.url)}>{c[2].cta.label}</a>
+                <a class="coffrets-btn-reserver" href={href(c[2].cta.url)} {...ext(c[2].cta.url)} aria-label={`${clean(c[2].cta.label)} ${clean(coffrets.prefix)} ${clean(c[2].name)}`}>{c[2].cta.label}</a>
               </div>
               <div class="coffrets-img-clip coffrets-img-small" data-anim="coffrets-img">
                 <img src={small[2].src} srcset={small[2].srcset} sizes={small[2].sizes} alt={small[2].alt} loading="lazy" decoding="async" />
@@ -211,7 +214,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
         <header class="coffrets-card-header">
           <div class="coffrets-card-title-group">
             <h3 class="coffrets-card-title" data-anim="coffrets-title">
-              <span class="coffrets-extra-light">{coffrets.prefix}</span>
+              <span class="coffrets-extra-light">{coffrets.prefix}{' '}</span>
               <span class="coffrets-extra-bold">{c[3].name}</span>
             </h3>
             <span class="coffrets-card-subtitle">{c[3].tagline}</span>
@@ -237,7 +240,7 @@ const para = (t: string) => { const parts = rich(t); return { bold: parts.length
                     </div>
                   ))}
                 </div>
-                <a class="coffrets-btn-reserver" href={href(c[3].cta.url)}>{c[3].cta.label}</a>
+                <a class="coffrets-btn-reserver" href={href(c[3].cta.url)} {...ext(c[3].cta.url)} aria-label={`${clean(c[3].cta.label)} ${clean(coffrets.prefix)} ${clean(c[3].name)}`}>{c[3].cta.label}</a>
               </div>
             </div>
 

@@ -9,14 +9,22 @@ export function initHomeGallery() {
 
   const items = Array.from(track.children) as HTMLElement[];
   const center = items.find((el) => el.hasAttribute('data-center'))!;
+  // Le marquee contient chaque image deux fois (boucle) : la jumelle de l'image centrale
+  // se retrouve au centre quand la boucle a avancé, elle doit être masquée en même temps
+  const centerTwin = items[items.indexOf(center) + items.length / 2];
+  const centers = [center, centerTwin].filter(Boolean);
   const sides = items.filter((el) => el !== center);
   // largeur d'un groupe = distance entre l'item 0 et son jumeau du 2e groupe
   const loopW = () => items[items.length / 2].offsetLeft - items[0].offsetLeft;
 
   const loop = gsap.to(track, {
     x: () => -loopW(), duration: 25, ease: 'none', repeat: -1,
-    paused: true, invalidateOnRefresh: true,
+    paused: true,
   });
+  // Largeur de la boucle recalculée quand la page change de taille (invalidateOnRefresh n'existe que sur un ScrollTrigger)
+  const galleryOnRefresh = () => { const t = loop.time(); loop.invalidate(); loop.time(t); };
+  ScrollTrigger.addEventListener('refresh', galleryOnRefresh);
+  document.addEventListener('astro:before-swap', () => ScrollTrigger.removeEventListener('refresh', galleryOnRefresh), { once: true });
 
   // ── Marquee en pause quand la section n'est pas à l'écran ──
   let galleryVisible = true;
@@ -40,7 +48,7 @@ export function initHomeGallery() {
   const place = (self: ScrollTrigger) => {
     const p = self.progress;
     gsap.set(follow, { autoAlpha: p > 0 && p < 1 ? 1 : 0 });
-    gsap.set(center, { autoAlpha: p === 1 ? 1 : 0 });
+    gsap.set(centers, { autoAlpha: p === 1 ? 1 : 0 });
   };
 
   ScrollTrigger.create({
@@ -78,8 +86,9 @@ if (followImg) {
     loop.pause();
     gsap.killTweensOf(loop);
     if (on && galleryVisible) loop.play();
+    // Retour à la position de départ par le chemin le plus court (début ou fin de boucle, identiques à l'écran)
     else gsap.to(loop, {
-      time: loop.duration(), duration: 0.6, ease: 'power2.out',
+      time: loop.time() < loop.duration() / 2 ? 0 : loop.duration(), duration: 0.6, ease: 'power2.out',
       onComplete: () => { loop.pause(0); },
     });
   };
@@ -108,7 +117,7 @@ gsap.timeline({
 
   // Mobile : pas de pin, marquee direct
   mm.add('(max-width: 1023px)', () => {
-    gsap.set(center, { autoAlpha: 1 });
+    gsap.set(centers, { autoAlpha: 1 });
     galleryRunning = true;
     if (galleryVisible) loop.play();
     return () => {

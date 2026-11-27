@@ -1,180 +1,200 @@
 ---
-// Page L'équipe — Moussine puis Violaine : la section se fige et le scroll fait le relais entre les deux
+// Page L'équipe — les membres : la liste des prénoms à gauche (groupés par étiquette : Muses Coiffure,
+// Muses Bien-être…), la fiche du membre choisi au centre (photo) et à droite (nom, métier, présentation, réservation).
+// Au clic sur un prénom, la fiche sort et la suivante entre (scripts/pages/equipe.ts).
 // Contenu : document « Page L'équipe » → Membres (Sanity + valeurs par défaut, lib/content.ts)
-// Dans l'accroche, {coeur} est remplacé par le petit cœur dessiné
 import { picture, href } from '../../lib/content';
 import { clean } from '../../lib/sanity';
-import { rich, lines } from '../../lib/rich';
+import { rich } from '../../lib/rich';
 const { equipe } = Astro.props;
-// Deux panneaux : m (Moussine, mise en page orange) puis v (Violaine)
-const keys = ['m', 'v'];
-const members = equipe.members.slice(0, 2).map((mb: any, i: number) => ({
+
+const members = equipe.members.map((mb: any, i: number) => ({
   ...mb,
-  key: keys[i],
-  big: picture(mb.imageMain),
-  small: picture(mb.imageSecond),
+  key: `m${i}`,
+  photo: picture(mb.imageMain, '(max-width: 899px) 90vw, 400px'),
+  // Membres du bien-être : fiche sur fond vert, textes en crème
+  green: /bien/i.test(clean(mb.tag)),
 }));
-const label = members.map((mb: any) => clean(mb.name)).join(' et ');
+
+// Groupes, dans l'ordre d'apparition : les membres qui partagent la même étiquette sont réunis
+const groups: { tag: string; members: any[] }[] = [];
+for (const mb of members) {
+  const tagText = clean(mb.tag).replace(/[*_]/g, '').trim();
+  let g = groups.find((x) => x.tag === tagText);
+  if (!g) groups.push((g = { tag: tagText, members: [] }));
+  g.members.push(mb);
+}
+const label = members.map((mb: any) => clean(mb.name)).join(', ');
 ---
 
-<section class="em" id="em" data-anim="em-relay" aria-label={label}>
-  {members.map((mb: any, i: number) => (
-    <div class={`em-panel em-${mb.key}`} data-em-panel={mb.key} hidden={i > 0}>
-      <div class="em-head">
-        <p class="em-tag em-mask" data-em-line><span>{rich(mb.tag).map((p) => (p.br ? <br /> : p.bold ? <b>{p.text}</b> : p.italic ? <i>{p.text}</i> : p.text))}</span></p>
-        <p class="em-lead">
-          {lines(mb.lead).map((line, k) => (
-            <span class:list={['em-mask', { 'em-l1': i === 0 && k === 0 }]} data-em-line><span>{line.split('{coeur}').map((part, j) => <>{j > 0 && <img class="em-heart" src="/images/coeur_orange.svg" alt="cœur" width="80" height="80" />}{part}</>)}</span></span>
+<section class:list={["em", { "is-green": members[0]?.green }]} id="em" data-anim="em-team" aria-label={`L’équipe : ${label}`}>
+  <!-- Liste des membres -->
+  <nav class="em-list" aria-label="Choisir un membre de l’équipe">
+    {groups.map((g) => (
+      <div class="em-group">
+        <p class="em-group-tag">{g.tag}</p>
+        <ul>
+          {g.members.map((mb) => (
+            <li>
+              <button class:list={['em-pick', { 'is-active': mb.key === 'm0' }]} type="button" data-em-pick={mb.key} aria-controls={`em-${mb.key}`} aria-pressed={mb.key === 'm0' ? 'true' : 'false'}>{mb.name}</button>
+            </li>
           ))}
-        </p>
+        </ul>
       </div>
+    ))}
+  </nav>
 
-      <figure class="em-photo em-big" data-em-clip><img src={mb.big.src} alt={mb.big.alt} loading="lazy" decoding="async" /></figure>
-      <figure class="em-photo em-small" data-em-clip><img src={mb.small.src} alt={mb.small.alt} loading="lazy" decoding="async" /></figure>
-
-      <div class="em-col">
-        <div class="em-id">
+  <!-- Fiches : une seule visible à la fois -->
+  <div class="em-stage">
+    {members.map((mb: any, i: number) => (
+      <article class="em-panel" id={`em-${mb.key}`} data-em-panel={mb.key} data-em-green={mb.green ? "" : undefined} hidden={i > 0}>
+        <figure class="em-photo" data-em-clip><img src={mb.photo.src} srcset={mb.photo.srcset} sizes={mb.photo.sizes} alt={mb.photo.alt} loading="lazy" decoding="async" /></figure>
+        <div class="em-col">
           <h2 class="em-name em-mask" data-em-line><span>{mb.name}</span></h2>
           <p class="em-role em-mask" data-em-line><span>{mb.role}</span></p>
+          {/* Présentation : une ligne vide dans Sanity = un nouveau paragraphe (écart réduit plutôt qu’une ligne blanche) */}
+          <div class="em-bio" data-em-fade>
+            {String(mb.bio ?? '').split(/\n\s*\n/).filter((par: string) => par.trim()).map((par: string) => (
+              <p>{rich(par).map((p) => (p.br ? <br /> : p.bold ? <b>{p.text}</b> : p.italic ? <i>{p.text}</i> : p.text))}</p>
+            ))}
+          </div>
+          {/* Pas de bouton sans texte ou sans adresse (membre sans réservation en ligne) */}
+          {clean(mb.cta?.label) && clean(mb.cta?.url) && <a class="em-cta" href={href(mb.cta.url)} target="_blank" rel="noopener" data-em-fade>{mb.cta.label}</a>}
         </div>
-        <p class="em-bio" data-em-fade>{rich(mb.bio).map((p) => (p.br ? <br /> : p.bold ? <b>{p.text}</b> : p.italic ? <i>{p.text}</i> : p.text))}</p>
-        <a class="em-cta" href={href(mb.cta.url)} target="_blank" rel="noopener" data-em-fade>{mb.cta.label}</a>
-      </div>
-    </div>
-  ))}
+      </article>
+    ))}
+  </div>
 </section>
 
 <style>
-  /* Unité fluide --fpx (global.css), sur toute la largeur de l'écran */
+  /* Desktop : la photo et le texte tiennent dans un écran sous la nav (--em-h) ; marges haut et bas identiques.
+     --eu : unité de la section = la plus petite des deux échelles, largeur (--fpx) ou hauteur (1px pour 900px de haut) ;
+     textes, écarts et largeur de la photo en dépendent, la hauteur de la photo prend tout l'espace sous la nav. */
   .em {
-    --em-pad: calc(40 * var(--fpx));          /* padding gauche / droite des sections */
-    --em-top: calc(100 * var(--fpx));         /* haut du titre = haut de la grande image */
-    --em-small-top: calc(300 * var(--fpx));   /* haut de la petite image = haut de la colonne de texte */
-    --em-big-w: calc(399 * var(--fpx));
-    --em-small-w: calc(388 * var(--fpx));
-    --em-gap: calc(36 * var(--fpx));          /* espace entre les textes et les images */
-    --em-green: #11311A;
-    position: relative;
-    height: 100vh;
-    overflow: hidden;
+    --eu: min(var(--fpx), calc(100svh / 900));
+    --em-top: calc(100px + 24 * var(--eu));    /* hauteur de la nav + respiration */
+    --em-bottom: calc(44 * var(--eu));
+    --em-h: calc(100svh - var(--em-top) - var(--em-bottom));
+    display: grid;
+    grid-template-columns: calc(436 * var(--fpx)) minmax(0, 1fr);
+    align-items: start;
+    box-sizing: border-box;
+    /* même marge en bas qu'en haut (la section dépasse alors un peu de l'écran) ; écart avec le footer comme sur l'accueil */
+    padding: var(--em-top) calc(48 * var(--fpx));
+    margin-bottom: calc(140 * var(--fpx));
     background: var(--bg, #F7F2EC);
+    color: var(--orange, #e57851);
     transition: background-color 0.9s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .em.show-v { background: var(--em-green); }
+  /* Membre du bien-être affiché : fond vert, tous les textes de la section en crème */
+  .em.is-green { background: var(--em-green, #11311A); }
+  .em.is-green :is(.em-group-tag, .em-pick, .em-name, .em-role, .em-bio, .em-cta) { color: var(--bg, #F7F2EC); }
+  .em-group-tag, .em-pick, .em-name, .em-role, .em-bio, .em-cta { transition: color 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease; }
 
-  .em-panel {
-    position: absolute;
-    inset: 0;
-    font-family: var(--font, 'DM Sans', sans-serif);
+  /* ── Liste : étiquette du groupe, puis les prénoms ; celui affiché en orange plein ── */
+  .em-list { display: flex; flex-direction: column; gap: calc(30 * var(--eu)); }
+  .em-group-tag {
+    margin: 0 0 calc(10 * var(--eu));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(17 * var(--eu));
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-transform: uppercase;
   }
+  .em-group ul { list-style: none; margin: 0; padding: 0; }
+  .em-pick {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-family: 'Cormorant Infant', serif;
+    font-weight: 400;
+    font-size: calc(46 * var(--eu));
+    line-height: 1.26;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--orange, #e57851);
+    opacity: 0.38;
+    transition: opacity 0.4s ease, color 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .em-pick:hover, .em-pick:focus-visible, .em-pick.is-active { opacity: 1; }
+  .em-pick:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
 
+  /* ── Fiche : photo, puis la colonne de texte, toutes deux de la hauteur disponible ── */
+  .em-stage { display: grid; }
+  .em-panel {
+    grid-area: 1 / 1;
+    display: grid;
+    grid-template-columns: calc(400 * var(--eu)) minmax(0, 1fr);
+    column-gap: calc(56 * var(--fpx));
+    height: var(--em-h);
+  }
   .em .em-panel[hidden] { display: none !important; }
-  .em-m { --c: var(--orange, #e57851); }
-  .em-v { --c: #F7F2EC; }
-  .em-panel > * { position: absolute; margin: 0; }
 
+  .em-photo { margin: 0; height: 100%; overflow: hidden; border-radius: 2px; }
+  .em-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .em-col { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; min-height: 0; }
   .em-mask { display: block; overflow: hidden; padding-block: 0.1em; margin-block: -0.1em; }
   .em-mask > span { display: inline-block; }
 
-  /* ── Titre : aligné sur le haut de la grande image ── */
-  .em-head { top: var(--em-top); width: max-content; color: var(--c); }
-  .em-m .em-head { left: var(--em-pad); }
-  .em-v .em-head { right: var(--em-pad); text-align: right; }
-
-  .em-tag {
-    position: absolute;
-    left: 0;
-    top: calc(8 * var(--fpx));
-    font-family: 'Thunder', sans-serif;
-    font-weight: 200;
-    font-size: calc(24 * var(--fpx));
-    line-height: 1;
-    text-transform: uppercase;
-    white-space: nowrap;
-    text-align: left;
-  }
-
-  .em-tag i { font-family: 'Thunder LC', 'Thunder', sans-serif; font-style: normal; }
-
-  .em-lead {
-    font-family: 'Thunder', sans-serif;
-    font-weight: 800;
-    font-size: calc(80 * var(--fpx));
-    line-height: 0.74;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  /* Moussine : la 1re ligne commence après le tag */
-  .em-m .em-l1 { padding-left: calc(220 * var(--fpx)); }
-  /* Cœur : à la taille des capitales, posé sur la ligne de base comme une lettre */
-  .em-heart {
-    display: inline-block;
-    width: 0.95em;
-    height: 0.95em;
-    vertical-align: -0.1em;
-  }
-
-  /* ── Images : collées aux bords de l'écran, jusqu'en bas ── */
-  .em-photo { overflow: hidden; bottom: 0; }
-  .em-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .em-big { top: var(--em-top); width: var(--em-big-w); }
-  .em-small { top: var(--em-small-top); width: var(--em-small-w); }
-  .em-m .em-big { right: 0; }
-  .em-m .em-small { left: 0; }
-  .em-v .em-big { left: 0; }
-  .em-v .em-small { right: 0; }
-
-  /* ── Colonne de texte : nom + métier, paragraphe centré, bouton à 24 du bas ── */
-  .em-col {
-    top: var(--em-small-top);
-    bottom: calc(24 * var(--fpx));
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: calc(24 * var(--fpx));
-    color: var(--c);
-  }
-
-  .em-m .em-col { left: calc(var(--em-small-w) + var(--em-gap)); right: calc(var(--em-big-w) + var(--em-gap)); align-items: flex-start; }
-  .em-v .em-col { left: calc(var(--em-big-w) + var(--em-gap)); right: calc(var(--em-small-w) + var(--em-gap)); align-items: flex-end; text-align: right; }
-
-  .em-id { display: flex; flex-direction: column; gap: calc(6 * var(--fpx)); }
-  .em-v .em-id { align-items: flex-end; }
-
+  /* Nom : le haut des capitales aligné sur le haut de la photo (Cormorant : ~0,22em d’espace au-dessus des capitales, accents non comptés) */
   .em-name {
+    margin: -0.22em 0 0;
     font-family: 'Cormorant Infant', serif;
     font-weight: 400;
-    font-size: calc(80 * var(--fpx));
-    line-height: 0.7;
-    letter-spacing: -0.01em;
+    font-size: calc(76 * var(--eu));
+    line-height: 0.9;
     text-transform: uppercase;
+    color: var(--orange, #e57851);
+  }
+  .em-role {
+    margin: calc(12 * var(--eu)) 0 0;
+    font-size: calc(20 * var(--eu));
+    line-height: 1.3;
+    color: var(--orange-ink, #ae4c2c);
+  }
+  .em-bio {
+    display: flex;
+    flex-direction: column;
+    gap: calc(10 * var(--eu));
+    margin: calc(26 * var(--eu)) 0 0;
+    max-width: calc(452 * var(--fpx));
+    font-size: calc(18 * var(--eu));
+    line-height: 1.5;
+    color: var(--orange-ink, #ae4c2c);
+  }
+  .em-bio p { margin: 0; }
+  .em-bio b { font-weight: 700; }
+  .em-cta {
+    margin-top: auto;
+    padding-top: calc(24 * var(--eu));
+    font-size: calc(24 * var(--eu));
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    color: var(--orange-ink, #ae4c2c);
     white-space: nowrap;
   }
 
-  .em-role { font-size: calc(26 * var(--fpx)); line-height: 1; text-transform: uppercase; }
-  .em-bio { max-width: calc(480 * var(--fpx)); font-size: calc(17.5 * var(--fpx)); line-height: 1.5; }
-  .em-bio b { font-weight: 700; }
-  .em-cta { font-size: calc(29 * var(--fpx)); line-height: 1; text-transform: uppercase; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; white-space: nowrap; }
-
-  /* Mobile : même relais, contenu empilé (deux photos côte à côte) */
+  /* Mobile / tablette : prénoms en ligne, puis la photo et le texte empilés (hauteur libre) */
   @media (max-width: 899px) {
-    .em { height: 100svh; }
-    .em-panel { display: grid; grid-template-columns: 1.25fr 1fr; column-gap: 0.8rem; row-gap: 0.8rem; align-content: start; padding: 4.5rem 1.25rem 1.25rem; }
-    .em-panel > * { position: relative; inset: auto; left: auto !important; right: auto !important; top: auto !important; bottom: auto !important; width: auto !important; grid-column: 1 / -1; }
-    .em-head, .em-v .em-head { text-align: left; }
-    .em-tag { position: relative; top: 0; font-size: 1.1rem; margin-bottom: 0.4rem; }
-    .em-lead { font-size: 1.85rem; white-space: normal; }
-    .em-m .em-l1 { padding-left: 0; }
-    /* « .em-panel > » : plus spécifique que « .em-panel > * » une fois scopé par Astro */
-    .em-panel > .em-big { grid-column: 1; height: 30vh; }
-    .em-panel > .em-small { grid-column: 2; height: 21vh; align-self: end; }
-    .em-col, .em-v .em-col { align-items: flex-start; text-align: left; justify-content: flex-start; gap: 0.8rem; }
-    .em-v .em-id { align-items: flex-start; }
+    .em { grid-template-columns: 1fr; row-gap: 2rem; padding: 4rem 1.25rem; margin-bottom: 5rem; }
+    .em-list { flex-direction: row; flex-wrap: wrap; gap: 1.25rem 2rem; }
+    .em-group-tag { font-size: 0.95rem; margin-bottom: 0.35rem; }
+    .em-pick { font-size: 1.9rem; line-height: 1.2; }
+    .em-panel { grid-template-columns: 1fr; row-gap: 1.5rem; height: auto; }
+    .em-photo { height: auto; aspect-ratio: 4 / 5; }
     .em-name { font-size: 2.8rem; }
-    .em-role { font-size: 0.95rem; }
-    .em-bio { max-width: none; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-    .em-cta { font-size: 1.05rem; }
+    .em-role { margin-top: 0.5rem; font-size: 1.05rem; }
+    .em-bio { margin-top: 1.1rem; max-width: none; font-size: 0.98rem; gap: 0.6rem; }
+    .em-cta { margin-top: 1.5rem; padding-top: 0; font-size: 1.15rem; white-space: normal; }
   }
 </style>

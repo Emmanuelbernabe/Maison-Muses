@@ -24,6 +24,7 @@ export const HOME = {
     load4: img('load-4', 'Coiffure au salon Maison Muses'),
   },
   hero: {
+    heading: 'Maison Muses, coiffure et bien-être à Toulouse',
     subtitle: 'Sublimer vos cheveux, \néveiller vos sens.',
     video: vid('hero-bg-video'),
     portrait: img('hero', 'Cliente de Maison Muses, cheveux longs ondulés'),
@@ -69,7 +70,7 @@ export const HOME = {
           { title: 'BIEN ÊTRE', detail: 'Massage relaxant\n30 min' },
           { title: 'COIFFURE', detail: 'Soin profond cheveux\n& coiffure au choix' },
         ],
-        cta: link('RESERVER', '#reserver'),
+        cta: link('RESERVER', 'https://www.planity.com/'),
         description: ["Profitez d'une parenthèse de douceur avec un massage relaxant de 30 minutes chez Maison Muses Bien-être, suivi d'un soin profond pour vos cheveux et d'une coiffure au choix. Idéal pour découvrir l'alliance du bien-être et de la coiffure."],
         bigImage: img(['initiation-big', 'soin-img'], 'Massage Maison Muses'),
         smallImage: img(['initiation-little', 'slide-2'], 'Coiffure Maison Muses'),
@@ -83,7 +84,7 @@ export const HOME = {
           { title: 'BIEN ÊTRE', detail: 'Prestation au choix' },
           { title: 'COIFFURE', detail: 'Prestation au choix' },
         ],
-        cta: link('RESERVER', '#reserver'),
+        cta: link('RESERVER', 'https://www.planity.com/'),
         description: ["L'harmonie parfaite entre beauté des cheveux et bien-être. Choisis librement parmi toutes nos prestations coiffure et soins pour un moment unique personnalisé (or rituels Olaplex/Tokio Inkarami et Essence des Muses). La durée sera en fonction des prestations choisies."],
         bigImage: img('harmonie-big', 'Soin Maison Muses'),
         smallImage: img('harmonie-little', 'Ambiance Maison Muses'),
@@ -97,7 +98,7 @@ export const HOME = {
           { title: 'BIEN ÊTRE', detail: 'Prestation au choix' },
           { title: 'COIFFURE', detail: 'Prestation au choix' },
         ],
-        cta: link('RESERVER', '#reserver'),
+        cta: link('RESERVER', 'https://www.planity.com/'),
         description: ["L'harmonie parfaite entre beauté des cheveux et bien-être. Choisis librement parmi toutes nos prestations coiffure et soins pour un moment unique personnalisé (or rituels Olaplex/Tokio Inkarami et Essence des Muses). La durée sera en fonction des prestations choisies."],
         bigImage: img('symbiose-big', 'Soin Symbiose'),
         smallImage: img('symbiose-little', 'Détail Symbiose'),
@@ -111,7 +112,7 @@ export const HOME = {
           { title: 'BIEN ÊTRE', detail: 'Soin Signature\nEssence des Muses' },
           { title: 'COIFFURE', detail: 'Prestation au choix\navec le RITUEL TOKIO INKARAMI' },
         ],
-        cta: link('RESERVER', '#reserver'),
+        cta: link('RESERVER', 'https://www.planity.com/'),
         description: [
           "**L'ultime expérience signée Maison Muses Bien-être et Maison Muses coiffure !**",
           "Ce coffret regroupe la prestation coiffure de ton choix avec le rituel Tokio Inkarami, ainsi que le soin signature l'Essence des Muses qui est un voyage de deux heures alliant massage et soin visage.",
@@ -171,17 +172,28 @@ export const SETTINGS = {
   logo: img('logo', 'Maison Muses'),
   header: {
     menuLabel: 'MENU',
-    reserve: link('RESERVER', '#coffrets'),
+    reserve: link('RÉSERVER', '#coffrets'),
   },
+  // Image : affichée à droite du menu au survol du lien (les marques utilisent leur image de hero)
   menu: [
-    { label: 'Accueil', url: '/', brands: false },
-    { label: 'Bien-être', url: '/bien-etre', brands: false },
-    { label: 'Coiffure', url: '/coiffure', brands: false },
-    { label: 'Nos marques', url: '', brands: true },
-    { label: 'Coffrets', url: '#coffrets', brands: false },
-    { label: 'L’équipe', url: '/equipe', brands: false },
-    { label: 'Journal', url: '/journal', brands: false },
+    { label: 'Accueil', url: '/', brands: false, image: img('hero', 'Maison Muses') },
+    { label: 'Bien-être', url: '/bien-etre', brands: false, image: img('soin-img', 'Soin bien-être') },
+    { label: 'Coiffure', url: '/coiffure', brands: false, image: img('marquee-1', 'Coiffure au salon') },
+    { label: 'Nos marques', url: '', brands: true, image: img('slide-3', 'Nos marques') },
+    { label: 'Coffrets', url: '#coffrets', brands: false, image: img('initiation-big', 'Coffret cadeau') },
+    { label: 'L’équipe', url: '/equipe', brands: false, image: img('team-mid', 'L’équipe Maison Muses') },
+    { label: 'Journal', url: '/journal', brands: false, image: img('july', 'Le journal des Muses') },
   ],
+  // Menu déployé : intitulés des colonnes, encart « Première visite », liens Instagram
+  menuPanel: {
+    maisonTitle: 'LA MAISON',
+    brandsTitle: 'NOS MARQUES',
+    visit: { label: 'PREMIÈRE VISITE', text: 'Réservez une consultation de 30 minutes.', url: 'https://www.planity.com/' },
+    socials: [
+      link('@maison_muses_coiffure', 'https://www.instagram.com/maison_muses_coiffure/'),
+      link('@maison_muses_bien_etre', 'https://www.instagram.com/maison_muses_bien_etre/'),
+    ],
+  },
   footer: {
     title: 'PRENEZ LE TEMPS.\n**ON S’OCCUPE DU RESTE**',
     cta: link('PRENDRE RENDEZ-VOUS', 'https://www.planity.com/'),
@@ -201,16 +213,48 @@ export const SETTINGS = {
     socialLinks: [
       link('MAISON MUSE COIFFURE', '#'),
       link('MAISON MUSE BIEN-ÊTRE', '#'),
-      link('PODCAST', '#'),
     ],
     copyright: '© MAISON MUSES',
-    legalLinks: [link('MENTIONS LEGALES', '#'), link('COOKIES', '#')],
+    legalLinks: [link('MENTIONS LÉGALES', '/mentions-legales'), link('CONFIDENTIALITÉ', '/politique-de-confidentialite'), link('COOKIES', '#cookies')],
+  },
+  // Réservation : fenêtre de choix du salon (bouton RESERVER du header) et pages /reserver/… (module Planity)
+  booking: {
+    title: 'Réserver',
+    text: 'Dans quel salon souhaitez-vous prendre rendez-vous ?',
+    choices: [
+      { label: 'Coiffure', place: 'Maison Muses Coiffure', address: '48 Allées Jean Jaurès, Toulouse', url: '/reserver/coiffure', image: img(['coiffure-poster', 'marquee-1'], 'L’espace coiffure') },
+      { label: 'Bien-être', place: 'Maison Muses Bien-être', address: '11 Rue Bellegarde, Toulouse', url: '/reserver/bien-etre', image: img(['bien-etre-poster', 'soin-img'], 'L’espace bien-être') },
+    ],
+    coiffure: { eyebrow: 'Réserver', title: 'Espace coiffure', text: 'Choisissez votre prestation, votre coiffeur et votre créneau : la réservation se fait en quelques clics, avec la confirmation par e-mail.', planityKey: '-NQQ1msjYmTzuZ1zuRSU' },
+    bienEtre: { eyebrow: 'Réserver', title: 'Espace bien-être', text: 'Choisissez votre soin et votre créneau : la réservation se fait en quelques clics, avec la confirmation par e-mail.', planityKey: '-OFu_IEQRuw6g1ctZOpl' },
+    otherLabel: 'Réserver plutôt dans l’autre salon',
+  },
+  // Bandeau de consentement (components/layout/CookieBanner.astro) ; gtmId vide = aucune mesure d'audience
+  cookies: {
+    gtmId: '',
+    title: 'Vos cookies, votre choix',
+    text: 'Nous utilisons des cookies pour améliorer votre expérience de navigation et analyser notre trafic. Pour plus d’informations, consultez notre',
+    accept: 'Tout accepter',
+    refuse: 'Tout refuser',
+    customize: 'Personnaliser',
+    save: 'Enregistrer mes choix',
+    analyticsLabel: 'Mesure d’audience',
+    analyticsText: 'Google Analytics, via Google Tag Manager : statistiques de visite anonymisées pour améliorer le site.',
+    policyLabel: 'Politique de confidentialité',
+  },
+  notFound: {
+    title: 'PAGE **INTROUVABLE**',
+    text: 'La page que vous cherchez n’existe pas ou a été déplacée.',
+    cta: link('Retour à l’accueil', '/'),
   },
   brandLabels: {
     origin: 'Origine',
     qualities: 'Qualités',
     products: 'Les produits',
     booking: 'Réserver un soin',
+    cursor: 'Cliquez pour en savoir plus',
+    mobileHint: 'Cliquez sur les produits ci-dessous pour en savoir plus',
+    available: 'Produit disponible à l’achat dans nos salons',
   },
 };
 
@@ -226,6 +270,7 @@ export const EQUIPE = {
     video: vid('presentation-video', 'prestige-big'),
     poster: img(['equipe-poster', 'team-left'], ''),
     playLabel: 'Lire la vidéo',
+    rotateHint: 'Tournez votre téléphone pour voir la vidéo en plein écran',
   },
   members: [
     {

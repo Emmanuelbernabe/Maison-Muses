@@ -1,0 +1,115 @@
+---
+// Bandeau de consentement aux cookies (logique : scripts/layout/consent.ts ; textes : Réglages du site → Cookies)
+// Discret : petit encart crème en bas à gauche. Trois boutons de même poids (refuser / personnaliser / accepter).
+import { loadSettings } from '../../lib/content';
+const { cookies: c } = await loadSettings();
+---
+<section class="cc" data-cc role="dialog" aria-labelledby="cc-title" aria-describedby="cc-text">
+  <div class="cc-head">
+    <!-- Cookie croqué, aux couleurs du site -->
+    <svg class="cc-icon" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 2a14 14 0 1 0 13.9 15.6 4.6 4.6 0 0 1-5.3-5 4.6 4.6 0 0 1-5.6-5.3A4.6 4.6 0 0 1 16 2Z" fill="currentColor" />
+      <circle cx="10.5" cy="12.5" r="2" fill="#F7F2EC" />
+      <circle cx="9.5" cy="21" r="1.7" fill="#F7F2EC" />
+      <circle cx="16.5" cy="17.5" r="1.5" fill="#F7F2EC" />
+      <circle cx="18" cy="24.5" r="1.9" fill="#F7F2EC" />
+      <circle cx="24.5" cy="20.5" r="1.3" fill="#F7F2EC" />
+    </svg>
+    <p class="cc-title" id="cc-title">{c.title}</p>
+  </div>
+  <p class="cc-text" id="cc-text">
+    {c.text} <a href="/politique-de-confidentialite">{c.policyLabel}</a>.
+  </p>
+
+  <div class="cc-panel" id="cc-panel" data-cc-panel hidden>
+    <label class="cc-row">
+      <input type="checkbox" data-cc-analytics />
+      <span><b>{c.analyticsLabel}</b>{c.analyticsText}</span>
+    </label>
+    <button class="cc-btn cc-save" type="button" data-cc-save>{c.save}</button>
+  </div>
+
+  <div class="cc-actions">
+    <button class="cc-btn" type="button" data-cc-refuse>{c.refuse}</button>
+    <button class="cc-btn" type="button" data-cc-customize aria-expanded="false" aria-controls="cc-panel">{c.customize}</button>
+    <button class="cc-btn" type="button" data-cc-accept>{c.accept}</button>
+  </div>
+</section>
+
+<style>
+  .cc {
+    position: fixed;
+    left: clamp(12px, 1.8vw, 28px);
+    bottom: clamp(12px, 1.8vw, 28px);
+    z-index: 1005;                        /* au-dessus du header et du menu */
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    padding: 16px 16px 14px;
+    border: 1px solid rgba(229, 120, 81, 0.35);
+    border-radius: 8px;
+    background: var(--bg, #F7F2EC);
+    color: var(--orange-ink, #ae4c2c);
+    box-shadow: 0 10px 30px rgba(174, 76, 44, 0.08);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.45s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.6s;
+  }
+  .cc:global(.is-open) {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.45s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+  }
+
+  .cc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; color: var(--orange, #e57851); }
+  .cc-icon { flex: none; display: block; width: 26px; height: 26px; }
+  .cc-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .cc-text { margin: 0; font-size: 0.82rem; line-height: 1.5; }
+  .cc-text a { color: inherit; text-decoration: underline; text-underline-offset: 0.18em; }
+
+  .cc-panel { display: grid; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(229, 120, 81, 0.3); }
+  .cc-panel[hidden] { display: none; }
+  .cc-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; font-size: 0.8rem; line-height: 1.45; cursor: pointer; }
+  .cc-row b { display: block; font-weight: 500; color: var(--orange, #e57851); }
+  .cc-row input { width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--orange, #e57851); cursor: pointer; }
+
+  /* Mêmes boutons pour refuser, personnaliser et accepter : aucun choix n'est mis en avant */
+  /* Boutons sur une ligne chacun (texte jamais coupé) ; ils passent à la ligne s'ils ne tiennent pas côte à côte */
+  .cc-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .cc-actions .cc-btn { flex: 1 1 auto; }
+  .cc-btn {
+    min-height: 32px;
+    padding: 8px 12px 7px;
+    border: 1px solid var(--orange, #e57851);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--orange, #e57851);
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .cc-btn:hover { background: var(--orange, #e57851); color: var(--bg, #F7F2EC); }
+  .cc-btn:focus-visible, .cc-row input:focus-visible, .cc-text a:focus-visible { outline: 2px solid var(--orange, #e57851); outline-offset: 2px; }
+  .cc-save { justify-self: start; padding-inline: 14px; }
+
+  @media (max-width: 420px) {
+    .cc { padding: 14px 14px 12px; }
+  }
+</style>

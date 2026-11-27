@@ -111,6 +111,17 @@ export const servicePage = defineType({
           title: 'Marques (défilent en boucle)',
           type: 'array',
           of: [defineArrayMember({ type: 'string' })],
+          description: 'Utilisés seulement si aucun logo n’est renseigné ci-dessous.',
+        }),
+        defineField({
+          name: 'logos',
+          title: 'Logos des marques (défilent en boucle)',
+          type: 'array',
+          description: 'SVG conseillé, déjà à la bonne couleur (orange pour la coiffure, vert pour le bien-être). Remplacent les noms ci-dessus.',
+          of: [defineArrayMember({
+            type: 'image',
+            fields: [defineField({ name: 'alt', title: 'Nom de la marque', type: 'string', validation: (r) => r.required() })],
+          })],
         }),
       ],
     }),

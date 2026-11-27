@@ -7,7 +7,7 @@ import { singletons, structure } from './structure';
 import { resolve } from './presentation/resolve';
 
 const singletonIds = singletons.map((s) => s.id);
-const singletonTypes = ['homepage', 'siteSettings', 'servicePage', 'equipePage', 'journalPage'];
+const singletonTypes = ['homepage', 'siteSettings', 'servicePage', 'equipePage', 'journalPage', 'legalPage'];
 
 export default defineConfig({
   name: 'default',

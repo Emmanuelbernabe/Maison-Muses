@@ -29,7 +29,7 @@ const categories = JOURNAL_CATEGORIES.filter((c) => others.some((p) => p.categor
   <main id="top">
     <section class="jr-hub" data-anim="jr-hub" aria-label="Le journal">
       <div class="jr-head">
-        <h1 class="jr-title"><span class="jr-title-it">{page.titleItalic}</span>{page.titleMain}</h1>
+        <h1 class="jr-title"><span class="jr-title-it">{page.titleItalic}{' '}</span>{page.titleMain}</h1>
         {categories.length > 1 && (
           <div class="jr-filters" role="group" aria-label="Filtrer par catégorie" data-jr-filters>
             <button type="button" aria-pressed="true" data-filter="all">{page.allLabel}</button>

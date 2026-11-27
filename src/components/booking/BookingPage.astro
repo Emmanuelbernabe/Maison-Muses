@@ -1,0 +1,145 @@
+---
+// Pages de réservation (/reserver/coiffure, /reserver/bien-etre) : introduction + module Planity du salon
+// Contenu et clés Planity : Réglages du site → Réservation
+import Layout from '../../layouts/Layout.astro';
+import Header from '../layout/Header.astro';
+import SiteFooter from '../layout/SiteFooter.astro';
+import { loadSettings, href } from '../../lib/content';
+import { clean } from '../../lib/sanity';
+
+interface Props { salon: 'coiffure' | 'bienEtre'; }
+const { salon } = Astro.props;
+const { booking } = await loadSettings();
+const page = booking[salon];
+const planityKey = clean(page.planityKey);
+const other = salon === 'coiffure' ? '/reserver/bien-etre' : '/reserver/coiffure';
+---
+<Layout title={`${clean(page.eyebrow)} – ${clean(page.title)} – Maison Muses, Toulouse`} description={clean(page.text)}>
+  <Header />
+  <main id="top" class:list={["bp", { "bp--green": salon === "bienEtre" }]}>
+    <header class="bp-head">
+      <p class="bp-eyebrow">{page.eyebrow}</p>
+      <h1 class="bp-title">{page.title}</h1>
+      <p class="bp-text">{page.text}</p>
+    </header>
+
+    <!-- Module de réservation Planity -->
+    <div class="bp-widget">
+      <div id="planity-container"></div>
+    </div>
+
+    <p class="bp-other"><a href={href(other)} data-astro-reload>{booking.otherLabel}</a></p>
+  </main>
+  <SiteFooter variant={salon === 'bienEtre' ? 'green' : 'orange'} />
+
+  <!-- Planity : configuration puis chargement du module (une seule fois par chargement de page ;
+       arrivée par une navigation sans rechargement : la page est rechargée pour l'initialiser) -->
+  <script is:inline define:vars={{ planityKey }}>
+    if (window.__mmPlanityLoaded) {
+      location.reload();
+    } else {
+      window.__mmPlanityLoaded = true;
+      window.planity = {
+        key: planityKey,
+        primaryColor: '#e57851',
+        container: document.getElementById('planity-container'),
+        options: {},
+      };
+      ['https://d2skjte8udjqxw.cloudfront.net/widget/production/2/polyfills.latest.js',
+       'https://d2skjte8udjqxw.cloudfront.net/widget/production/2/app.latest.js'].reduce(function (prev, src) {
+        return prev.then(function () {
+          return new Promise(function (resolve) {
+            var s = document.createElement('script');
+            s.src = src;
+            s.onload = s.onerror = resolve;
+            document.body.appendChild(s);
+          });
+        });
+      }, Promise.resolve());
+    }
+  </script>
+  <script>
+    import '../../scripts/main';
+  </script>
+</Layout>
+
+<style>
+  .bp { padding: calc(170 * var(--fpx)) calc(48 * var(--fpx)) calc(140 * var(--fpx)); }
+  .bp-head { max-width: calc(980 * var(--fpx)); margin: 0 auto calc(48 * var(--fpx)); }
+  .bp-eyebrow {
+    margin: 0 0 calc(10 * var(--fpx));
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(22 * var(--fpx));
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+  }
+  .bp-title {
+    margin: 0;
+    font-family: 'Cormorant Infant', serif;
+    font-weight: 400;
+    font-size: calc(96 * var(--fpx));
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+  }
+  .bp-text { max-width: calc(560 * var(--fpx)); margin: calc(22 * var(--fpx)) 0 0; font-size: calc(18 * var(--fpx)); line-height: 1.55; color: var(--orange-ink, #ae4c2c); }
+
+  .bp-widget { max-width: calc(980 * var(--fpx)); min-height: 60vh; margin: 0 auto; }
+
+  .bp-other { max-width: calc(980 * var(--fpx)); margin: calc(48 * var(--fpx)) auto 0; }
+  .bp-other a { font-size: calc(18 * var(--fpx)); color: var(--orange-ink, #ae4c2c); text-decoration: underline; text-underline-offset: 0.18em; }
+
+  @media (max-width: 899px) {
+    .bp { padding: 7.5rem 1.25rem 5rem; }
+    .bp-head { margin-bottom: 2rem; }
+    .bp-eyebrow { font-size: 1.05rem; }
+    .bp-title { font-size: 3rem; }
+    .bp-text { font-size: 1rem; }
+    .bp-other { margin-top: 2rem; }
+    .bp-other a { font-size: 1rem; }
+  }
+
+  /* ── Module Planity : textes plus grands (tout le module à l'échelle, ses tailles sont fixées en px) ── */
+  :global(#planitywl) { zoom: 1.15; }
+  @media (max-width: 899px) { :global(#planitywl) { zoom: 1.05; } }
+
+  /* Titres de rubrique : plus de repli au clic, mais l'espacement de l'état déplié est gardé */
+  :global(#planitywl [class*="service_set-module_title"]) { padding-bottom: 16px !important; pointer-events: none; cursor: default; }
+
+  /* ── Espace coiffure : titres en orange, textes en terracotta (hors libellés des boutons) ── */
+  :global(.bp:not(.bp--green) #planitywl :is(p, span, li, a, h2, h4, div):not(button, button *)) { color: var(--orange-ink, #ae4c2c) !important; }
+  :global(.bp:not(.bp--green) #planitywl h3) { color: var(--orange, #e57851) !important; }
+
+  /* ── Espace bien-être : la barre de navigation passe en vert, ses éléments en crème ── */
+  :global(body:has(.bp--green) header#hd::before) { background: var(--green, #0F2F18); }
+  :global(body:has(.bp--green) header#hd .nav-item) { color: #F7F2EC; }
+  :global(body:has(.bp--green) header#hd .nav-logo img) { opacity: 0; }
+  :global(body:has(.bp--green) header#hd .nav-logo .nav-logo-cream) { opacity: 1; }
+
+  /* ── Espace bien-être : direction artistique bien-être (fond vert, textes crème, boutons verts) ── */
+  .bp--green { background: var(--green, #0F2F18); }
+  .bp--green :is(.bp-eyebrow, .bp-title, .bp-text, .bp-other a) { color: #F7F2EC; }
+  :global(.bp--green #planitywl) { background-color: transparent !important; }
+  /* Descriptions des rubriques (hors cartes blanches) : en crème pour rester lisibles sur le vert
+     (début du nom de classe Planity, la fin change à chaque version du module) */
+  :global(.bp--green #planitywl [class*="service_set-module_description"]),
+  :global(.bp--green #planitywl [class*="service_set-module_description"] *) { color: #F7F2EC !important; }
+  @media (min-width: 768px) { :global(.bp--green #planitywl h3) { color: #F7F2EC !important; } }
+  :global(.bp--green #planitywl .planity_bookappointment-button-choose),
+  :global(.bp--green .planity-gift-voucher-button-choose) { background-color: var(--green, #0F2F18) !important; }
+  :global(.bp--green #planitywl > div:nth-child(2) > div:nth-child(2) > div > div > div > div > h2),
+  :global(.bp--green #planitywl > div:nth-child(2) > div:nth-child(2) > div > div > div > h2),
+  :global(.bp--green #planitywl > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > span) { color: #F7F2EC !important; }
+
+  /* ── Module Planity aux couleurs du site (styles fournis par Planity, couleurs adaptées) ── */
+  :global(#planitywl) { background-color: var(--bg, #F7F2EC) !important; font-family: var(--font, 'DM Sans', sans-serif); }
+  @media (min-width: 768px) { :global(#planitywl h3) { color: var(--orange-ink, #ae4c2c) !important; } }
+  :global(#planitywl .planity_bookappointment-button-choose) { background-color: var(--orange, #e57851) !important; }
+  :global(.planity_ui_appointment_background > div:nth-child(2)) { padding: 10px; }
+  :global(.planity-gift-voucher-button-choose) { background-color: var(--orange, #e57851) !important; }
+  :global(#planitywl > div:nth-child(2) > div:nth-child(2) > div > div > div > div > h2),
+  :global(#planitywl > div:nth-child(2) > div:nth-child(2) > div > div > div > h2),
+  :global(#planitywl > div:nth-child(2) > div:nth-child(2) > div > div > div:nth-child(2) > span) { color: var(--orange-ink, #ae4c2c) !important; }
+</style>

@@ -12,7 +12,7 @@ const words = String(approach.title).split(' ');
       <p class="service-tag" data-service-fade>{approach.tag}</p>
       <!-- Mots découpés : ils se remplissent un par un au scroll, comme le titre de la section équipe de l'accueil (HomeTeam) -->
       <h2 class="service-approach-title" data-anim="service-fill">
-        {words.map((word) => <span class="service-word">{word}</span>)}
+        {words.map((word) => <span class="service-word">{word}{' '}</span>)}
       </h2>
       <p class="service-body" data-service-fade>{approach.text}</p>
       {approach.ctaLabel && <a class="service-cta" href={approach.ctaUrl} target={approach.ctaUrl?.startsWith('http') ? '_blank' : undefined} rel="noopener" data-service-fade>{approach.ctaLabel}</a>}

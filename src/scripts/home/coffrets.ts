@@ -67,7 +67,9 @@ export function initHomeCoffrets() {
         pin: true,
         scrub: true,
         invalidateOnRefresh: true,
-        onRefresh: updateCardWidth,
+        // Largeur des cartes posée AVANT le calcul de la longueur du défilement (onRefresh arrivait après :
+        // après un redimensionnement, la longueur était calculée avec la largeur de l'écran précédent)
+        onRefreshInit: updateCardWidth,
         // Sans Lenis (écran tactile) : aimantation native de ScrollTrigger
         snap: lenis ? undefined : { snapTo: 1 / coffretsLast, directional: true, delay: 0.1, duration: { min: 0.4, max: 0.9 }, ease: 'power2.inOut' },
       },
@@ -171,10 +173,10 @@ export function initHomeCoffrets() {
       });
     }
 
-    // ── Arrivée de la carte 1 à l'écran : le haut de la section passe aux 40 % de la hauteur ──
+    // ── Arrivée de la carte 1 à l'écran : le haut de la carte passe aux 80 % de la hauteur (« top 80% ») ──
     // Calculé depuis le début du défilement horizontal (coffretsSt.start), toujours juste, même après un rechargement
     // sous la section (un repère dans le bloc épinglé, lui, était mesuré décalé)
-    const coffretsCard1In = { trigger: coffrets, start: () => coffretsSt.start - innerHeight * 0.4 };
+    const coffretsCard1In = { trigger: coffrets, start: () => coffretsSt.start - innerHeight * 0.8 };
 
     // ── Déclenchement du clip-path INDÉPENDANT sur chaque image ──
     // Visible dès qu'on a dépassé le point de départ, quel que soit le sens d'arrivée (par le haut, ou en
@@ -184,9 +186,9 @@ export function initHomeCoffrets() {
     const coffretsClip = (img: HTMLElement, show: boolean, delay = 0) =>
       gsap.to(img, {
         clipPath: show ? 'inset(0% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)',
-        duration: show ? 0.9 : 0.7,
+        duration: show ? 1.6 : 0.7,
         delay: show ? delay : 0,
-        ease: show ? 'power3.out' : 'power3.in',
+        ease: show ? 'musesReveal' : 'power3.in',
         overwrite: true,
       });
 
@@ -256,8 +258,8 @@ export function initHomeCoffrets() {
         { clipPath: 'inset(0% 0% 100% 0%)' },
         {
           clipPath: 'inset(0% 0% 0% 0%)',
-          duration: 0.9,
-          ease: 'power3.out',
+          duration: 1.6,
+          ease: 'musesReveal',
           scrollTrigger: {
             trigger: img,
             start: 'top 85%',

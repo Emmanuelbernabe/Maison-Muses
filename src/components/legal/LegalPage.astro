@@ -1,0 +1,99 @@
+---
+// Pages légales (mentions légales, politique de confidentialité) : contenu Sanity (Pages du site),
+// rendu en HTML depuis le texte riche. Liens « mailto: » et internes gérés comme dans le journal.
+import Layout from '../../layouts/Layout.astro';
+import Header from '../layout/Header.astro';
+import SiteFooter from '../layout/SiteFooter.astro';
+import { toHTML, escapeHTML } from '@portabletext/to-html';
+import { getLegalPage, clean } from '../../lib/sanity';
+
+interface Props { id: 'page-mentions-legales' | 'page-confidentialite'; fallbackTitle: string; }
+const { id, fallbackTitle } = Astro.props;
+const doc = await getLegalPage(id);
+const title = clean(doc?.title) || fallbackTitle;
+const html = toHTML(doc?.body ?? [], {
+  components: {
+    marks: {
+      link: ({ children, value }) => {
+        const href = escapeHTML(value?.href || '#');
+        const blank = value?.blank ? ' target="_blank" rel="noopener"' : '';
+        return `<a href="${href}"${blank}>${children}</a>`;
+      },
+    },
+  },
+});
+const updated = doc?.updatedAt
+  ? new Date(`${doc.updatedAt}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  : '';
+---
+<Layout title={`${title} – Maison Muses`} description={clean(doc?.seoDescription) || `${title} du site Maison Muses.`}>
+  <Header />
+  <main id="top" class="lg">
+    <header class="lg-head">
+      <h1 class="lg-title">{title}</h1>
+      {updated && <p class="lg-date">Dernière mise à jour : {updated}</p>}
+    </header>
+    {html ? <div class="lg-body" set:html={html} /> : <p class="lg-body">Contenu à venir.</p>}
+  </main>
+  <SiteFooter />
+  <script>
+    import '../../scripts/main';
+  </script>
+</Layout>
+
+<style>
+  .lg {
+    padding: calc(170 * var(--fpx)) calc(48 * var(--fpx)) calc(140 * var(--fpx));
+    color: var(--orange-ink, #ae4c2c);
+  }
+
+  .lg-head { max-width: calc(820 * var(--fpx)); margin: 0 auto calc(56 * var(--fpx)); }
+  .lg-title {
+    margin: 0;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 700;
+    font-size: calc(96 * var(--fpx));
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+  }
+  .lg-date { margin: calc(18 * var(--fpx)) 0 0; font-size: calc(15 * var(--fpx)); }
+
+  .lg-body { max-width: calc(820 * var(--fpx)); margin: 0 auto; font-size: calc(17 * var(--fpx)); line-height: 1.65; }
+  .lg-body > :global(*) { margin: 0; }
+  .lg-body > :global(* + *) { margin-top: 0.9em; }
+  .lg-body :global(h2) {
+    margin-top: 2em;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(36 * var(--fpx));
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+  }
+  .lg-body :global(h3) {
+    margin-top: 1.6em;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 400;
+    font-size: calc(24 * var(--fpx));
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--orange, #e57851);
+  }
+  .lg-body :global(h2 + *), .lg-body :global(h3 + *) { margin-top: 0.6em; }
+  .lg-body :global(ul) { padding-left: 1.2em; }
+  .lg-body :global(li + li) { margin-top: 0.35em; }
+  .lg-body :global(strong) { font-weight: 700; }
+  .lg-body :global(a) { color: inherit; text-decoration: underline; text-underline-offset: 0.18em; }
+
+  @media (max-width: 899px) {
+    .lg { padding: 7.5rem 1.25rem 5rem; }
+    .lg-head { margin-bottom: 2rem; }
+    .lg-title { font-size: 3.4rem; }
+    .lg-date { font-size: 0.9rem; }
+    .lg-body { font-size: 1rem; }
+    .lg-body :global(h2) { font-size: 1.9rem; }
+    .lg-body :global(h3) { font-size: 1.3rem; }
+  }
+</style>

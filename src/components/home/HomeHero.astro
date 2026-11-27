@@ -11,6 +11,8 @@ const marqueeFollowImg = picture(hero.center, SIZES.portrait);
 ---
 
 <section class="hero" id="hero" data-anim="hero-section">
+  <!-- Titre principal de la page : invisible à l'écran (MAISON / MUSES sont décoratifs et animés), lu par Google et les lecteurs d'écran -->
+  <h1 class="sr-only">{hero.heading}</h1>
   <!-- Layout : MAISON calé sous le header, portrait en fixed au bas du viewport, MUSES par-dessus -->
   <div class="hero-stage">
 
@@ -52,7 +54,9 @@ const marqueeFollowImg = picture(hero.center, SIZES.portrait);
 <style>
   :root {
    
-    --hero-maison-fs: 23.75rem;
+    /* Plafond en vw : sous ~1300px de large, la base rem a un plancher (14px) et le mot débordait de l'écran.
+       26.6vw ≥ 23.75rem dès 1440px : rien ne change au-dessus. */
+    --hero-maison-fs: min(23.75rem, 26.6vw);
     --hero-portrait-w: 28.125rem;
     --hero-portrait-h: 34.56rem;
     --hero-muses-fs: 7.5rem;
@@ -99,9 +103,11 @@ const marqueeFollowImg = picture(hero.center, SIZES.portrait);
   }
 
   /* load-1 overlay : révélé par clip-path depuis le bas */
+  /* inset -2px : l'image déborde un peu de la vidéo (coupée par l'overflow du cadre),
+     sinon l'anticrénelage des bords laissait voir 1px de vidéo de chaque côté */
   .load1-overlay {
     position: absolute;
-    inset: 0;
+    inset: -2px;
     clip-path: inset(100% 0 0 0);
     z-index: 1;
     pointer-events: none;

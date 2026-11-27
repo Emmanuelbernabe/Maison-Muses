@@ -5,12 +5,17 @@
 interface Props { slides: any[]; label: string; }
 const { slides, label } = Astro.props;
 const captions = slides.some((slide) => slide.title);
+// Peu de diapositives (2 produits, par ex.) : la liste est répétée pour remplir l'écran et boucler sans vide.
+// Les copies gardent le numéro de leur original (data-index) et sont masquées aux lecteurs d'écran.
+const MIN_SLIDES = 5;
+const copies = slides.length ? Math.ceil(MIN_SLIDES / slides.length) : 0;
+const shown = Array.from({ length: copies }, (_, c) => slides.map((slide, i) => ({ slide, i, copy: c > 0 }))).flat();
 ---
 
 <section class="service-slider-section" aria-label={label}>
   <div class={`service-slider${captions ? ' has-captions' : ''}`} data-anim="service-slider" tabindex="0" aria-roledescription="carrousel" aria-label="Réalisations, flèches gauche et droite pour naviguer">
-    {slides.map((slide, i) => (
-      <figure class="service-slide" data-service-slide data-index={i} data-sanity={slide.attr}>
+    {shown.map(({ slide, i, copy }) => (
+      <figure class="service-slide" data-service-slide data-index={i} data-sanity={copy ? undefined : slide.attr} aria-hidden={copy ? 'true' : undefined}>
         <div class="service-slide-media">
           <!-- data-parallax-x : déplacement de l'image dans sa diapositive (équivalent de data-swiper-parallax-x) -->
           <img src={slide.src} alt={slide.alt} data-parallax-x="25" loading="lazy" decoding="async" draggable="false" />
@@ -68,11 +73,13 @@ const captions = slides.some((slide) => slide.title);
   .service-slider.has-captions { height: calc(660 * var(--fpx)); cursor: grab; }
   .service-slider.has-captions .service-slide { display: flex; flex-direction: column; overflow: visible; }
   .service-slider.has-captions .service-slide-media { position: relative; inset: auto; flex: 1; }
-  .service-slider.has-captions .service-slider-nav { bottom: calc(80 * var(--fpx) + 1.25rem); }
+  .service-slider.has-captions .service-slider-nav { bottom: calc(104 * var(--fpx) + 1.25rem); }
 
-  .service-slide-caption { display: flex; flex-direction: column; gap: 2px; padding-top: calc(14 * var(--fpx)); height: calc(80 * var(--fpx)); }
+  /* Légende : hauteur fixe (images alignées), un nom long passe sur 2 lignes et le sous-titre reste visible */
+  .service-slide-caption { display: flex; flex-direction: column; gap: 2px; padding-top: calc(14 * var(--fpx)); height: calc(104 * var(--fpx)); }
+  .service-slide-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .service-slide-title { font-family: 'Cormorant Infant', serif; font-size: calc(30 * var(--fpx)); line-height: 1.05; color: var(--sp-c, #e57851); }
-  .service-slide-sub { font-size: calc(14 * var(--fpx)); color: var(--mut, rgba(125, 67, 48, 0.55)); }
+  .service-slide-sub { font-size: calc(14 * var(--fpx)); color: var(--mut, rgba(125, 67, 48, 0.85)); }
 
   /* Image plus large que sa diapositive, pour la parallaxe */
   .service-slide img {
@@ -100,8 +107,8 @@ const captions = slides.some((slide) => slide.title);
   }
 
   .service-slider-nav button {
-    width: 30px;
-    height: 30px;
+    width: 48px;
+    height: 48px;
     padding: 0;
     border: 0;
     border-radius: 50%;
@@ -112,13 +119,13 @@ const captions = slides.some((slide) => slide.title);
     place-items: center;
   }
 
-  .service-slider-nav svg { width: 9px; height: 7px; display: block; }
+  .service-slider-nav svg { width: 14px; height: 11px; display: block; }
   .service-slider-nav button:focus-visible { outline: 2px solid var(--bg, #F7F2EC); outline-offset: 2px; }
 
   @media (max-width: 899px) {
     .service-slider.has-captions { height: 128vw; }
-    .service-slide-caption { height: 64px; padding-top: 10px; }
-    .service-slider.has-captions .service-slider-nav { bottom: calc(64px + 1rem); }
+    .service-slide-caption { height: 84px; padding-top: 10px; }
+    .service-slider.has-captions .service-slider-nav { bottom: calc(84px + 1rem); }
     .service-slide-title { font-size: 22px; }
     .service-slide-sub { font-size: 13px; }
     .service-slider { height: 95vw; }

@@ -1,18 +1,40 @@
 ---
 import { resolveImage } from '../../lib/images';
 import { getBrandLinks } from '../../lib/sanity';
-import { loadSettings, href } from '../../lib/content';
+import { loadSettings, href, picture } from '../../lib/content';
+import BookingModal from './BookingModal.astro';
 // Logo, libellés et menu : Réglages du site (Sanity + valeurs par défaut, lib/content.ts)
 const settings = await loadSettings();
-// Sous-menu « Nos marques » : les marques publiées dans Sanity (Pages du site → Marques)
+// Colonne « Nos marques » : les marques publiées dans Sanity (Pages du site → Marques)
 const brandLinks = await getBrandLinks();
 const logoSrc = settings.logo.image?.url ?? resolveImage(...settings.logo.local);
+const panel = settings.menuPanel;
 
 // Sur la home, les liens restent des ancres (#coffrets…) ; sur les autres pages, ils ramènent à la home (/#coffrets…)
 const isHome = Astro.url.pathname === '/';
+const trim = (p: string) => p.replace(/\/+$/, '') || '/';
+const here = trim(Astro.url.pathname);
 
-// Une entrée « marques » affiche le sous-menu des marques publiées
-const menuLinks = settings.menu.map((l: any) => (l.brands ? { label: l.label, sub: brandLinks } : { label: l.label, url: href(l.url, isHome) }));
+// Colonne « La Maison » : les liens du menu (l'entrée « marques » correspond à la 2e colonne)
+const pages = settings.menu
+  .filter((l: any) => !l.brands)
+  .map((l: any, i: number) => {
+    const url = href(l.url, isHome);
+    return { key: `p${i}`, label: l.label, url, current: trim(url) === here, image: picture(l.image, '(max-width: 899px) 1px, 420px') };
+  });
+const brandsEntry = settings.menu.find((l: any) => l.brands);
+const brandsFallback = brandsEntry ? picture(brandsEntry.image, '420px') : pages[0]?.image;
+const brands = brandLinks.map((b, i) => ({
+  key: `b${i}`,
+  label: b.name,
+  url: b.url,
+  current: trim(b.url) === here,
+  image: b.image ? { src: b.image, srcset: undefined, sizes: undefined } : brandsFallback,
+}));
+
+// Image affichée à l'ouverture : celle de la page en cours, sinon celle de l'accueil
+const all = [...pages, ...brands];
+const initialKey = (all.find((l) => l.current) ?? pages[0])?.key;
 ---
 <header id="hd">
   <button class="nav-item nav-menu" type="button" aria-expanded="false" aria-controls="menu-panel" data-menu-open>{settings.header.menuLabel}</button>
@@ -20,43 +42,74 @@ const menuLinks = settings.menu.map((l: any) => (l.brands ? { label: l.label, su
     <img src={logoSrc} alt={settings.logo.alt || 'Maison Muses'} width="28" height="52" />
     <img class="nav-logo-cream" src={logoSrc} alt="" width="28" height="52" aria-hidden="true" />
   </a>
-  <a class="nav-item nav-reserver" href={href(settings.header.reserve.url, isHome)}>{settings.header.reserve.label}</a>
+  <!-- RESERVER : ouvre la fenêtre de choix du salon (BookingModal, scripts/layout/booking.ts) -->
+  <button class="nav-item nav-reserver" type="button" aria-haspopup="dialog" data-bk-open>{settings.header.reserve.label}</button>
 </header>
+
+<BookingModal />
 
 <div class="menu-backdrop" data-menu-backdrop aria-hidden="true"></div>
 
-<nav class="menu-panel" id="menu-panel" aria-label="Menu principal" inert data-menu-panel>
+<nav class="menu-panel" id="menu-panel" aria-label="Menu principal" inert data-menu-panel data-lenis-prevent>
   <div class="menu-head">
     <button class="menu-title" type="button" data-menu-close>Menu</button>
     <button class="menu-close" type="button" aria-label="Fermer le menu" data-menu-close>
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-        <path d="M1.4 14L0 12.6L5.6 7L0 1.4L1.4 0L7 5.6L12.6 0L14 1.4L8.4 7L14 12.6L12.6 14L7 8.4L1.4 14Z" fill="currentColor"/>
-      </svg>
+      <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.2" /></svg>
     </button>
   </div>
-  <ul class="menu-links">
-    {menuLinks.map((l) =>
-      l.sub ? (
-        l.sub.length > 0 && (
-          <li class="menu-group">
-            <button class="menu-link menu-toggle" type="button" aria-expanded="false" aria-controls="menu-brands" data-menu-link data-menu-sub>
-              {l.label}
-              <svg class="menu-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-                <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <ul class="menu-sub" id="menu-brands" inert>
-              {l.sub.map((s) => (
-                <li><a class="menu-sub-link" href={s.url}>{s.name}</a></li>
-              ))}
-            </ul>
+
+  <div class="menu-body">
+    <!-- Colonne 1 : les pages -->
+    <div class="menu-col menu-col-pages">
+      <p class="menu-label" data-menu-link>{panel.maisonTitle}</p>
+      <ul class="menu-links">
+        {pages.map((l) => (
+          <li data-menu-link>
+            <a class:list={['menu-link', { 'is-current': l.current }]} href={l.url} data-menu-key={l.key} aria-current={l.current ? 'page' : undefined}>{l.label}</a>
           </li>
-        )
-      ) : (
-        <li><a class="menu-link" href={l.url} data-menu-link>{l.label}</a></li>
-      )
-    )}
-  </ul>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Colonne 2 : les marques, puis l'encart « Première visite » -->
+    <div class="menu-col menu-col-brands">
+      {brands.length > 0 && (
+        <>
+          <p class="menu-label" data-menu-link>{panel.brandsTitle}</p>
+          <ul class="menu-brands">
+            {brands.map((b) => (
+              <li data-menu-link>
+                <a class:list={['menu-brand', { 'is-current': b.current }]} href={b.url} data-menu-key={b.key} aria-current={b.current ? 'page' : undefined}>
+                  <span>{b.label}</span>
+                  <svg class="menu-arrow" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 11.5l9-9M4.5 2.5h7v7" stroke="currentColor" stroke-width="1.2" /></svg>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <a class="menu-visit" href={href(panel.visit.url, isHome)} target={/^https?:/.test(panel.visit.url) ? '_blank' : undefined} rel="noopener" data-menu-link>
+        <span class="menu-visit-label">{panel.visit.label}</span>
+        <span class="menu-visit-text">{panel.visit.text}</span>
+      </a>
+    </div>
+
+    <!-- Colonne 3 : l'image du lien survolé, révélée de haut en bas (scripts/layout/menu.ts) -->
+    <div class="menu-media" aria-hidden="true" data-menu-link>
+      {all.map((l) => l.image?.src && (
+        <img class:list={[{ 'is-shown': l.key === initialKey }]} src={l.image.src} srcset={l.image.srcset} sizes={l.image.sizes} alt="" data-menu-img={l.key} loading="lazy" decoding="async" />
+      ))}
+    </div>
+  </div>
+
+  <div class="menu-foot" data-menu-link>
+    {panel.socials.map((s: any) => (
+      <a class="menu-social" href={s.url} target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.5" /><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5" /><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" /></svg>
+        <span>{s.label}</span>
+      </a>
+    ))}
+  </div>
 </nav>
 
 <style>
@@ -87,6 +140,20 @@ const menuLinks = settings.menu.map((l: any) => (l.brands ? { label: l.label, su
   :global(.js) header#hd.hd-ready {
     pointer-events: auto;
   }
+
+  /* Fond crème plein, sous les éléments du header ; retiré au-dessus des coffrets et des vidéos
+     (.hd-clear posée par scripts/main.ts, .is-on-orange quand le header passe en crème sur une vidéo) */
+  header#hd::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg, #F7F2EC);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  header#hd.hd-clear::before,
+  header#hd.is-on-orange::before { opacity: 0; }
 
   .nav-item {
     font-family: 'Thunder', sans-serif;
@@ -137,7 +204,7 @@ const menuLinks = settings.menu.map((l: any) => (l.brands ? { label: l.label, su
     opacity: 0;
   }
 
-  /* Au-dessus d'une section à fond orange (coffrets) : items en crème */
+  /* Au-dessus d'un fond sombre ou orange (vidéo des pages espace, page équipe) : items en crème */
   header#hd.is-on-orange .nav-item {
     color: var(--ld-cream, #F7F2EC);
   }
@@ -150,155 +217,257 @@ const menuLinks = settings.menu.map((l: any) => (l.brands ? { label: l.label, su
     opacity: 1;
   }
 
-  /* Le MENU est maintenant un <button> : on neutralise le style natif */
-.nav-menu { background: none; border: 0; padding: 0; }
+  /* Le MENU est un <button> : on neutralise le style natif */
+  /* !important : le module Planity (pages de réservation) réapplique le style natif des boutons (bordure) */
+  header#hd .nav-menu, header#hd .nav-reserver { background: none !important; border: 0 !important; padding: 0 !important; box-shadow: none !important; }
 
-/* ── Menu déployé ── */
-.menu-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1002;                       /* au-dessus du header (1001) : tout le reste est flouté */
-  background: rgba(247, 242, 236, 0.35);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  opacity: 0;
-  visibility: hidden;
-}
+  /* ══════════════════════ Menu déployé ══════════════════════
+     Grand panneau orange : il s'ouvre depuis l'angle haut-gauche, son titre « Menu » posé sur le bouton MENU
+     (position calculée par scripts/layout/menu.ts, qui fixe aussi --menu-x / --menu-y, ses marges à l'écran). */
+  .menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1002;                       /* au-dessus du header (1001) : tout le reste est flouté */
+    background: rgba(247, 242, 236, 0.35);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+  }
 
-.menu-head {
-  display: flex;
-  align-items: center;               /* l'icône reste centrée sur la hauteur du titre */
-  justify-content: space-between;
-}
+  .menu-panel {
+    /* Unité du menu : la plus petite des deux échelles, largeur (--fpx) ou hauteur de l'écran
+       (1px pour 790px de haut). Tout le contenu est exprimé avec : le menu tient dans l'écran
+       quelle que soit sa taille (24 pouces, portable peu haut…), sans défilement. */
+    --mu: min(var(--fpx), calc(100dvh / 790));
+    --cream: #F7F2EC;
+    --line: rgba(247, 242, 236, 0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1003;
+    box-sizing: border-box;
+    right: var(--menu-x, 16px);           /* largeur : de --menu-x à gauche à --menu-x à droite (hors barre de défilement) */
+    max-width: 1920px;
+    max-height: calc(100dvh - 2 * var(--menu-y, 16px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: calc(30 * var(--mu)) calc(36 * var(--mu));   /* même marge en haut (titre, croix) et en bas (liens Instagram) */
+    background: var(--orange, #e57851);
+    color: var(--cream);
+    border-radius: calc(14 * var(--mu));
+    clip-path: inset(0% 100% 100% 0%);   /* fermé : replié dans l'angle haut-gauche */
+    visibility: hidden;
+    scrollbar-width: none;
+  }
+  .menu-panel::-webkit-scrollbar { display: none; }
 
-.menu-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  color: #F7F2EC;
-  transition: opacity 0.25s ease;
-}
-.menu-close:hover { opacity: 0.75; }
+  .menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.menu-close svg {
-  display: block;
-  width: calc(14 * var(--fpx));      /* 14px à 1440, ~19px à 1920 */
-  height: auto;
-}
+  .menu-title {
+    display: block;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    text-align: left;
+    /* Même typo que les items du header (MENU / RESERVER) */
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--cream);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    cursor: pointer;
+    transition: opacity 0.25s ease;
+  }
 
-.menu-panel {
-  position: fixed;
-  top: 0;
-  left: 0;                             /* position exacte posée par scripts/layout/menu.ts */
-  z-index: 1003;
-  box-sizing: border-box;
-  width: calc(206 * var(--fpx));
-  padding: calc(12 * var(--fpx)) calc(16 * var(--fpx)) calc(16 * var(--fpx));
-  background: var(--orange, #e57851);
-  border-radius: calc(8 * var(--fpx));
-  clip-path: inset(0% 100% 100% 0%);   /* fermé : replié dans l'angle haut-gauche */
-  visibility: hidden;
-}
+  .menu-close {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--cream);
+    cursor: pointer;
+    transition: opacity 0.25s ease;
+  }
+  .menu-close svg { display: block; width: calc(22 * var(--mu)); height: auto; }
+  .menu-title:hover, .menu-close:hover { opacity: 0.75; }
 
-.menu-title {
-  display: block;
-  margin: 0;
-  padding: 0;
-  background: none;
-  border: 0;
-  text-align: left;
-  /* Même typo que les items du header (MENU / RESERVER) */
-  font-family: 'Thunder', sans-serif;
-  font-weight: 600;
-  font-size: 1.25rem;
-  color: #F7F2EC;                      /* crème : le panneau est orange */
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  line-height: 1;
-  text-decoration: none;
-  transition: opacity 0.25s ease, color 0.35s ease;
-  cursor: pointer;
-}
+  /* Trois colonnes : pages, marques + encart, image */
+  .menu-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: calc(72 * var(--mu));
+    align-items: start;
+    margin-top: calc(48 * var(--mu));
+  }
 
-.menu-links {
-  list-style: none;
-  margin: calc(24 * var(--fpx)) 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;               /* aligné à droite */
-  gap: 0.5rem;
-}
+  .menu-label {
+    margin: 0;
+    padding-bottom: calc(16 * var(--mu));
+    border-bottom: 1px solid var(--line);
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(19 * var(--mu));
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.85;
+  }
 
-.menu-link {
-  display: block;
-  font-family: 'Thunder', sans-serif;
-  font-weight: 400;                    /* regular */
-  font-size: calc(24 * var(--fpx));    /* 24px à 1440, 32px à 1920 */
-  line-height: 0.85;
-  color: #F7F2EC;
-  text-decoration: none;
-  transition: opacity 0.25s ease;
-}
-.menu-link:hover { opacity: 0.75; }
+  /* Pages : grands liens, celui de la page en cours en crème plein */
+  .menu-links {
+    list-style: none;
+    margin: calc(20 * var(--mu)) 0 0;
+    padding: 0;
+  }
+  .menu-link {
+    display: inline-block;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 500;
+    font-size: calc(66 * var(--mu));
+    line-height: 1.12;
+    color: var(--cream);
+    opacity: 0.55;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+  }
+  .menu-link:hover, .menu-link:focus-visible, .menu-link.is-current { opacity: 1; }
 
-/* ── Sous-menu « Nos marques » ── */
-.menu-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
+  /* Marques : une ligne par marque, filet en dessous, flèche à droite */
+  .menu-brands {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .menu-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: calc(15 * var(--mu)) 0;
+    border-bottom: 1px solid var(--line);
+    font-family: 'DM Sans', sans-serif;
+    font-size: calc(17 * var(--mu));
+    line-height: 1.2;
+    color: var(--cream);
+    text-decoration: none;
+  }
+  .menu-arrow {
+    flex: none;
+    width: calc(13 * var(--mu));
+    height: auto;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-brand span { transition: opacity 0.3s ease; }
+  .menu-brand:hover .menu-arrow, .menu-brand:focus-visible .menu-arrow { transform: translate(3px, -3px); }
+  .menu-brand:hover span, .menu-brand:focus-visible span { opacity: 0.75; }
 
-.menu-toggle {
-  display: flex;
-  align-items: center;
-  gap: calc(6 * var(--fpx));
-  margin: 0;
-  padding: 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  text-align: right;
-}
+  /* Encart « Première visite » */
+  .menu-visit {
+    display: block;
+    margin-top: calc(28 * var(--mu));
+    padding: calc(22 * var(--mu)) calc(22 * var(--mu)) calc(24 * var(--mu));
+    border-radius: calc(6 * var(--mu));
+    background: var(--cream);
+    text-decoration: none;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-visit:hover { transform: translateY(-3px); }
+  .menu-visit-label {
+    display: block;
+    font-family: 'Thunder', sans-serif;
+    font-weight: 600;
+    font-size: calc(15 * var(--mu));
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--orange, #e57851);
+  }
+  .menu-visit-text {
+    display: block;
+    margin-top: calc(12 * var(--mu));
+    font-family: 'Cormorant Infant', serif;
+    font-size: calc(26 * var(--mu));
+    line-height: 1.2;
+    color: var(--orange-ink, #ae4c2c);
+  }
 
-.menu-chevron {
-  width: calc(10 * var(--fpx));
-  height: auto;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.menu-toggle[aria-expanded='true'] .menu-chevron { transform: rotate(180deg); }
+  /* Image : toutes les images sont empilées ; celle du lien survolé passe devant en se révélant.
+     Hauteur fixée en --mu (et non par la largeur de la colonne) : elle ne fait pas déborder le menu sur écran large */
+  .menu-media {
+    position: relative;
+    justify-self: end;
+    height: calc(507 * var(--mu));
+    width: auto;
+    max-width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: rgba(247, 242, 236, 0.15);
+  }
+  .menu-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    clip-path: inset(0% 0% 100% 0%);
+  }
+  .menu-media img.is-shown { clip-path: inset(0% 0% 0% 0%); }
 
-.menu-sub {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-  height: 0;                           /* ouvert par scripts/layout/menu.ts */
-  overflow: hidden;
-}
-.menu-sub li:first-child { padding-top: 0.45rem; }
-.menu-sub li:last-child { padding-bottom: 0.15rem; }
+  /* Bas du panneau : liens Instagram */
+  .menu-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(12 * var(--mu)) calc(40 * var(--mu));
+    margin-top: calc(32 * var(--mu));
+    padding-top: calc(24 * var(--mu));
+    border-top: 1px solid var(--line);
+  }
+  .menu-social {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(12 * var(--mu));
+    font-family: 'DM Sans', sans-serif;
+    font-size: calc(17 * var(--mu));
+    color: var(--cream);
+    text-decoration: none;
+    transition: opacity 0.25s ease;
+  }
+  .menu-social svg { width: calc(18 * var(--mu)); height: auto; flex: none; }
+  .menu-social:hover { opacity: 0.75; }
 
-.menu-sub-link {
-  display: block;
-  font-family: 'DM Sans', sans-serif;
-  font-size: calc(13 * var(--fpx));
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-  color: #F7F2EC;
-  opacity: 0.85;
-  text-decoration: none;
-  transition: opacity 0.25s ease;
-}
-.menu-sub-link:hover { opacity: 1; }
+  .menu-panel :focus-visible { outline: 1px solid var(--cream); outline-offset: 4px; }
 
-:global(html.menu-open) { overflow: hidden; }   /* repli si Lenis est désactivé */
+  /* Mobile / tablette : une seule colonne, sans l'image */
+  /* Mobile / tablette : une seule colonne, sans l'image ; unité réglée sur la hauteur de l'écran
+     (1px pour 940px de haut, 1px au maximum) pour que tout tienne aussi sur un téléphone */
+  @media (max-width: 899px) {
+    .menu-panel { --mu: min(1px, calc(100dvh / 940)); padding: calc(20 * var(--mu)) 20px; border-radius: 12px; }
+    .menu-close svg { width: 18px; }
+    .menu-body { grid-template-columns: 1fr; gap: calc(26 * var(--mu)); margin-top: calc(22 * var(--mu)); }
+    .menu-media { display: none; }
+    .menu-label { font-size: calc(14 * var(--mu)); padding-bottom: calc(10 * var(--mu)); }
+    .menu-links { margin-top: calc(8 * var(--mu)); }
+    .menu-link { font-size: calc(42 * var(--mu)); line-height: 1.08; }
+    .menu-brand { font-size: calc(16 * var(--mu)); padding: calc(11 * var(--mu)) 0; }
+    .menu-arrow { width: 12px; }
+    .menu-visit { margin-top: calc(16 * var(--mu)); padding: calc(14 * var(--mu)) 16px calc(16 * var(--mu)); border-radius: 6px; }
+    .menu-visit-label { font-size: calc(13 * var(--mu)); }
+    .menu-visit-text { font-size: calc(20 * var(--mu)); margin-top: calc(6 * var(--mu)); }
+    .menu-foot { gap: calc(10 * var(--mu)) 20px; margin-top: calc(20 * var(--mu)); padding-top: calc(16 * var(--mu)); }
+    .menu-social { font-size: calc(14 * var(--mu)); gap: 8px; }
+    .menu-social svg { width: 16px; }
+  }
+
+  :global(html.menu-open) { overflow: hidden; }   /* repli si Lenis est désactivé */
 </style>

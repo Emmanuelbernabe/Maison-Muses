@@ -11,12 +11,15 @@ import HomeRoutines from '../components/home/HomeRoutines.astro';
 import HomeJournal from '../components/home/HomeJournal.astro';
 import SiteFooter from '../components/layout/SiteFooter.astro';
 import LoadingScreen from '../components/home/LoadingScreen.astro';
-import { loadHome } from '../lib/content';
+import { loadHome, loadSettings } from '../lib/content';
+import { businessJsonLd } from '../lib/seo';
 
 // Contenu de la page d'accueil (Sanity, complété par les valeurs par défaut de lib/content.ts)
-const home = await loadHome();
+const [home, settings] = await Promise.all([loadHome(), loadSettings()]);
+// Fiche de la marque et de ses deux établissements, pour Google et les IA
+const jsonLd = businessJsonLd(settings, home, Astro.site!);
 ---
-<Layout title={home.seoTitle} description={home.seoDescription}>
+<Layout title={home.seoTitle} description={home.seoDescription} jsonLd={jsonLd}>
   <LoadingScreen loader={home.loader} hero={home.hero} />
   <Header />
   <main id="top">

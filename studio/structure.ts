@@ -10,6 +10,8 @@ export const singletons = [
   { id: 'page-equipe', type: 'equipePage', title: 'L’équipe' },
   { id: 'page-journal', type: 'journalPage', title: 'Journal : textes des pages' },
   { id: 'siteSettings', type: 'siteSettings', title: 'Réglages du site' },
+  { id: 'page-mentions-legales', type: 'legalPage', title: 'Mentions légales' },
+  { id: 'page-confidentialite', type: 'legalPage', title: 'Politique de confidentialité' },
 ];
 
 const page = (S: any, id: string) => {
@@ -33,6 +35,8 @@ export const structure: StructureResolver = (S) =>
               page(S, 'page-bien-etre'),
               page(S, 'page-equipe'),
               page(S, 'page-journal'),
+              page(S, 'page-mentions-legales'),
+              page(S, 'page-confidentialite'),
               S.listItem()
                 .title('Marques')
                 .id('marques')
